@@ -6,14 +6,172 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0C7646612F02D6300065F576 /* Ring.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C76465B2F02D6300065F576 /* Ring.framework */; };
+		0C7646622F02D6300065F576 /* Ring.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0C76465B2F02D6300065F576 /* Ring.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0C76466D2F02D6820065F576 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76466C2F02D6820065F576 /* MLX */; };
+		0C76466F2F02D6820065F576 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76466E2F02D6820065F576 /* MLXNN */; };
+		0C7646712F02D6820065F576 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646702F02D6820065F576 /* MLXLLM */; };
+		0C7646732F02D6820065F576 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646722F02D6820065F576 /* MLXLMCommon */; };
+		0C7646752F02D6A60065F576 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646742F02D6A60065F576 /* MLX */; };
+		0C7646772F02D6A60065F576 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646762F02D6A60065F576 /* MLXNN */; };
+		0C7646792F02D6A60065F576 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646782F02D6A60065F576 /* MLXLLM */; };
+		0C76467B2F02D6A60065F576 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76467A2F02D6A60065F576 /* MLXLMCommon */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0C76465F2F02D6300065F576 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0C7646402F02D2FD0065F576 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0C76465A2F02D6300065F576;
+			remoteInfo = Ring;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0C7646662F02D6300065F576 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0C7646622F02D6300065F576 /* Ring.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0C7646482F02D2FD0065F576 /* Infer Ring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Infer Ring.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C76465B2F02D6300065F576 /* Ring.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ring.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0C7646FF2F02D7A30065F576 /* Exceptions for "Ring" folder in "Ring" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				python_ref/exo/__init__.py,
+				python_ref/exo/__main__.py,
+				python_ref/exo/main.py,
+				python_ref/exo/master/__init__.py,
+				python_ref/exo/master/api.py,
+				python_ref/exo/master/main.py,
+				python_ref/exo/master/placement_utils.py,
+				python_ref/exo/master/placement.py,
+				python_ref/exo/master/tests/conftest.py,
+				python_ref/exo/master/tests/test_master.py,
+				python_ref/exo/master/tests/test_placement_utils.py,
+				python_ref/exo/master/tests/test_placement.py,
+				python_ref/exo/master/tests/test_topology.py,
+				python_ref/exo/routing/__init__.py,
+				python_ref/exo/routing/connection_message.py,
+				python_ref/exo/routing/router.py,
+				python_ref/exo/routing/tests/test_event_buffer.py,
+				python_ref/exo/routing/topics.py,
+				python_ref/exo/shared/__init__.py,
+				python_ref/exo/shared/apply.py,
+				python_ref/exo/shared/constants.py,
+				python_ref/exo/shared/election.py,
+				python_ref/exo/shared/logging.py,
+				python_ref/exo/shared/models/model_cards.py,
+				python_ref/exo/shared/models/model_meta.py,
+				python_ref/exo/shared/tests/__init__.py,
+				python_ref/exo/shared/tests/conftest.py,
+				python_ref/exo/shared/tests/test_apply/test_apply_node_download.py,
+				python_ref/exo/shared/tests/test_election.py,
+				python_ref/exo/shared/tests/test_node_id_persistence.py,
+				python_ref/exo/shared/tests/test_state_serialization.py,
+				python_ref/exo/shared/tests/test_xdg_paths.py,
+				python_ref/exo/shared/topology.py,
+				python_ref/exo/shared/types/__init__.py,
+				python_ref/exo/shared/types/api.py,
+				python_ref/exo/shared/types/chunks.py,
+				python_ref/exo/shared/types/commands.py,
+				python_ref/exo/shared/types/common.py,
+				python_ref/exo/shared/types/events.py,
+				python_ref/exo/shared/types/memory.py,
+				python_ref/exo/shared/types/models.py,
+				python_ref/exo/shared/types/multiaddr.py,
+				python_ref/exo/shared/types/profiling.py,
+				python_ref/exo/shared/types/state.py,
+				python_ref/exo/shared/types/tasks.py,
+				python_ref/exo/shared/types/topology.py,
+				python_ref/exo/shared/types/worker/downloads.py,
+				python_ref/exo/shared/types/worker/instances.py,
+				python_ref/exo/shared/types/worker/resource_monitor.py,
+				python_ref/exo/shared/types/worker/runner_response.py,
+				python_ref/exo/shared/types/worker/runners.py,
+				python_ref/exo/shared/types/worker/shards.py,
+				python_ref/exo/utils/__init__.py,
+				python_ref/exo/utils/banner.py,
+				python_ref/exo/utils/channels.py,
+				python_ref/exo/utils/dashboard_path.py,
+				python_ref/exo/utils/event_buffer.py,
+				python_ref/exo/utils/fs.py,
+				python_ref/exo/utils/phantom.py,
+				python_ref/exo/utils/pydantic_ext.py,
+				python_ref/exo/utils/reactive.py,
+				python_ref/exo/utils/tests/test_tagged.py,
+				python_ref/exo/utils/tests/testing_mp.py,
+				python_ref/exo/worker/__init__.py,
+				python_ref/exo/worker/download/download_utils.py,
+				python_ref/exo/worker/download/huggingface_utils.py,
+				python_ref/exo/worker/download/impl_shard_downloader.py,
+				python_ref/exo/worker/download/shard_downloader.py,
+				python_ref/exo/worker/engines/__init__.py,
+				python_ref/exo/worker/engines/mlx/__init__.py,
+				python_ref/exo/worker/engines/mlx/auto_parallel.py,
+				python_ref/exo/worker/engines/mlx/cache.py,
+				python_ref/exo/worker/engines/mlx/constants.py,
+				python_ref/exo/worker/engines/mlx/generator/__init__.py,
+				python_ref/exo/worker/engines/mlx/generator/generate.py,
+				python_ref/exo/worker/engines/mlx/utils_mlx.py,
+				python_ref/exo/worker/main.py,
+				python_ref/exo/worker/plan.py,
+				python_ref/exo/worker/runner/bootstrap.py,
+				python_ref/exo/worker/runner/runner_supervisor.py,
+				python_ref/exo/worker/runner/runner.py,
+				python_ref/exo/worker/tests/__init__.py,
+				python_ref/exo/worker/tests/constants.py,
+				python_ref/exo/worker/tests/TODO.tests,
+				python_ref/exo/worker/tests/unittests/__init__.py,
+				python_ref/exo/worker/tests/unittests/conftest.py,
+				python_ref/exo/worker/tests/unittests/test_download/__init__.py,
+				python_ref/exo/worker/tests/unittests/test_mlx/__init__.py,
+				python_ref/exo/worker/tests/unittests/test_plan/__init__.py,
+				python_ref/exo/worker/tests/unittests/test_plan/test_download_and_loading.py,
+				python_ref/exo/worker/tests/unittests/test_plan/test_runner_lifecycle.py,
+				python_ref/exo/worker/tests/unittests/test_plan/test_task_forwarding.py,
+				python_ref/exo/worker/tests/unittests/test_plan/test_warmup.py,
+				python_ref/exo/worker/tests/unittests/test_runner/__init__.py,
+				python_ref/exo/worker/tests/unittests/test_runner/test_event_ordering.py,
+				python_ref/exo/worker/tests/unittests/test_runner/test_runner_supervisor.py,
+				python_ref/exo/worker/utils/__init__.py,
+				python_ref/exo/worker/utils/macmon.py,
+				python_ref/exo/worker/utils/net_profile.py,
+				python_ref/exo/worker/utils/profile.py,
+				python_ref/exo/worker/utils/system_info.py,
+				python_ref/exo/worker/utils/tests/__init__.py,
+				python_ref/exo/worker/utils/tests/test_macmon.py,
+			);
+			target = 0C76465A2F02D6300065F576 /* Ring */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0C76464A2F02D2FD0065F576 /* Infer Ring */ = {
+		0C76464A2F02D2FD0065F576 /* InferRing */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Infer Ring";
+			path = InferRing;
+			sourceTree = "<group>";
+		};
+		0C76465C2F02D6300065F576 /* Ring */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0C7646FF2F02D7A30065F576 /* Exceptions for "Ring" folder in "Ring" target */,
+			);
+			path = Ring;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +181,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0C76467B2F02D6A60065F576 /* MLXLMCommon in Frameworks */,
+				0C7646792F02D6A60065F576 /* MLXLLM in Frameworks */,
+				0C7646772F02D6A60065F576 /* MLXNN in Frameworks */,
+				0C7646752F02D6A60065F576 /* MLX in Frameworks */,
+				0C7646612F02D6300065F576 /* Ring.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0C7646582F02D6300065F576 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0C7646712F02D6820065F576 /* MLXLLM in Frameworks */,
+				0C76466F2F02D6820065F576 /* MLXNN in Frameworks */,
+				0C7646732F02D6820065F576 /* MLXLMCommon in Frameworks */,
+				0C76466D2F02D6820065F576 /* MLX in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,7 +206,9 @@
 		0C76463F2F02D2FD0065F576 = {
 			isa = PBXGroup;
 			children = (
-				0C76464A2F02D2FD0065F576 /* Infer Ring */,
+				0C76464A2F02D2FD0065F576 /* InferRing */,
+				0C76465C2F02D6300065F576 /* Ring */,
+				0C76466B2F02D6820065F576 /* Frameworks */,
 				0C7646492F02D2FD0065F576 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,11 +217,29 @@
 			isa = PBXGroup;
 			children = (
 				0C7646482F02D2FD0065F576 /* Infer Ring.app */,
+				0C76465B2F02D6300065F576 /* Ring.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
+		0C76466B2F02D6820065F576 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		0C7646562F02D6300065F576 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		0C7646472F02D2FD0065F576 /* Infer Ring */ = {
@@ -55,20 +249,53 @@
 				0C7646442F02D2FD0065F576 /* Sources */,
 				0C7646452F02D2FD0065F576 /* Frameworks */,
 				0C7646462F02D2FD0065F576 /* Resources */,
+				0C7646662F02D6300065F576 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0C7646602F02D6300065F576 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0C76464A2F02D2FD0065F576 /* InferRing */,
+			);
+			name = "Infer Ring";
+			packageProductDependencies = (
+				0C7646742F02D6A60065F576 /* MLX */,
+				0C7646762F02D6A60065F576 /* MLXNN */,
+				0C7646782F02D6A60065F576 /* MLXLLM */,
+				0C76467A2F02D6A60065F576 /* MLXLMCommon */,
+			);
+			productName = "Infer Ring";
+			productReference = 0C7646482F02D2FD0065F576 /* Infer Ring.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0C76465A2F02D6300065F576 /* Ring */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0C7646632F02D6300065F576 /* Build configuration list for PBXNativeTarget "Ring" */;
+			buildPhases = (
+				0C7646562F02D6300065F576 /* Headers */,
+				0C7646572F02D6300065F576 /* Sources */,
+				0C7646582F02D6300065F576 /* Frameworks */,
+				0C7646592F02D6300065F576 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0C76464A2F02D2FD0065F576 /* Infer Ring */,
+				0C76465C2F02D6300065F576 /* Ring */,
 			);
-			name = "Infer Ring";
+			name = Ring;
 			packageProductDependencies = (
+				0C76466C2F02D6820065F576 /* MLX */,
+				0C76466E2F02D6820065F576 /* MLXNN */,
+				0C7646702F02D6820065F576 /* MLXLLM */,
+				0C7646722F02D6820065F576 /* MLXLMCommon */,
 			);
-			productName = "Infer Ring";
-			productReference = 0C7646482F02D2FD0065F576 /* Infer Ring.app */;
-			productType = "com.apple.product-type.application";
+			productName = Ring;
+			productReference = 0C76465B2F02D6300065F576 /* Ring.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +308,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					0C7646472F02D2FD0065F576 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					0C76465A2F02D6300065F576 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -100,12 +330,20 @@
 			projectRoot = "";
 			targets = (
 				0C7646472F02D2FD0065F576 /* Infer Ring */,
+				0C76465A2F02D6300065F576 /* Ring */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0C7646462F02D2FD0065F576 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0C7646592F02D6300065F576 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +360,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0C7646572F02D6300065F576 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0C7646602F02D6300065F576 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0C76465A2F02D6300065F576 /* Ring */;
+			targetProxy = 0C76465F2F02D6300065F576 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0C7646512F02D2FF0065F576 /* Debug */ = {
@@ -254,6 +507,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -274,13 +528,14 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -298,6 +553,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -318,13 +574,110 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		0C7646642F02D6300065F576 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 669J55BPZE;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.n1k1tung.Ring;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		0C7646652F02D6300065F576 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 669J55BPZE;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.n1k1tung.Ring;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -350,7 +703,51 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		0C7646632F02D6300065F576 /* Build configuration list for PBXNativeTarget "Ring" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0C7646642F02D6300065F576 /* Debug */,
+				0C7646652F02D6300065F576 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0C76466C2F02D6820065F576 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLX;
+		};
+		0C76466E2F02D6820065F576 /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXNN;
+		};
+		0C7646702F02D6820065F576 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXLLM;
+		};
+		0C7646722F02D6820065F576 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXLMCommon;
+		};
+		0C7646742F02D6A60065F576 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLX;
+		};
+		0C7646762F02D6A60065F576 /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXNN;
+		};
+		0C7646782F02D6A60065F576 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXLLM;
+		};
+		0C76467A2F02D6A60065F576 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXLMCommon;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0C7646402F02D2FD0065F576 /* Project object */;
 }

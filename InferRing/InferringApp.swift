@@ -3,7 +3,7 @@
 import SwiftUI
 
 @main
-struct Infer_RingApp: App {
+struct InferringApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
