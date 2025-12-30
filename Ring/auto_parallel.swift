@@ -215,7 +215,6 @@ public class LlamaShardingStrategy: TensorParallelShardingStrategy {
         let layers = getLayers(inner)
         
         for layer in layers {
-             guard let layer = layer as? Module else { continue }
              let children = layer.children()
              
              if let attn = children[unwrapping: "self_attn"] {
@@ -388,40 +387,31 @@ func innerModel(_ model: Module) -> Module {
 
 func getLayers(_ innerModel: Module) -> [Module] {
     let children = innerModel.children()
-    var layerDict: [Int: Module] = [:]
-    
-    for (key, item) in children {
-        if let module = item.asModule() {
-            if key.hasPrefix("layers.") {
-                if let index = Int(key.dropFirst(7)) {
-                    layerDict[index] = module
-                }
-            } else if key.hasPrefix("h.") {
-                if let index = Int(key.dropFirst(2)) {
-                    layerDict[index] = module
-                }
-            }
-        }
-    }
-    
-    let sortedKeys = layerDict.keys.sorted()
-    return sortedKeys.map { layerDict[$0]! }
+    if let m = children[unwrapping: "layers"] { return m.modules() }
+    else if let t = children[unwrapping: "h"] { return t.modules() }
+    return []
+
 }
 
 func setLayers(_ model: Module, newLayers: [Module]) {
     let inner = innerModel(model)
-    // Attempt to determine correct prefix
     let children = inner.children()
     let prefix: String
-    if children.keys.contains(where: { $0.hasPrefix("layers.") }) {
+    if children["layers"] != nil {
         prefix = "layers"
-    } else if children.keys.contains(where: { $0.hasPrefix("h.") }) {
+//        # Update DeepSeek V3 specific parameters when layers are shrunk
+//        if isinstance(model, DeepseekV3Model) and hasattr(
+//            inner_model_instance, "num_layers"
+//        ):
+//                inner_model_instance.start_idx = 0
+//            inner_model_instance.end_idx = len(layers)
+//            inner_model_instance.num_layers = len(layers)
+    } else if children["h"] != nil {
         prefix = "h"
     } else {
+        // throw error
         prefix = "layers"
     }
     
-    var modulesUpdate = ModuleChildren()
-
-    inner.update(modules: modulesUpdate)
+    try? inner.updateModule(key: prefix, newLayers)
 }
