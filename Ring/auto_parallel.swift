@@ -379,13 +379,6 @@ public protocol UnaryLayerLike {
     func callAsFunction(_ x: MLXArray) -> MLXArray
 }
 
-extension ModuleItem {
-    func asModule() -> Module? {
-        if case .value(.module(let m)) = self { return m }
-        return nil
-    }
-}
-
 func innerModel(_ model: Module) -> Module {
     let children = model.children()
     if let m = children[unwrapping: "model"] { return m }
@@ -429,20 +422,6 @@ func setLayers(_ model: Module, newLayers: [Module]) {
     }
     
     var modulesUpdate = ModuleChildren()
-    // Explicitly set each index
-    for (i, layer) in newLayers.enumerated() {
-         // This relies on `update(modules:)` processing dictionary keys "layers.0", "layers.1" etc.
-         // This creates new keys in the update dictionary.
-         // Module.update will map these to existing array items if the structure matches.
-         // Since we are replacing likely ALL layers in the list with the subset?
-         // No, the Python code replaces layers IN PLACE in the list.
-         // Here `newLayers` is the subset.
-         // Wait, Python: `layers = layers[start:end]; layers[0] = ...; _set_layers(model, layers)`.
-         // `set_layers` in Python REPLACES the model.layers list with the subset.
-         // So `model.layers` becomes shorter.
-         // To do this in Swift via `update`, we usually need to replace the container.
-         modulesUpdate[prefix] = .array(newLayers.map { .value($0) })
-    }
-    
+
     inner.update(modules: modulesUpdate)
 }
