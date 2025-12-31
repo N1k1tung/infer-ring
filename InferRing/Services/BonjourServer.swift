@@ -1,9 +1,14 @@
 //
 import Foundation
 
+@Observable
 final class BonjourServer: NSObject {
+    @ObservationIgnored
     private var service: NetService?
+    @ObservationIgnored
     private var resolver: NetService?
+
+    var isReachable: Bool = false
 
     func registerBonjour(name: String, type: String = "_http._tcp.", domain: String = "local.", port: Int32) {
         let publishName = name.trimmed.nilIfEmpty() ?? Host.current().localizedName ?? "Server"
@@ -42,6 +47,7 @@ extension BonjourServer: NetServiceDelegate {
             let scheme = sender.type.contains("_https") ? "https" : "http"
             let urlString = "\(scheme)://\(host):\(sender.port)/"
             dprint("Service now locally reachable at: \(urlString)")
+            isReachable = true
         }
     }
 

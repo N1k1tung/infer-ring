@@ -1,13 +1,20 @@
 //
 import Foundation
 
-struct Node {
+struct Node: Hashable {
     let name: String
     let host: String
 }
 
+protocol BonjourClientProtocol: Observable {
+    var nodes: [Node] { get }
+    var isSearching: Bool { get }
+    func startSearching()
+    func stopSearching()
+}
+
 @Observable
-final class BonjourClient: NSObject {
+final class BonjourClient: NSObject, BonjourClientProtocol {
     @ObservationIgnored
     private lazy var browser = NetServiceBrowser()
     @ObservationIgnored
