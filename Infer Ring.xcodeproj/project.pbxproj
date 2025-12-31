@@ -17,6 +17,8 @@
 		0C7646772F02D6A60065F576 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646762F02D6A60065F576 /* MLXNN */; };
 		0C7646792F02D6A60065F576 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646782F02D6A60065F576 /* MLXLLM */; };
 		0C76467B2F02D6A60065F576 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76467A2F02D6A60065F576 /* MLXLMCommon */; };
+		0C8802E12F04A2FF006AF043 /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = 0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */; };
+		0C8802E42F04A410006AF043 /* HTTPServer in Frameworks */ = {isa = PBXBuildFile; productRef = 0C8802E32F04A410006AF043 /* HTTPServer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0C7379B42F052E06001EEFB6 /* Infer-Ring-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Infer-Ring-Info.plist"; sourceTree = "<group>"; };
 		0C7646482F02D2FD0065F576 /* Infer Ring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Infer Ring.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C76465B2F02D6300065F576 /* Ring.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ring.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -183,6 +186,8 @@
 			files = (
 				0C76467B2F02D6A60065F576 /* MLXLMCommon in Frameworks */,
 				0C7646792F02D6A60065F576 /* MLXLLM in Frameworks */,
+				0C8802E42F04A410006AF043 /* HTTPServer in Frameworks */,
+				0C8802E12F04A2FF006AF043 /* AsyncHTTPClient in Frameworks */,
 				0C7646772F02D6A60065F576 /* MLXNN in Frameworks */,
 				0C7646752F02D6A60065F576 /* MLX in Frameworks */,
 				0C7646612F02D6300065F576 /* Ring.framework in Frameworks */,
@@ -206,6 +211,7 @@
 		0C76463F2F02D2FD0065F576 = {
 			isa = PBXGroup;
 			children = (
+				0C7379B42F052E06001EEFB6 /* Infer-Ring-Info.plist */,
 				0C76464A2F02D2FD0065F576 /* InferRing */,
 				0C76465C2F02D6300065F576 /* Ring */,
 				0C76466B2F02D6820065F576 /* Frameworks */,
@@ -265,6 +271,8 @@
 				0C7646762F02D6A60065F576 /* MLXNN */,
 				0C7646782F02D6A60065F576 /* MLXLLM */,
 				0C76467A2F02D6A60065F576 /* MLXLMCommon */,
+				0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */,
+				0C8802E32F04A410006AF043 /* HTTPServer */,
 			);
 			productName = "Infer Ring";
 			productReference = 0C7646482F02D2FD0065F576 /* Infer Ring.app */;
@@ -324,6 +332,10 @@
 			);
 			mainGroup = 0C76463F2F02D2FD0065F576;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0C8802DF2F04A2FE006AF043 /* XCRemoteSwiftPackageReference "async-http-client" */,
+				0C8802E22F04A410006AF043 /* XCRemoteSwiftPackageReference "swift-http-server" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0C7646492F02D2FD0065F576 /* Products */;
 			projectDirPath = "";
@@ -507,7 +519,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Infer-Ring-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "In order to search and connect other ring members";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -553,7 +568,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Infer-Ring-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "In order to search and connect other ring members";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -714,6 +732,25 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		0C8802DF2F04A2FE006AF043 /* XCRemoteSwiftPackageReference "async-http-client" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swift-server/async-http-client";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.30.2;
+			};
+		};
+		0C8802E22F04A410006AF043 /* XCRemoteSwiftPackageReference "swift-http-server" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/N1k1tung/swift-http-server";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		0C76466C2F02D6820065F576 /* MLX */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -746,6 +783,16 @@
 		0C76467A2F02D6A60065F576 /* MLXLMCommon */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MLXLMCommon;
+		};
+		0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0C8802DF2F04A2FE006AF043 /* XCRemoteSwiftPackageReference "async-http-client" */;
+			productName = AsyncHTTPClient;
+		};
+		0C8802E32F04A410006AF043 /* HTTPServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0C8802E22F04A410006AF043 /* XCRemoteSwiftPackageReference "swift-http-server" */;
+			productName = HTTPServer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

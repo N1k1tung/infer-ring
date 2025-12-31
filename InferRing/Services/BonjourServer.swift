@@ -1,0 +1,51 @@
+//
+import Foundation
+
+final class BonjourServer: NSObject {
+    private var service: NetService?
+    private var resolver: NetService?
+
+    func registerBonjour(name: String, type: String = "_http._tcp.", domain: String = "local.", port: Int32) {
+        let publishName = name.trimmed.nilIfEmpty() ?? Host.current().localizedName ?? "Server"
+        let netService = NetService(domain: domain, type: type, name: publishName, port: port)
+        netService.includesPeerToPeer = true
+        netService.delegate = self
+        self.service = netService
+        netService.publish(options: [])
+
+        let resolver = NetService(domain: domain, type: type, name: publishName)
+        resolver.includesPeerToPeer = true
+        resolver.delegate = self
+        self.resolver = resolver
+    }
+
+    func stop() {
+        service?.stop()
+        resolver?.stop()
+        service = nil
+        resolver = nil
+    }
+}
+
+extension BonjourServer: NetServiceDelegate {
+    func netServiceDidPublish(_ sender: NetService) {
+        resolver?.resolve(withTimeout: 5.0)
+        dprint("Bonjour registration complete for: \(sender.name) \(sender.type) on \(sender.domain)")
+    }
+
+    func netService(_ sender: NetService, didNotPublish errorDict: [String : NSNumber]) {
+        dprint("Bonjour registration error: \(errorDict)")
+    }
+
+    func netServiceDidResolveAddress(_ sender: NetService) {
+        if let host = sender.hostName, sender.port > 0 {
+            let scheme = sender.type.contains("_https") ? "https" : "http"
+            let urlString = "\(scheme)://\(host):\(sender.port)/"
+            dprint("Service now locally reachable at: \(urlString)")
+        }
+    }
+
+    func netService(_ sender: NetService, didNotResolve errorDict: [String : NSNumber]) {
+        dprint("Bonjour resolution error: \(errorDict)")
+    }
+}
