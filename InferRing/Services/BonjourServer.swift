@@ -10,6 +10,12 @@ final class BonjourServer: NSObject {
 
     var isReachable: Bool = false
 
+    override init() {
+        super.init()
+
+        registerBonjour(name: ServiceInfo.bonjourName, port: Int32(ServiceInfo.port))
+    }
+
     func registerBonjour(name: String, type: String = "_http._tcp.", domain: String = "local.", port: Int32) {
         let publishName = name.trimmed.nilIfEmpty() ?? Host.current().localizedName ?? "Server"
         let netService = NetService(domain: domain, type: type, name: publishName, port: port)

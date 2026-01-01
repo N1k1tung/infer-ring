@@ -21,7 +21,7 @@ class DataServer {
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
 
         do {
-            channel = try bootstrap.bind(host: "127.0.0.1", port: 12345).wait()
+            channel = try bootstrap.bind(host: ServiceInfo.host, port: ServiceInfo.port).wait()
             dprint("Server started")
         } catch {
             dprint("Failed to start server: \(error)")
