@@ -1,37 +1,7 @@
 import Foundation
-import HTTPTypes
 import NIO
-import NIOHTTPTypes
 import NIOHTTP1
 import Logging
-
-class DataServer {
-    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    var channel: Channel?
-
-    func start() {
-        let bootstrap = ServerBootstrap(group: group)
-            .serverChannelOption(ChannelOptions.backlog, value: 256)
-            .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .childChannelInitializer { channel in
-                channel.pipeline.configureHTTPServerPipeline().flatMap {
-                    channel.pipeline.addHandler(FileServerHandler())
-                }
-            }
-            .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-
-        do {
-            channel = try bootstrap.bind(host: ServiceInfo.host, port: ServiceInfo.port).wait()
-            dprint("Server started")
-        } catch {
-            dprint("Failed to start server: \(error)")
-        }
-    }
-
-    func stop() {
-        try? group.syncShutdownGracefully()
-    }
-}
 
 final class FileServerHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPServerRequestPart
@@ -45,7 +15,8 @@ final class FileServerHandler: ChannelInboundHandler {
         if request.uri.hasPrefix("/download") {
             let filePath = "/path/to/file"
             sendFile(context: context, path: filePath)
-        } else {
+        }
+        else {
             sendText(context: context, body: "OK", status: .ok)
         }
     }
@@ -84,5 +55,37 @@ final class FileServerHandler: ChannelInboundHandler {
         context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
 
         context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+    }
+}
+
+final class DataServer {
+#if os(iOS)
+    let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+#else
+    let group = MultiThreadedEventLoopGroup(numberOfThreads:System.coreCount)
+#endif
+    var channel: Channel?
+
+    func start() {
+        let bootstrap = ServerBootstrap(group: group)
+            .serverChannelOption(ChannelOptions.backlog, value: 256)
+            .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .childChannelInitializer { channel in
+                channel.pipeline.configureHTTPServerPipeline().flatMap {
+                    channel.pipeline.addHandler(FileServerHandler())
+                }
+            }
+            .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+
+        do {
+            channel = try bootstrap.bind(host: ServiceInfo.host, port: ServiceInfo.port).wait()
+            dprint("Server started")
+        } catch {
+            dprint("Failed to start server: \(error)")
+        }
+    }
+
+    func stop() {
+        try? group.syncShutdownGracefully()
     }
 }

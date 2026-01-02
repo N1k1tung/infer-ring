@@ -17,7 +17,7 @@ final class BonjourServer: NSObject {
     }
 
     func registerBonjour(name: String, type: String = "_http._tcp.", domain: String = "local.", port: Int32) {
-        let publishName = name.trimmed.nilIfEmpty() ?? Host.current().localizedName ?? "Server"
+        let publishName = name.trimmed.nilIfEmpty() ?? "InferRing Server"
         let netService = NetService(domain: domain, type: type, name: publishName, port: port)
         netService.includesPeerToPeer = true
         netService.delegate = self

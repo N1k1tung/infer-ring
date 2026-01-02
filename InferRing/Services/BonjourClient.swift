@@ -47,7 +47,9 @@ extension BonjourClient: NetServiceBrowserDelegate {
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
-        guard isSearching else { return }
+        guard isSearching,
+              service.name.hasPrefix(ServiceInfo.servicePrefix)
+            else { return }
         resolvingServices.append(service)
         service.delegate = self
         service.resolve(withTimeout: 5.0)
@@ -69,7 +71,6 @@ extension BonjourClient: NetServiceDelegate {
         resolvingServices.removeAll { $0 == sender }
     }
 
-    // Extract a human-readable IP string from a sockaddr Data (supports IPv4/IPv6)
     private func ipString(from addressData: Data) -> String? {
         return addressData.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) -> String? in
             guard let base = rawBuffer.baseAddress else { return nil }

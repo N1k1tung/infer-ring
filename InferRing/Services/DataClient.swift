@@ -3,17 +3,24 @@ import AsyncHTTPClient
 import Foundation
 import NIOCore
 import NIOHTTP1
+import NIOFoundationCompat
 
 final class DataClient {
 
-    func get() async {
+    private let baseUrl: String
+
+    init(baseUrl: String) {
+        self.baseUrl = baseUrl
+    }
+
+    private func get<T: Decodable>(path: String) async -> T? {
         do {
-            let request = HTTPClientRequest(url: "https://apple.com/")
+            let request = HTTPClientRequest(url: "\(baseUrl)\(path)")
             let response = try await HTTPClient.shared.execute(request, timeout: .seconds(30))
-            print("HTTP head", response)
+            dprint("HTTP head \(response)")
             if response.status == .ok {
                 let body = try await response.body.collect(upTo: 2 * 1024 * 1024)
-                // handle body
+                return try JSONDecoder.default.decode(T.self, from: body)
             }
             else {
                 dprint("response error: \(response.status)")
@@ -22,14 +29,15 @@ final class DataClient {
         catch {
             dprint("request failed: \(error)")
         }
+        return nil
     }
 
-    func post() async {
+    private func post<T: Encodable>(path: String, body: T) async {
         do {
-            var request = HTTPClientRequest(url: "https://apple.com/")
+            var request = HTTPClientRequest(url: "\(baseUrl)\(path)")
             request.method = .POST
-            request.headers.add(name: "User-Agent", value: "Swift HTTPClient")
-            request.body = .bytes(ByteBuffer(string: "some data"))
+            request.headers.add(name: "Content-Type", value: "application/json")
+            request.body = .bytes(try JSONEncoder.default.encode(body))
 
             let response = try await HTTPClient.shared.execute(request, timeout: .seconds(30))
             if response.status == .ok {
@@ -74,4 +82,15 @@ final class DataClient {
 
 
 
+}
+
+extension DataClient {
+    func ping() async -> Bool {
+        let result: Ping? = await get(path: "/path")
+        return result?.isAlive ?? false
+    }
+
+    func elect(message: ElectionMessage) async {
+        await post(path: "/elect", body: message)
+    }
 }
