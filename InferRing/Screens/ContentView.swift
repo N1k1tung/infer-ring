@@ -9,6 +9,10 @@ struct ContentView: View {
                 NavigationLink("Browse Devices") {
                     ServiceBrowserView()
                 }
+                
+                NavigationLink("Ring Management") {
+                    RingManagementView()
+                }
             }
             .navigationTitle("Home")
         }

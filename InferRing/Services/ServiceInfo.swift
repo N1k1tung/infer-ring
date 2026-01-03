@@ -6,7 +6,8 @@ enum ServiceInfo {
     static let host = "127.0.0.1"
     static let port = 12345
     static let servicePrefix = "InferRing"
-    static let bonjourName = "\(servicePrefix)-\(UUID().uuidString)"
+    @UserDefaultsKey("bonjourName")
+    static var bonjourName = "\(servicePrefix)-\(UUID().uuidString)"
 
     
 }

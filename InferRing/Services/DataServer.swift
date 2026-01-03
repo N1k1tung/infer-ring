@@ -8,6 +8,9 @@ final class FileServerHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
 
+    @Inject
+    private var ringCoordinator: RingCoordinator?
+
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let head = self.unwrapInboundIn(data)
 
@@ -25,7 +28,7 @@ final class FileServerHandler: ChannelInboundHandler {
                   let message = try? JSONDecoder.default.decode(ElectionMessage.self, from: data) else {
                 return
             }
-            
+            ringCoordinator?.handleElectionRequest(message)
         }
         else if path.hasPrefix("/ping") {
             sendData(context: context, body: Ping(isAlive: true), status: .ok)
