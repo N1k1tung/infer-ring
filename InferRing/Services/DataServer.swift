@@ -2,19 +2,33 @@ import Foundation
 import NIO
 import NIOHTTP1
 import Logging
+import NIOFoundationCompat
 
 final class FileServerHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        let part = self.unwrapInboundIn(data)
+        let head = self.unwrapInboundIn(data)
 
-        guard case .head(let request) = part else { return }
+        guard case .head(let request) = head,
+            let url = URL(string: request.uri) else { return }
 
-        if request.uri.hasPrefix("/download") {
+        let path = url.path
+        if path.hasPrefix("/download") {
             let filePath = "/path/to/file"
             sendFile(context: context, path: filePath)
+        }
+        else if path.hasPrefix("/elect") {
+            let body = self.unwrapInboundIn(data)
+            guard case .body(let data) = body,
+                  let message = try? JSONDecoder.default.decode(ElectionMessage.self, from: data) else {
+                return
+            }
+            
+        }
+        else if path.hasPrefix("/ping") {
+            sendData(context: context, body: Ping(isAlive: true), status: .ok)
         }
         else {
             sendText(context: context, body: "OK", status: .ok)
@@ -52,6 +66,19 @@ final class FileServerHandler: ChannelInboundHandler {
 
         var buffer = context.channel.allocator.buffer(capacity: body.utf8.count)
         buffer.writeString(body)
+        context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+
+        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+    }
+
+    private func sendData<T: Encodable>(context: ChannelHandlerContext, body: T, status: HTTPResponseStatus) {
+        guard let data = try? JSONEncoder.default.encode(body) else { return }
+        var headers = HTTPHeaders()
+        headers.add(name: "Content-Length", value: "\(data.count)")
+        let head = HTTPResponseHead(version: .http1_1, status: status, headers: headers)
+        context.write(self.wrapOutboundOut(.head(head)), promise: nil)
+
+        let buffer = context.channel.allocator.buffer(data: data)
         context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
 
         context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
