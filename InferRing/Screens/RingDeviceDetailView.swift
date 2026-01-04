@@ -8,7 +8,6 @@ struct RingDeviceDetailView: View {
         Form {
             Section("Device Info") {
                 LabeledContent("Name", value: ringDevice.device.name)
-                LabeledContent("ID", value: ringDevice.device.id.uuidString.prefix(8) + "...")
                 LabeledContent("Role", value: isCoordinator ? "Coordinator" : "Follower")
                 LabeledContent("Rank", value: "\(ringDevice.rank)")
             }
@@ -36,7 +35,6 @@ struct RingDeviceDetailView: View {
 }
 
 #Preview {
-    let dummyID = UUID()
     let profile = HardwareProfile(
         totalRAM: 16 * 1024 * 1024 * 1024,
         availableRAM: 8 * 1024 * 1024 * 1024,
@@ -45,7 +43,6 @@ struct RingDeviceDetailView: View {
         gpuMemory: nil
     )
     let discDevice = DiscoveredDevice(
-        id: dummyID,
         name: "Preview Device",
         host: "local",
         hardwareProfile: profile

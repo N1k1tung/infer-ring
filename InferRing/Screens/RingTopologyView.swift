@@ -21,7 +21,7 @@ struct RingTopologyView: View {
             NavigationStack {
                 RingDeviceDetailView(
                     ringDevice: device,
-                    isCoordinator: device.id == coordinator.currentRing?.coordinator.uuid
+                    isCoordinator: device.id == coordinator.currentRing?.coordinator
                 )
             }
             .presentationDetents([.medium, .large])
@@ -67,7 +67,7 @@ struct RingVisualizer: View {
                     
                     RingDeviceNode(
                         device: device,
-                        isCoordinator: device.id == ring.coordinator.uuid
+                        isCoordinator: device.id == ring.coordinator
                     )
                     .position(position)
                     .onTapGesture {

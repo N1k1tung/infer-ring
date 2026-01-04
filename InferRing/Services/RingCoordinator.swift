@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import CryptoKit
+import Ring
 
 @Observable
 final class RingCoordinator {
@@ -24,13 +24,13 @@ final class RingCoordinator {
     // Local identity
     private let localDeviceID: DeviceID
     private let localDevice: DiscoveredDevice
+    private let mlxManager = MLXManager()
 
     init() {
         self.localDeviceID = DeviceID(
-            uuid: UUID(),
             name: ServiceInfo.bonjourName
         )
-        self.localDevice = DiscoveredDevice(id: localDeviceID.uuid, name: localDeviceID.name, host: "localhost", hardwareProfile: nil)
+        self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: nil)
 
         self.peers = []
     }
@@ -59,7 +59,6 @@ final class RingCoordinator {
     private func updatePeers(nodes: [Node]) {
         let currentDiscovered = nodes.map { node -> DiscoveredDevice in
             return DiscoveredDevice(
-                id: UUID(),
                 name: node.name,
                 host: node.host,
                 hardwareProfile: nil
@@ -68,7 +67,7 @@ final class RingCoordinator {
         
         peers = currentDiscovered
         allDevices = (peers + [localDevice]).sorted { $0.deviceID < $1.deviceID }
-        myIndex = allDevices.firstIndex { $0.id == localDeviceID.uuid } ?? 0
+        myIndex = allDevices.firstIndex { $0.id == localDeviceID } ?? 0
 
         // Check if we need to start election (e.g. if we have no coordinator)
         if peers.isEmpty && coordinatorID != localDeviceID {
@@ -107,12 +106,12 @@ final class RingCoordinator {
         
         switch message.type {
         case .election(let candidateID):
-            if candidateID.uuid.uuidString > localDeviceID.uuid.uuidString {
+            if localDeviceID < candidateID  {
                 // Candidate is higher ID, so they win over us. Forward.
                 state = .follower
                 sendToSuccessor(message)
             }
-            else if candidateID.uuid.uuidString < localDeviceID.uuid.uuidString {
+            else if candidateID < localDeviceID {
                 if state != .candidate {
                     // Start our own election to overtake
                     initiateElection()
@@ -139,6 +138,17 @@ final class RingCoordinator {
                 devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
                 coordinator: leaderID
             )
+
+            do {
+                try mlxManager.initMLX(rank: myIndex, devices: allDevices.map { $0.host })
+                Task {
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    mlxManager.synchronize()
+                    dprint("MLX ring started")
+                }
+            } catch {
+                dprint(error)
+            }
         }
     }
     
@@ -175,7 +185,7 @@ final class RingCoordinator {
         let nextIndex = (myIndex + 1) % allDevices.count
         let successor = allDevices[nextIndex]
 
-        if successor.id == localDeviceID.uuid {
+        if successor.id == localDeviceID {
             return nil // Ring of one
         }
         return successor

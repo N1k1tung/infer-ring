@@ -2,12 +2,11 @@ import Foundation
 
 // MARK: - Device identification and capabilities
 struct DeviceID: Hashable, Codable, Identifiable {
-    var id: UUID { uuid }
-    let uuid: UUID
+    var id: String { name }
     let name: String
     
     static func < (lhs: DeviceID, rhs: DeviceID) -> Bool {
-        return lhs.uuid.uuidString < rhs.uuid.uuidString
+        return lhs.id < rhs.id
     }
 }
 
@@ -20,18 +19,18 @@ struct HardwareProfile: Codable, Equatable {
 }
 
 struct DiscoveredDevice: Identifiable, Equatable {
-    let id: UUID
+    var id: DeviceID { deviceID }
     let name: String
     let host: String
     let hardwareProfile: HardwareProfile?
 
     var deviceID: DeviceID {
-        DeviceID(uuid: id, name: name)
+        DeviceID(name: name)
     }
 }
 
 struct RingDevice: Identifiable {
-    var id: UUID { device.id }
+    var id: DeviceID { device.id }
     let device: DiscoveredDevice
     let rank: Int
 }
