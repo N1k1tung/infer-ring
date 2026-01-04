@@ -20,6 +20,10 @@ final class RingCoordinator {
     var electionInProgress: Bool {
         state == .candidate
     }
+    var isLeader: Bool {
+        guard let coordinatorID, currentRing != nil else { return false }
+        return localDeviceID == coordinatorID
+    }
 
     // Local identity
     private let localDeviceID: DeviceID

@@ -1,21 +1,22 @@
-
 import Foundation
+
+// adapted from https://github.com/exo-explore/exo/blob/main/src/exo/shared/types/shards.py
 
 // MARK: - Memory
 
-struct Memory: Codable, Hashable {
-    var inBytes: Int = 0
+public struct Memory: Codable, Hashable {
+    public var inBytes: Int = 0
 }
 
 // MARK: - ModelMetadata
 
-struct ModelMetadata: Codable, Hashable {
-    let modelId: String
-    let prettyName: String
-    let storageSize: Memory
-    let nLayers: Int
-    let hiddenSize: Int
-    let supportsTensor: Bool
+public struct ModelMetadata: Codable, Hashable {
+    public let modelId: String
+    public let prettyName: String
+    public let storageSize: Memory
+    public let nLayers: Int
+    public let hiddenSize: Int
+    public let supportsTensor: Bool
 }
 
 // MARK: - Sharding

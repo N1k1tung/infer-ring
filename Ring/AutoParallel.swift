@@ -2,6 +2,8 @@
 import Foundation
 import MLX
 import MLXNN
+
+// adapted from https://github.com/exo-explore/exo/blob/main/src/exo/worker/engines/mlx/auto_parallel.py
 // import Models // Implicitly assumed available
 
 // MARK: - Auto Parallel Functions

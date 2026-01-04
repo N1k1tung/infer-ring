@@ -3,6 +3,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(RingCoordinator.self) var coordinator
+
     var body: some View {
         NavigationStack {
             List {
@@ -12,6 +14,9 @@ struct ContentView: View {
                 
                 NavigationLink("Ring Management") {
                     RingManagementView()
+                }
+                NavigationLink("Open chat") {
+                    ChatView()
                 }
             }
             .navigationTitle("Home")
