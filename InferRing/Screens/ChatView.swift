@@ -31,7 +31,7 @@ struct ChatView: View {
                         .lineLimit(1...4)
                         .disabled(viewModel.isSending)
 
-                    HStack(alignment: .bottom) {
+                    HStack {
                         Spacer()
                         Button {
                             viewModel.isShowingModelPicker.toggle()

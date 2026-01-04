@@ -2,6 +2,7 @@
 import Foundation
 import MLX
 import MLXNN
+import MLXLMCommon
 
 // adapted from https://github.com/exo-explore/exo/blob/main/src/exo/worker/engines/mlx/auto_parallel.py
 // import Models // Implicitly assumed available
@@ -81,7 +82,7 @@ public class PipelineFirstLayer: CustomMlxLayer {
         super.init(originalLayer: originalLayer)
     }
     
-    public func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: AnyObject? = nil) -> MLXArray {
+    public func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: [KVCache]? = nil) -> MLXArray {
         var x = x
         if r != 0 {
             x = group.recvLike(x, source: Int32(r - 1))
@@ -108,7 +109,7 @@ public class PipelineLastLayer: CustomMlxLayer {
         super.init(originalLayer: originalLayer)
     }
     
-    public func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: AnyObject? = nil) -> MLXArray {
+    public func callAsFunction(_ x: MLXArray, mask: MLXArray? = nil, cache: [KVCache]? = nil) -> MLXArray {
         var output: MLXArray
         if let layer = originalLayer as? LlamaTransformerBlockLike {
             output = layer(x, mask: mask, cache: cache)
@@ -373,7 +374,7 @@ public class QwenShardingStrategy: TensorParallelShardingStrategy {
 // MARK: - Helpers
 
 public protocol LlamaTransformerBlockLike {
-    func callAsFunction(_ x: MLXArray, mask: MLXArray?, cache: AnyObject?) -> MLXArray
+    func callAsFunction(_ x: MLXArray, mask: MLXArray?, cache: [KVCache]?) -> MLXArray
 }
 
 public protocol UnaryLayerLike {

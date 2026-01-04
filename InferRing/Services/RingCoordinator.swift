@@ -37,6 +37,7 @@ final class RingCoordinator {
         self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: nil)
 
         self.peers = []
+        DI.register(mlxManager)
     }
     
     // MARK: - Public API
