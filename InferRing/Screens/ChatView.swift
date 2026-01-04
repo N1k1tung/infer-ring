@@ -1,15 +1,16 @@
 import SwiftUI
 import Observation
+import Ring
 
 struct ChatView: View {
-    @State private var model = ChatViewModel()
-    
+    @State private var viewModel = ChatViewModel()
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(model.messages) { message in
+                        ForEach(viewModel.messages) { message in
                             ChatBubble(message: message)
                                 .id(message.id)
                         }
@@ -17,40 +18,68 @@ struct ChatView: View {
                     .padding(.horizontal)
                     .padding(.top)
                 }
-                .onChange(of: model.messages) { _, _ in
-                    if let last = model.messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
+                .onChange(of: viewModel.messages) { _, _ in
+                    if let last = viewModel.messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
             
             Divider()
-            
-            HStack(alignment: .bottom, spacing: 8) {
-                TextField("Message", text: $model.input, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(1...4)
-                    .disabled(model.isSending)
-                
-                Button {
-                    Task { try? await model.send() }
-                } label: {
-                    if model.isSending {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "paperplane.fill")
+            ZStack {
+                VStack(spacing: 4) {
+                    TextField("Message", text: $viewModel.input, axis: .vertical)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1...4)
+                        .disabled(viewModel.isSending)
+
+                    HStack(alignment: .bottom) {
+                        Spacer()
+                        Button {
+                            viewModel.isShowingModelPicker.toggle()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(viewModel.selectedModel?.metadata.prettyName ?? "Select model")
+                                Image(systemName: "chevron.down")
+                            }
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        Button {
+                            Task { try? await viewModel.send() }
+                        } label: {
+                            if viewModel.isSending {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "paperplane.fill")
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(viewModel.isSending || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
+                    .frame(maxHeight: 30)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(model.isSending || model.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .padding(.horizontal, 8)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.2))
+                        .stroke(Color.black.opacity(0.3), lineWidth: 0.5)
+                )
             }
-            .padding()
+            .padding(8)
             .background(.bar)
         }
         .navigationTitle("Chat")
         .toolbar {
             ToolbarItem {
-                Button("Reset") { model.reset() }
-                    .disabled(model.isSending)
+                Button("Reset") { viewModel.reset() }
+                    .disabled(viewModel.isSending)
             }
+        }
+        .sheet(isPresented: $viewModel.isShowingModelPicker) {
+            ModelPickerView(selectedModel: $viewModel.selectedModel)
+                .frame(height: 600)
         }
     }
 }

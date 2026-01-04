@@ -23,6 +23,7 @@ class ChatViewModel {
     var input: String = ""
     var isSending: Bool = false
     var selectedModel: ModelCard?
+    var isShowingModelPicker: Bool = false
 
     func send() async throws {
         let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
