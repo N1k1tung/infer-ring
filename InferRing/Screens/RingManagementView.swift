@@ -20,7 +20,7 @@ struct RingManagementView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     HStack {
-                        statusBadge
+                        StatusBadge()
                         Spacer()
                         if let ring = coordinator.currentRing {
                             Text("\(ring.devices.count) Devices")
@@ -110,36 +110,6 @@ struct RingManagementView: View {
         })
     }
     
-    private var statusBadge: some View {
-        HStack {
-            Image(systemName: statusIcon)
-            Text(statusText)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(statusColor.opacity(0.1))
-        .foregroundStyle(statusColor)
-        .clipShape(Capsule())
-    }
-    
-    private var statusText: String {
-        if coordinator.electionInProgress { return "Forming..." }
-        if coordinator.currentRing != nil { return "Active" }
-        return "Inactive"
-    }
-    
-    private var statusColor: Color {
-        if coordinator.electionInProgress { return .yellow }
-        if coordinator.currentRing != nil { return .green }
-        return .secondary
-    }
-    
-    private var statusIcon: String {
-        if coordinator.electionInProgress { return "arrow.triangle.2.circlepath" }
-        if coordinator.currentRing != nil { return "checkmark.circle.fill" }
-        return "circle"
-    }
-    
     private func startFormation() {
         coordinator.startFormation()
     }
@@ -176,6 +146,40 @@ struct ErrorBanner: View {
         .padding()
         .background(Color.red.opacity(0.8))
         .cornerRadius(8)
+    }
+}
+
+struct StatusBadge: View {
+    @Environment(RingCoordinator.self) var coordinator
+
+    private var text: String {
+        if coordinator.electionInProgress { return "Forming..." }
+        if coordinator.currentRing != nil { return "Active" }
+        return "Inactive"
+    }
+
+    private var color: Color {
+        if coordinator.electionInProgress { return .yellow }
+        if coordinator.currentRing != nil { return .green }
+        return .secondary
+    }
+
+    private var icon: String {
+        if coordinator.electionInProgress { return "arrow.triangle.2.circlepath" }
+        if coordinator.currentRing != nil { return "checkmark.circle.fill" }
+        return "circle"
+    }
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+            Text(text)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(color.opacity(0.1))
+        .foregroundStyle(color)
+        .clipShape(Capsule())
     }
 }
 

@@ -15,6 +15,11 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Home")
+            .toolbar {
+                ToolbarItem() {
+                    StatusBadge()
+                }
+            }
         }
     }
 }
