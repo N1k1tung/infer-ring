@@ -15,7 +15,10 @@ final class RingCoordinator {
     var peers: [DiscoveredDevice] = []
     var coordinatorID: DeviceID?
     var state: CoordinatorState = .inactive
-    
+    var electionInProgress: Bool {
+        state == .candidate
+    }
+
     // Local identity
     let localDeviceID: DeviceID
     
@@ -26,20 +29,21 @@ final class RingCoordinator {
         )
         
         self.peers = []
-        start()
     }
     
     // MARK: - Public API
     
     func start() {
         bonjourClient?.startSearching()
-        _ = withObservationTracking {
-            bonjourClient?.nodes
-        } onChange: { [weak self] in
-            self?.updatePeers()
+        Task {
+            for await nodes in Observations({ [weak self] in
+                self?.bonjourClient?.nodes ?? []
+            }) {
+                updatePeers(nodes: nodes)
+            }
         }
     }
-    
+
     func handleElectionRequest(_ message: ElectionMessage) {
         Task {
             await processElectionMessage(message)
@@ -48,31 +52,24 @@ final class RingCoordinator {
     
     // MARK: - Internal Logic
 
-    private func updatePeers() {
-        let nodes = bonjourClient?.nodes ?? []
-
-        // Map Nodes to DiscoveredDevices with stable UUIDs
+    private func updatePeers(nodes: [Node]) {
         let currentDiscovered = nodes.map { node -> DiscoveredDevice in
             return DiscoveredDevice(
                 id: UUID(),
                 name: node.name,
                 host: node.host,
-                hardwareProfile: nil // Not needed for simple election
+                hardwareProfile: nil
             )
         }
         
-        // Simple diff or update
         self.peers = currentDiscovered
         
         // Check if we need to start election (e.g. if we have no coordinator)
-        // Or just wait for user trigger? "Auto-election" implies automatic.
-        // If we are alone, we are coordinator.
         if peers.isEmpty && coordinatorID != localDeviceID {
             coordinatorID = localDeviceID
             state = .coordinator
         }
         else if !peers.isEmpty && coordinatorID == nil {
-            // New peers found, no coordinator, start election
             initiateElection()
         }
     }
@@ -94,10 +91,8 @@ final class RingCoordinator {
         switch message.type {
         case .election(let candidateID):
             if candidateID.uuid.uuidString > localDeviceID.uuid.uuidString {
-                // Determine if we should forward
                 // Candidate is higher ID, so they win over us. Forward.
                 state = .follower
-                // Update candidate in message? No, message is immutable, just forward.
                 sendToSuccessor(message)
             }
             else if candidateID.uuid.uuidString < localDeviceID.uuid.uuidString {

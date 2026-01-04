@@ -30,7 +30,8 @@ struct DiscoveredDevice: Identifiable, Equatable {
     }
 }
 
-struct RingDevice {
+struct RingDevice: Identifiable {
+    var id: UUID { device.id }
     let device: DiscoveredDevice
     let rank: Int
     let predecessor: DeviceID?

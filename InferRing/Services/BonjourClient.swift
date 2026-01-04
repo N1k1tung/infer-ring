@@ -26,6 +26,7 @@ final class BonjourClient: NSObject, BonjourClientProtocol {
     func startSearching() {
         stopSearching()
         nodes.removeAll()
+        browser.delegate = self
         browser.searchForServices(ofType: "_http._tcp", inDomain: "local.")
         isSearching = true
     }
@@ -44,15 +45,18 @@ final class BonjourClient: NSObject, BonjourClientProtocol {
 extension BonjourClient: NetServiceBrowserDelegate {
     func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
         guard isSearching else { return }
+        nodes.removeAll { $0.host == service.hostName }
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         guard isSearching,
-              service.name.hasPrefix(ServiceInfo.servicePrefix)
+              service.name.hasPrefix(ServiceInfo.servicePrefix),
+              service.name != ServiceInfo.bonjourName
             else { return }
         resolvingServices.append(service)
         service.delegate = self
         service.resolve(withTimeout: 5.0)
+
     }
 }
 

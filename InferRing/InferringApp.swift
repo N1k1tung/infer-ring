@@ -9,8 +9,10 @@ struct InferringApp: App {
     @State private var ringCoordinator = RingCoordinator()
     private let dataServer = DataServer()
     init() {
+        DI.register(bonjourClient)
         DI.register(ringCoordinator)
         dataServer.start()
+        ringCoordinator.start()
     }
 
     var body: some Scene {

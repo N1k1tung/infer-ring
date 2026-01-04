@@ -24,10 +24,14 @@ final class BonjourServer: NSObject {
         self.service = netService
         netService.publish(options: [])
 
-        let resolver = NetService(domain: domain, type: type, name: publishName)
+        let resolver = NetService(domain: domain, type: type, name: publishName, port: port)
         resolver.includesPeerToPeer = true
         resolver.delegate = self
         self.resolver = resolver
+    }
+
+    deinit {
+        stop()
     }
 
     func stop() {

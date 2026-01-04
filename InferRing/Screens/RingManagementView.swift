@@ -67,8 +67,7 @@ struct RingManagementView: View {
                                 .foregroundStyle(.secondary)
                             
                             Button("Cancel") {
-                                // Placeholder for cancellation
-                                coordinator.electionInProgress = false 
+                                //TODO: Placeholder for cancellation
                             }
                             .font(.caption)
                             .foregroundStyle(.red)
@@ -148,8 +147,7 @@ struct RingManagementView: View {
     
     private func stopFormation() {
         coordinator.currentRing = nil
-        coordinator.electionInProgress = false
-        coordinator.coordinatorState = .inactive
+        coordinator.state = .inactive
     }
 }
 

@@ -16,7 +16,7 @@ final class DataClient {
     private func get<T: Decodable>(path: String) async -> T? {
         do {
             let request = HTTPClientRequest(url: "\(baseUrl)\(path)")
-            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(30))
+            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(5))
             dprint("HTTP head \(response)")
             if response.status == .ok {
                 let body = try await response.body.collect(upTo: 2 * 1024 * 1024)
@@ -39,7 +39,7 @@ final class DataClient {
             request.headers.add(name: "Content-Type", value: "application/json")
             request.body = .bytes(try JSONEncoder.default.encode(body))
 
-            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(30))
+            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(5))
             if response.status == .ok {
                 // handle response
             }
@@ -84,7 +84,7 @@ final class DataClient {
 
 extension DataClient {
     func ping() async -> Bool {
-        let result: Ping? = await get(path: "/path")
+        let result: Ping? = await get(path: "/ping")
         return result?.isAlive ?? false
     }
 

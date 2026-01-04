@@ -11,30 +11,59 @@ final class FileServerHandler: ChannelInboundHandler {
     @Inject
     private var ringCoordinator: RingCoordinator?
 
+    private var currentRequestHead: HTTPRequestHead?
+    private var requestBodyBuffer: ByteBuffer?
+
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        let head = self.unwrapInboundIn(data)
+        let part = self.unwrapInboundIn(data)
 
-        guard case .head(let request) = head,
-            let url = URL(string: request.uri) else { return }
+        switch part {
+        case .head(let request):
+            currentRequestHead = request
+            requestBodyBuffer = nil
 
-        let path = url.path
-        if path.hasPrefix("/download") {
-            let filePath = "/path/to/file"
-            sendFile(context: context, path: filePath)
-        }
-        else if path.hasPrefix("/elect") {
-            let body = self.unwrapInboundIn(data)
-            guard case .body(let data) = body,
-                  let message = try? JSONDecoder.default.decode(ElectionMessage.self, from: data) else {
+        case .body(var chunk):
+            if requestBodyBuffer == nil {
+                requestBodyBuffer = context.channel.allocator.buffer(capacity: chunk.readableBytes)
+            }
+            requestBodyBuffer?.writeBuffer(&chunk)
+
+        case .end:
+            defer {
+                currentRequestHead = nil
+                requestBodyBuffer = nil
+            }
+
+            guard let request = currentRequestHead,
+                  let url = URL(string: request.uri) else {
+                sendText(context: context, body: "Bad Request", status: .badRequest)
                 return
             }
-            ringCoordinator?.handleElectionRequest(message)
-        }
-        else if path.hasPrefix("/ping") {
-            sendData(context: context, body: Ping(isAlive: true), status: .ok)
-        }
-        else {
-            sendText(context: context, body: "OK", status: .ok)
+
+            let path = url.path
+            if path.hasPrefix("/download") {
+                let filePath = "/path/to/file"
+                sendFile(context: context, path: filePath)
+            }
+            else if path.hasPrefix("/elect") {
+                guard let buffer = requestBodyBuffer else {
+                    sendText(context: context, body: "Bad Request: Empty Body", status: .badRequest)
+                    return
+                }
+                let data = buffer.getData(at: buffer.readerIndex, length: buffer.readableBytes) ?? Data()
+                guard let message = try? JSONDecoder.default.decode(ElectionMessage.self, from: data) else {
+                    sendText(context: context, body: "Bad Request: Invalid JSON", status: .badRequest)
+                    return
+                }
+                ringCoordinator?.handleElectionRequest(message)
+                sendText(context: context, body: "OK", status: .ok)
+            }
+            else if path.hasPrefix("/ping") {
+                sendData(context: context, body: Ping(isAlive: true), status: .ok)
+            }
+            else {
+                sendText(context: context, body: "OK", status: .ok)
+            }
         }
     }
 
@@ -106,6 +135,7 @@ final class DataServer {
                 }
             }
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .childChannelOption(ChannelOptions.socket(.init(IPPROTO_TCP), .init(TCP_NODELAY)), value: 1)
 
         do {
             channel = try bootstrap.bind(host: ServiceInfo.host, port: ServiceInfo.port).wait()
