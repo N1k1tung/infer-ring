@@ -52,9 +52,7 @@ struct RingDeviceDetailView: View {
     )
     let ringDevice = RingDevice(
         device: discDevice,
-        rank: 0,
-        predecessor: nil,
-        successor: nil
+        rank: 0
     )
 
     NavigationStack {

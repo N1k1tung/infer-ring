@@ -34,8 +34,6 @@ struct RingDevice: Identifiable {
     var id: UUID { device.id }
     let device: DiscoveredDevice
     let rank: Int
-    let predecessor: DeviceID?
-    let successor: DeviceID?
 }
 
 struct Ring {

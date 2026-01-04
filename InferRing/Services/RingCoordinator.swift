@@ -13,6 +13,8 @@ final class RingCoordinator {
     // MARK: - State
     var currentRing: Ring?
     var peers: [DiscoveredDevice] = []
+    var allDevices: [DiscoveredDevice] = [] // peers including self, sorted
+    var myIndex: Int = 0
     var coordinatorID: DeviceID?
     var state: CoordinatorState = .inactive
     var electionInProgress: Bool {
@@ -20,14 +22,16 @@ final class RingCoordinator {
     }
 
     // Local identity
-    let localDeviceID: DeviceID
-    
+    private let localDeviceID: DeviceID
+    private let localDevice: DiscoveredDevice
+
     init() {
         self.localDeviceID = DeviceID(
             uuid: UUID(),
             name: ServiceInfo.bonjourName
         )
-        
+        self.localDevice = DiscoveredDevice(id: localDeviceID.uuid, name: localDeviceID.name, host: "localhost", hardwareProfile: nil)
+
         self.peers = []
     }
     
@@ -62,19 +66,21 @@ final class RingCoordinator {
             )
         }
         
-        self.peers = currentDiscovered
-        
+        peers = currentDiscovered
+        allDevices = (peers + [localDevice]).sorted { $0.deviceID < $1.deviceID }
+        myIndex = allDevices.firstIndex { $0.id == localDeviceID.uuid } ?? 0
+
         // Check if we need to start election (e.g. if we have no coordinator)
         if peers.isEmpty && coordinatorID != localDeviceID {
             coordinatorID = localDeviceID
             state = .coordinator
         }
-        else if !peers.isEmpty && coordinatorID == nil {
+        else if !peers.isEmpty && currentRing == nil {
             initiateElection()
         }
     }
     
-    func initiateElection() {
+    private func initiateElection() {
         dprint("Starting Election from \(localDeviceID.name)")
         state = .candidate
         let message = ElectionMessage(
@@ -84,7 +90,18 @@ final class RingCoordinator {
         )
         sendToSuccessor(message)
     }
-    
+
+    func startFormation() {
+        bonjourClient?.startSearching()
+        initiateElection()
+    }
+
+    func stopFormation() {
+        currentRing = nil
+        state = .inactive
+        bonjourClient?.stopSearching()
+    }
+
     private func processElectionMessage(_ message: ElectionMessage) async {
         dprint("Processing election message: \(message.type)")
         
@@ -117,6 +134,11 @@ final class RingCoordinator {
             else {
                 dprint("Coordinator announcement returned to leader. Ring stable.")
             }
+            bonjourClient?.stopSearching()
+            currentRing = Ring(
+                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
+                coordinator: leaderID
+            )
         }
     }
     
@@ -150,18 +172,9 @@ final class RingCoordinator {
     }
     
     private func getSuccessor() -> DiscoveredDevice? {
-        var all = peers
-        // Add self (stubbed as discovered device)
-        let selfDevice = DiscoveredDevice(id: localDeviceID.uuid, name: localDeviceID.name, host: "localhost", hardwareProfile: nil)
-        all.append(selfDevice)
-        
-        let sorted = all.sorted { $0.deviceID.uuid.uuidString < $1.deviceID.uuid.uuidString }
-        
-        guard let myIndex = sorted.firstIndex(where: { $0.id == localDeviceID.uuid }) else { return nil }
-        
-        let nextIndex = (myIndex + 1) % sorted.count
-        let successor = sorted[nextIndex]
-        
+        let nextIndex = (myIndex + 1) % allDevices.count
+        let successor = allDevices[nextIndex]
+
         if successor.id == localDeviceID.uuid {
             return nil // Ring of one
         }
