@@ -13,6 +13,11 @@ final class DataClient {
         self.baseUrl = baseUrl
     }
 
+    static func client(for device: DiscoveredDevice) -> DataClient {
+        let url = "http://\(device.host):\(ServiceInfo.port)"
+        return DataClient(baseUrl: url)
+    }
+
     private func get<T: Decodable>(path: String) async -> T? {
         do {
             let request = HTTPClientRequest(url: "\(baseUrl)\(path)")

@@ -51,8 +51,8 @@ struct ChatView: View {
 
                 HStack {
                     Spacer()
-                    if let loadingProgress = viewModel.loadingProgress {
-                        ProgressView(value: loadingProgress.fractionCompleted)
+                    if let loadingPercent = viewModel.loadingPercent {
+                        ProgressView(value: loadingPercent)
                             .progressViewStyle(.circular)
                     }
                     Button {

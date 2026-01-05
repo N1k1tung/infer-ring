@@ -30,20 +30,22 @@ class ChatViewModel {
                 do {
                     try await mlxManager?.loadModel(selectedModel) { [weak self] progress in
                         Task { @MainActor in
-                            self?.loadingProgress = progress
+                            self?.loadingPercent = progress.fractionCompleted
                         }
                     }
+                    loadingPercent = nil
                 }
                 catch {
                     dprint(error)
                     errorMessage = "Failed to load model"
+                    loadingPercent = nil
                 }
             }
         }
     }
     var isShowingModelPicker: Bool = false
     var errorMessage: String? = nil
-    var loadingProgress: Progress? = nil
+    var loadingPercent: Double? = nil
 
     @ObservationIgnored
     @Inject

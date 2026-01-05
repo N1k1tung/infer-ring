@@ -179,8 +179,7 @@ final class RingCoordinator {
         dprint("Sending to successor: \(successor.name) (\(successor.host))")
         
         Task {
-            let url = "http://\(successor.host):\(ServiceInfo.port)"
-            let client = DataClient(baseUrl: url)
+            let client = DataClient.client(for: successor)
             
             await client.elect(message: message)
         }
