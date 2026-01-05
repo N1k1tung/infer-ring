@@ -11,6 +11,9 @@ final class FileServerHandler: ChannelInboundHandler {
     @Inject
     private var ringCoordinator: RingCoordinator?
 
+    @Inject 
+    private var modelManager: ModelManager?
+
     private var currentRequestHead: HTTPRequestHead?
     private var requestBodyBuffer: ByteBuffer?
 
@@ -46,25 +49,52 @@ final class FileServerHandler: ChannelInboundHandler {
                 sendFile(context: context, path: filePath)
             }
             else if path.hasPrefix("/elect") {
-                guard let buffer = requestBodyBuffer else {
-                    sendText(context: context, body: "Bad Request: Empty Body", status: .badRequest)
-                    return
-                }
-                let data = buffer.getData(at: buffer.readerIndex, length: buffer.readableBytes) ?? Data()
-                guard let message = try? JSONDecoder.default.decode(ElectionMessage.self, from: data) else {
-                    sendText(context: context, body: "Bad Request: Invalid JSON", status: .badRequest)
-                    return
-                }
+                guard let data = getData(context: context) else { return }
+                guard let message = parseBody(data: data, context: context, type: ElectionMessage.self)
+                    else { return }
                 ringCoordinator?.handleElectionRequest(message)
                 sendText(context: context, body: "OK", status: .ok)
             }
             else if path.hasPrefix("/ping") {
                 sendData(context: context, body: Ping(isAlive: true), status: .ok)
             }
+            else if path.hasPrefix("/loadModel") { // TODO: instead of long timeout request just notify progress/failure
+                guard let data = getData(context: context) else { return }
+                guard let request = parseBody(data: data, context: context, type: ModelLoadRequest.self)
+                    else { return }
+
+                Task {
+                    let response = await modelManager?.handleModelLoadRequest(request) ?? ModelLoadResponse(
+                        requestID: request.requestID,
+                        success: false,
+                        errorMessage: "ModelManager not available",
+                        timestamp: Date()
+                    )
+                    context.eventLoop.execute { [weak self] in
+                        self?.sendData(context: context, body: response, status: .ok)
+                    }
+                }
+            }
             else {
                 sendText(context: context, body: "OK", status: .ok)
             }
         }
+    }
+
+    private func getData(context: ChannelHandlerContext) -> Data? {
+        guard let buffer = requestBodyBuffer else {
+            sendText(context: context, body: "Bad Request: Empty Body", status: .badRequest)
+            return nil
+        }
+        return buffer.getData(at: buffer.readerIndex, length: buffer.readableBytes) ?? Data() // allow empty
+    }
+
+    private func parseBody<T: Decodable>(data: Data, context: ChannelHandlerContext, type: T.Type) -> T? {
+        guard let payload = try? JSONDecoder.default.decode(type.self, from: data) else {
+            sendText(context: context, body: "Bad Request: Invalid JSON", status: .badRequest)
+            return nil
+        }
+        return payload
     }
 
     private func sendFile(context: ChannelHandlerContext, path: String) {

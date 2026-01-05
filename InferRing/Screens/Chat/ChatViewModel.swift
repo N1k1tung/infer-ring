@@ -24,20 +24,23 @@ class ChatViewModel {
     var isSending: Bool = false
     var selectedModel: ModelCard? {
         didSet {
-            guard let selectedModel else { return }
+            guard let selectedModel,
+                  selectedModel != oldValue,
+                  selectedModel != modelManager?.currentModelCard
+            else { return }
             // TODO: check mem
             Task {
                 do {
-                    try await mlxManager?.loadModel(selectedModel) { [weak self] progress in
+                    try await modelManager?.loadModelAcrossPeers(selectedModel) { [weak self] progress in
                         Task { @MainActor in
-                            self?.loadingPercent = progress.fractionCompleted
+                            self?.loadingPercent = progress
                         }
                     }
                     loadingPercent = nil
                 }
                 catch {
                     dprint(error)
-                    errorMessage = "Failed to load model"
+                    errorMessage = "Failed to load model: \(error.localizedDescription)"
                     loadingPercent = nil
                 }
             }
@@ -49,7 +52,19 @@ class ChatViewModel {
 
     @ObservationIgnored
     @Inject
-    private var mlxManager: MLXManager?
+    private var modelManager: ModelManager?
+    
+    init() {
+        selectedModel = modelManager?.currentModelCard
+
+        Task { @MainActor in
+            for await loadedModel in Observations({ [weak self] in
+                self?.modelManager?.currentModelCard
+            }) {
+                selectedModel = loadedModel
+            }
+        }
+    }
 
     func send() async throws {
         let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -1,6 +1,7 @@
 //
 
 import Foundation
+import Ring
 
 struct Ping: Codable {
     let isAlive: Bool
@@ -15,4 +16,17 @@ struct ElectionMessage: Codable {
 enum ElectionMessageType: Codable {
     case election(DeviceID)
     case coordinator(DeviceID)
+}
+
+struct ModelLoadRequest: Codable {
+    let modelCard: ModelCard
+    let requestID: String
+    let timestamp: Date
+}
+
+struct ModelLoadResponse: Codable {
+    let requestID: String
+    let success: Bool
+    let errorMessage: String?
+    let timestamp: Date
 }

@@ -20,7 +20,7 @@ extension Memory {
     }
 }
 
-public struct ModelCard: Codable {
+public struct ModelCard: Codable, Equatable {
     public let shortId: String
     public let modelId: String
     public let name: String

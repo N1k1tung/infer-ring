@@ -18,10 +18,10 @@ final class DataClient {
         return DataClient(baseUrl: url)
     }
 
-    private func get<T: Decodable>(path: String) async -> T? {
+    private func get<T: Decodable>(path: String, timeout: TimeAmount = .seconds(5)) async -> T? {
         do {
             let request = HTTPClientRequest(url: "\(baseUrl)\(path)")
-            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(5))
+            let response = try await HTTPClient.shared.execute(request, timeout: timeout)
             dprint("HTTP head \(response)")
             if response.status == .ok {
                 let body = try await response.body.collect(upTo: 2 * 1024 * 1024)
@@ -37,14 +37,36 @@ final class DataClient {
         return nil
     }
 
-    private func post<T: Encodable>(path: String, body: T) async {
+    private func post<T: Encodable, R: Decodable>(path: String, body: T, timeout: TimeAmount = .seconds(30)) async -> R? {
         do {
             var request = HTTPClientRequest(url: "\(baseUrl)\(path)")
             request.method = .POST
             request.headers.add(name: "Content-Type", value: "application/json")
             request.body = .bytes(try JSONEncoder.default.encode(body))
 
-            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(5))
+            let response = try await HTTPClient.shared.execute(request, timeout: timeout)
+            if response.status == .ok {
+                let responseBody = try await response.body.collect(upTo: 2 * 1024 * 1024)
+                return try JSONDecoder.default.decode(R.self, from: responseBody)
+            }
+            else {
+                dprint("response error: \(response.status)")
+            }
+        }
+        catch {
+            dprint("request failed: \(error)")
+        }
+        return nil
+    }
+
+    private func post<T: Encodable>(path: String, body: T, timeout: TimeAmount = .seconds(5)) async {
+        do {
+            var request = HTTPClientRequest(url: "\(baseUrl)\(path)")
+            request.method = .POST
+            request.headers.add(name: "Content-Type", value: "application/json")
+            request.body = .bytes(try JSONEncoder.default.encode(body))
+
+            let response = try await HTTPClient.shared.execute(request, timeout: timeout)
             if response.status == .ok {
                 // handle response
             }
@@ -95,5 +117,9 @@ extension DataClient {
 
     func elect(message: ElectionMessage) async {
         await post(path: "/elect", body: message)
+    }
+    
+    func loadModel(request: ModelLoadRequest) async -> ModelLoadResponse? {
+        await post(path: "/loadModel", body: request, timeout: .seconds(600))
     }
 }
