@@ -1,10 +1,10 @@
 //
 import Foundation
 
-public enum RingError: Error {
+public enum RingError: LocalizedError {
     case failed(String)
 
-    public var localizedDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .failed(let message):
             return "Ring Error: \(message)"

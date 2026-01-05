@@ -4,7 +4,7 @@ import Ring
 
 struct ChatView: View {
     @State private var viewModel = ChatViewModel()
-
+    
     var body: some View {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
@@ -24,51 +24,7 @@ struct ChatView: View {
             }
             
             Divider()
-            ZStack {
-                VStack(spacing: 4) {
-                    TextField("Message", text: $viewModel.input, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1...4)
-                        .disabled(viewModel.isSending)
-
-                    HStack {
-                        Spacer()
-                        Button {
-                            viewModel.isShowingModelPicker.toggle()
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(viewModel.selectedModel?.metadata.prettyName ?? "Select model")
-                                Image(systemName: "chevron.down")
-                            }
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        }
-                        .buttonStyle(.plain)
-                        Button {
-                            Task { try? await viewModel.send() }
-                        } label: {
-                            if viewModel.isSending {
-                                ProgressView()
-                            } else {
-                                Image(systemName: "paperplane.fill")
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(viewModel.isSending || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                    .frame(maxHeight: 30)
-                }
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
-                .padding(.bottom, 4)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.2))
-                        .stroke(Color.black.opacity(0.3), lineWidth: 0.5)
-                )
-            }
-            .padding(8)
-            .background(.bar)
+            messageContainer
         }
         .navigationTitle("Chat")
         .toolbar {
@@ -79,9 +35,64 @@ struct ChatView: View {
         }
         .sheet(isPresented: $viewModel.isShowingModelPicker) {
             ModelPickerView(selectedModel: $viewModel.selectedModel)
-                .frame(height: 600)
+                .frame(minHeight: 560)
         }
+        .errorAlert($viewModel.errorMessage)
     }
+
+    @ViewBuilder
+    private var messageContainer: some View {
+        ZStack {
+            VStack(spacing: 4) {
+                TextField("Message", text: $viewModel.input, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1...4)
+                    .disabled(viewModel.isSending)
+
+                HStack {
+                    Spacer()
+                    if let loadingProgress = viewModel.loadingProgress {
+                        ProgressView(value: loadingProgress.fractionCompleted)
+                            .progressViewStyle(.circular)
+                    }
+                    Button {
+                        viewModel.isShowingModelPicker.toggle()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(viewModel.selectedModel?.metadata.prettyName ?? "Select model")
+                            Image(systemName: "chevron.down")
+                        }
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        Task { try? await viewModel.send() }
+                    } label: {
+                        if viewModel.isSending {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "paperplane.fill")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(viewModel.isSending || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                .frame(maxHeight: 30)
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.2))
+                    .stroke(Color.black.opacity(0.3), lineWidth: 0.5)
+            )
+        }
+        .padding(8)
+        .background(.bar)
+    }
+
 }
 
 private struct ChatBubble: View {

@@ -59,9 +59,15 @@ public final class MLXManager {
         }
     }
 
-    public func loadModel(_ card: ModelCard, progressHandler: @Sendable @escaping (Progress) -> Void) async throws -> ModelContext {
+    public func loadModel(
+        _ card: ModelCard,
+        progressHandler: @Sendable @escaping (Progress) -> Void
+    ) async throws -> ModelContext {
         guard let group else { throw RingError.failed("group not initialized") }
-        var context = try await LLMModelFactory.shared.load(configuration: ModelConfiguration(id: card.modelId), progressHandler: progressHandler)
+        var context = try await LLMModelFactory.shared.load(
+            configuration: ModelConfiguration(id: card.modelId),
+            progressHandler: progressHandler
+        )
         if card.metadata.supportsTensor {
             context.model = tensorAutoParallel(model: context.model, group: group) as! any LanguageModel
         }

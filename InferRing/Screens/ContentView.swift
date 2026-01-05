@@ -7,31 +7,15 @@ struct ContentView: View {
     @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
-        content
-    }
-    
-    @ViewBuilder
-    var content: some View {
-        splitView
-    }
-
-    var splitView: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             listContent
         } detail: {
-            Text("Select an item")
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    var stackView: some View {
-        NavigationStack {
-            listContent
+            EmptyView()
         }
     }
 
     @ViewBuilder
-    var listContent: some View {
+    private var listContent: some View {
         List {
             NavigationLink("Browse Devices") {
                 ServiceBrowserView()

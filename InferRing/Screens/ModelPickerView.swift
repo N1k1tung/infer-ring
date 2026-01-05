@@ -1,7 +1,7 @@
 import SwiftUI
 import Ring
 
-public struct ModelPickerView: View {
+struct ModelPickerView: View {
     @Environment(\.dismiss) private var dismiss
 
     @Binding var selectedModel: ModelCard?
@@ -28,11 +28,11 @@ public struct ModelPickerView: View {
         }
     }
 
-    public init(selectedModel: Binding<ModelCard?>) {
+    init(selectedModel: Binding<ModelCard?>) {
         self._selectedModel = selectedModel
     }
 
-    public var body: some View {
+    var body: some View {
         NavigationStack {
             List {
                 ForEach(filteredCards, id: \.shortId) { card in

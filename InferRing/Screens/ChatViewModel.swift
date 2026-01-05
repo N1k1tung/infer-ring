@@ -22,8 +22,32 @@ class ChatViewModel {
     ]
     var input: String = ""
     var isSending: Bool = false
-    var selectedModel: ModelCard?
+    var selectedModel: ModelCard? {
+        didSet {
+            guard let selectedModel else { return }
+            // TODO: check mem
+            Task {
+                do {
+                    try await mlxManager?.loadModel(selectedModel) { [weak self] progress in
+                        Task { @MainActor in
+                            self?.loadingProgress = progress
+                        }
+                    }
+                }
+                catch {
+                    dprint(error)
+                    errorMessage = "Failed to load model"
+                }
+            }
+        }
+    }
     var isShowingModelPicker: Bool = false
+    var errorMessage: String? = nil
+    var loadingProgress: Progress? = nil
+
+    @ObservationIgnored
+    @Inject
+    private var mlxManager: MLXManager?
 
     func send() async throws {
         let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
