@@ -37,7 +37,7 @@ public func pipelineAutoParallel(
     let safeStart = max(0, min(startLayer, layers.count))
     let safeEnd = max(safeStart, min(endLayer, layers.count))
     
-    let subsetLayers = layers[safeStart..<safeEnd]
+    let subsetLayers = Array(layers[safeStart..<safeEnd])
     guard !subsetLayers.isEmpty else {
         print("Warning: pipelineAutoParallel layer range [\(safeStart), \(safeEnd)) is empty")
         return model
@@ -51,7 +51,7 @@ public func pipelineAutoParallel(
     newLayers[0] = first
     newLayers[newLayers.count - 1] = last
     
-    setLayers(on: model, newLayers: Array(newLayers))
+    setLayers(on: model, newLayers: newLayers)
 
     return model
 }
@@ -476,27 +476,29 @@ func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
     else if let qwen = model as? Qwen3Model {
         qwen.model.layers = newLayers
     }
-    if let lfm = model as? LFM2Model {
+    else if let lfm = model as? LFM2Model {
         lfm.model.layers = newLayers
     }
+    else {
+        // Fallback: try children() based approach
+        guard let inner = getInnerModel(model) else { return }
+        let children = inner.children()
 
-    // Fallback: try children() based approach
-    guard let inner = getInnerModel(model) else { return }
-    let children = inner.children()
-    
-    let prefix: String
-    if children["layers"] != nil {
-        prefix = "layers"
-    } else if children["h"] != nil {
-        prefix = "h"
-    } else {
-        prefix = "layers"
+        let prefix: String
+        if children["layers"] != nil {
+            prefix = "layers"
+        } else if children["h"] != nil {
+            prefix = "h"
+        } else {
+            prefix = "layers"
+        }
+
+        do {
+            try inner.updateModule(key: prefix, newLayers)
+        }
+        catch {
+            print("Couldn't update inner model layers \(error) for model \(String(describing: type(of: model)))")
+        }
     }
 
-    do {
-        try inner.updateModule(key: prefix, newLayers)
-    }
-    catch {
-        print("Couldn't update inner model layers \(error)")
-    }
 }
