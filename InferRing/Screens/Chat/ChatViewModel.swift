@@ -62,6 +62,7 @@ class ChatViewModel {
                 self?.modelManager?.currentModelCard
             }) {
                 selectedModel = loadedModel
+                resetChat()
             }
         }
     }
@@ -79,19 +80,23 @@ class ChatViewModel {
         messages.append(userMessage)
         input = ""
 
-        let assistantMessage = ChatMessage(role: .assistant, content: "...")
+        let assistantMessage = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMessage)
-        var index = messages.count - 1
+        let index = messages.count - 1
         for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
-            messages[index].content = replyStream
+            messages[index].content += replyStream
         }
 
     }
 
     func reset() {
+        resetChat()
+        modelManager?.resetChatSession()
+    }
+
+    private func resetChat() {
         messages = [.systemMessage]
         input = ""
         isSending = false
-        modelManager?.resetChatSession()
     }
 }
