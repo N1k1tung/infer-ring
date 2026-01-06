@@ -30,7 +30,7 @@ public struct ModelCard: Codable, Equatable {
 }
 
 public struct ModelCards {
-    public static let allModels: [String: ModelCard] = [
+    public static let largeModels: [String: ModelCard] = [
         // deepseek v3
         "deepseek-v3.1-4bit": ModelCard(
             shortId: "deepseek-v3.1-4bit",
@@ -101,58 +101,7 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
-        // llama-3.1
-        "llama-3.1-8b": ModelCard(
-            shortId: "llama-3.1-8b",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
-            name: "Llama 3.1 8B (4-bit)",
-            description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
-                prettyName: "Llama 3.1 8B (4-bit)",
-                storageSize: Memory.from_mb(4423),
-                nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
-            )
-        ),
-        "llama-3.1-8b-8bit": ModelCard(
-            shortId: "llama-3.1-8b-8bit",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
-            name: "Llama 3.1 8B (8-bit)",
-            description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
-                prettyName: "Llama 3.1 8B (8-bit)",
-                storageSize: Memory.from_mb(8540),
-                nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
-            )
-        ),
-        "llama-3.1-8b-bf16": ModelCard(
-            shortId: "llama-3.1-8b-bf16",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
-            name: "Llama 3.1 8B (BF16)",
-            description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
-                prettyName: "Llama 3.1 8B (BF16)",
-                storageSize: Memory.from_mb(16100),
-                nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
-            )
-        ),
+        // llama
         "llama-3.1-70b": ModelCard(
             shortId: "llama-3.1-70b",
             modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
@@ -167,58 +116,6 @@ public struct ModelCards {
                 storageSize: Memory.from_mb(38769),
                 nLayers: 80,
                 hiddenSize: 8192,
-                supportsTensor: true
-            )
-        ),
-        // llama-3.2
-        "llama-3.2-1b": ModelCard(
-            shortId: "llama-3.2-1b",
-            modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
-            name: "Llama 3.2 1B (4-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
-                prettyName: "Llama 3.2 1B (4-bit)",
-                storageSize: Memory.from_mb(696),
-                nLayers: 16,
-                hiddenSize: 2048,
-                supportsTensor: true
-            )
-        ),
-        "llama-3.2-3b": ModelCard(
-            shortId: "llama-3.2-3b",
-            modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
-            name: "Llama 3.2 3B (4-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
-                prettyName: "Llama 3.2 3B (4-bit)",
-                storageSize: Memory.from_mb(1777),
-                nLayers: 28,
-                hiddenSize: 3072,
-                supportsTensor: true
-            )
-        ),
-        "llama-3.2-3b-8bit": ModelCard(
-            shortId: "llama-3.2-3b-8bit",
-            modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
-            name: "Llama 3.2 3B (8-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
-                prettyName: "Llama 3.2 3B (8-bit)",
-                storageSize: Memory.from_mb(3339),
-                nLayers: 28,
-                hiddenSize: 3072,
                 supportsTensor: true
             )
         ),
@@ -275,74 +172,6 @@ public struct ModelCards {
             )
         ),
         // qwen3
-        "qwen3-0.6b": ModelCard(
-            shortId: "qwen3-0.6b",
-            modelId: "mlx-community/Qwen3-0.6B-4bit",
-            name: "Qwen3 0.6B (4-bit)",
-            description: """
-        Qwen3 0.6B is a large language model trained on the Qwen3 0.6B dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Qwen3-0.6B-4bit",
-                prettyName: "Qwen3 0.6B (4-bit)",
-                storageSize: Memory.from_mb(327),
-                nLayers: 28,
-                hiddenSize: 1024,
-                supportsTensor: false
-            )
-        ),
-        "qwen3-0.6b-8bit": ModelCard(
-            shortId: "qwen3-0.6b-8bit",
-            modelId: "mlx-community/Qwen3-0.6B-8bit",
-            name: "Qwen3 0.6B (8-bit)",
-            description: """
-        Qwen3 0.6B is a large language model trained on the Qwen3 0.6B dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Qwen3-0.6B-8bit",
-                prettyName: "Qwen3 0.6B (8-bit)",
-                storageSize: Memory.from_mb(666),
-                nLayers: 28,
-                hiddenSize: 1024,
-                supportsTensor: false
-            )
-        ),
-        "qwen3-30b": ModelCard(
-            shortId: "qwen3-30b",
-            modelId: "mlx-community/Qwen3-30B-A3B-4bit",
-            name: "Qwen3 30B A3B (4-bit)",
-            description: """
-        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Qwen3-30B-A3B-4bit",
-                prettyName: "Qwen3 30B A3B (4-bit)",
-                storageSize: Memory.from_mb(16797),
-                nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
-            )
-        ),
-        "qwen3-30b-8bit": ModelCard(
-            shortId: "qwen3-30b-8bit",
-            modelId: "mlx-community/Qwen3-30B-A3B-8bit",
-            name: "Qwen3 30B A3B (8-bit)",
-            description: """
-        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Qwen3-30B-A3B-8bit",
-                prettyName: "Qwen3 30B A3B (8-bit)",
-                storageSize: Memory.from_mb(31738),
-                nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
-            )
-        ),
         "qwen3-80b-a3B-4bit": ModelCard(
             shortId: "qwen3-80b-a3B-4bit",
             modelId: "mlx-community/Qwen3-Next-80B-A3B-Instruct-4bit",
@@ -497,23 +326,6 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
-        "gpt-oss-20b-4bit": ModelCard(
-            shortId: "gpt-oss-20b-4bit",
-            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-            description: """
-        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-                storageSize: Memory.from_kb(11_744_051),
-                nLayers: 24,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
         // Needs to be quantized g32 or g16.
         "glm-4.5-air-8bit": ModelCard(
             shortId: "glm-4.5-air-8bit",
@@ -549,6 +361,203 @@ public struct ModelCards {
                 supportsTensor: true
             )
         )
+        ]
+    public static let allModels: [String: ModelCard] = [
+        // qwen3
+        "qwen3-0.6b": ModelCard(
+            shortId: "qwen3-0.6b",
+            modelId: "mlx-community/Qwen3-0.6B-4bit",
+            name: "Qwen3 0.6B (4-bit)",
+            description: """
+        Qwen3 0.6B is a large language model trained on the Qwen3 0.6B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-0.6B-4bit",
+                prettyName: "Qwen3 0.6B (4-bit)",
+                storageSize: Memory.from_mb(327),
+                nLayers: 28,
+                hiddenSize: 1024,
+                supportsTensor: false
+            )
+        ),
+        "qwen3-0.6b-8bit": ModelCard(
+            shortId: "qwen3-0.6b-8bit",
+            modelId: "mlx-community/Qwen3-0.6B-8bit",
+            name: "Qwen3 0.6B (8-bit)",
+            description: """
+        Qwen3 0.6B is a large language model trained on the Qwen3 0.6B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-0.6B-8bit",
+                prettyName: "Qwen3 0.6B (8-bit)",
+                storageSize: Memory.from_mb(666),
+                nLayers: 28,
+                hiddenSize: 1024,
+                supportsTensor: false
+            )
+        ),
+        "qwen3-30b": ModelCard(
+            shortId: "qwen3-30b",
+            modelId: "mlx-community/Qwen3-30B-A3B-4bit",
+            name: "Qwen3 30B A3B (4-bit)",
+            description: """
+        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-30B-A3B-4bit",
+                prettyName: "Qwen3 30B A3B (4-bit)",
+                storageSize: Memory.from_mb(16797),
+                nLayers: 48,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "qwen3-30b-8bit": ModelCard(
+            shortId: "qwen3-30b-8bit",
+            modelId: "mlx-community/Qwen3-30B-A3B-8bit",
+            name: "Qwen3 30B A3B (8-bit)",
+            description: """
+        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-30B-A3B-8bit",
+                prettyName: "Qwen3 30B A3B (8-bit)",
+                storageSize: Memory.from_mb(31738),
+                nLayers: 48,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+
+        // gpt-oss
+        "gpt-oss-20b-4bit": ModelCard(
+            shortId: "gpt-oss-20b-4bit",
+            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
+            description: """
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
+                storageSize: Memory.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880,
+                supportsTensor: true
+            )
+        ),
+
+        // llama-3.1
+        "llama-3.1-8b": ModelCard(
+            shortId: "llama-3.1-8b",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+            name: "Llama 3.1 8B (4-bit)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+                prettyName: "Llama 3.1 8B (4-bit)",
+                storageSize: Memory.from_mb(4423),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+        "llama-3.1-8b-8bit": ModelCard(
+            shortId: "llama-3.1-8b-8bit",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
+            name: "Llama 3.1 8B (8-bit)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
+                prettyName: "Llama 3.1 8B (8-bit)",
+                storageSize: Memory.from_mb(8540),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+        "llama-3.1-8b-bf16": ModelCard(
+            shortId: "llama-3.1-8b-bf16",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
+            name: "Llama 3.1 8B (BF16)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
+                prettyName: "Llama 3.1 8B (BF16)",
+                storageSize: Memory.from_mb(16100),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+
+        // llama-3.2
+        "llama-3.2-1b": ModelCard(
+            shortId: "llama-3.2-1b",
+            modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
+            name: "Llama 3.2 1B (4-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
+                prettyName: "Llama 3.2 1B (4-bit)",
+                storageSize: Memory.from_mb(696),
+                nLayers: 16,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "llama-3.2-3b": ModelCard(
+            shortId: "llama-3.2-3b",
+            modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+            name: "Llama 3.2 3B (4-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+                prettyName: "Llama 3.2 3B (4-bit)",
+                storageSize: Memory.from_mb(1777),
+                nLayers: 28,
+                hiddenSize: 3072,
+                supportsTensor: true
+            )
+        ),
+        "llama-3.2-3b-8bit": ModelCard(
+            shortId: "llama-3.2-3b-8bit",
+            modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
+            name: "Llama 3.2 3B (8-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
+                prettyName: "Llama 3.2 3B (8-bit)",
+                storageSize: Memory.from_mb(3339),
+                nLayers: 28,
+                hiddenSize: 3072,
+                supportsTensor: true
+            )
+        ),
+
     ]
 
 }
