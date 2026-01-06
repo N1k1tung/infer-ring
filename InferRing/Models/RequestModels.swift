@@ -30,3 +30,16 @@ struct ModelLoadResponse: Codable {
     let errorMessage: String?
     let timestamp: Date
 }
+
+struct GenerationRequest: Codable {
+    let requestID: String
+    let input: String
+    let timestamp: Date
+}
+
+struct GenerationResponse: Codable {
+    let requestID: String
+    let success: Bool
+    let errorMessage: String?
+    let timestamp: Date
+}

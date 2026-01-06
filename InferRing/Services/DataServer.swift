@@ -75,6 +75,23 @@ final class FileServerHandler: ChannelInboundHandler {
                     }
                 }
             }
+            else if path.hasPrefix("/startGeneration") {
+                guard let data = getData(context: context) else { return }
+                guard let request = parseBody(data: data, context: context, type: GenerationRequest.self)
+                    else { return }
+
+                Task {
+                    let response = await modelManager?.handleGenerationRequest(request) ?? GenerationResponse(
+                        requestID: request.requestID,
+                        success: false,
+                        errorMessage: "ModelManager not available",
+                        timestamp: Date()
+                    )
+                    context.eventLoop.execute { [weak self] in
+                        self?.sendData(context: context, body: response, status: .ok)
+                    }
+                }
+            }
             else {
                 sendText(context: context, body: "OK", status: .ok)
             }

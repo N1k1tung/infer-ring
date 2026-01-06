@@ -97,7 +97,59 @@ final class ModelManager {
         guard let chatSession else {
             return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
         }
+        
+        // Start generation on all peers in parallel
+        let request = GenerationRequest(
+            requestID: UUID().uuidString,
+            input: input,
+            timestamp: Date()
+        )
+        
+        if let peers = coordinator?.peers {
+            Task {
+                await withTaskGroup(of: GenerationResponse?.self) { group in
+                    for peer in peers {
+                        group.addTask {
+                            let client = DataClient.client(for: peer)
+                            return await client.startGeneration(request: request)
+                        }
+                    }
+                }
+            }
+        }
+        
         return chatSession.streamResponse(to: input)
+    }
+
+    /// Handle generation request from remote peer
+    func handleGenerationRequest(_ request: GenerationRequest) async -> GenerationResponse {
+        guard let chatSession else {
+            return GenerationResponse(
+                requestID: request.requestID,
+                success: false,
+                errorMessage: "ChatSession not initialized",
+                timestamp: Date()
+            )
+        }
+        
+        do {
+            let response = try await chatSession.respond(to: request.input)
+            dprint(response)
+
+            return GenerationResponse(
+                requestID: request.requestID,
+                success: true,
+                errorMessage: nil,
+                timestamp: Date()
+            )
+        } catch {
+            return GenerationResponse(
+                requestID: request.requestID,
+                success: false,
+                errorMessage: error.localizedDescription,
+                timestamp: Date()
+            )
+        }
     }
 
     /// starts a new chat session
