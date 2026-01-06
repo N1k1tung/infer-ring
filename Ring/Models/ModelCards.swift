@@ -433,6 +433,42 @@ public struct ModelCards {
             )
         ),
 
+        // LFM2.5
+        "LFM2.5-1.2B-Instruct-8bit": ModelCard(
+            shortId: "LFM2.5-1.2B-Instruct-8bit",
+            modelId: "mlx-community/LFM2.5-1.2B-Instruct-8bit",
+            name: "LFM2.5 1.2B (8-bit)",
+            description: """
+        LFM2.5 1.2 is a new family of hybrid models designed for on-device deployment.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/LFM2.5-1.2B-Instruct-8bit",
+                prettyName: "LFM2.5 1.2B (8-bit)",
+                storageSize: Memory.from_mb(1280),
+                nLayers: 16,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+        "LFM2.5-1.2B-Instruct-bf16": ModelCard(
+            shortId: "LFM2.5-1.2B-Instruct-bf16",
+            modelId: "mlx-community/LFM2.5-1.2B-Instruct-bf16",
+            name: "LFM2.5 1.2B (bf16)",
+            description: """
+        LFM2.5 1.2 is a new family of hybrid models designed for on-device deployment.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/LFM2.5-1.2B-Instruct-bf16",
+                prettyName: "LFM2.5 1.2B (bf16)",
+                storageSize: Memory.from_mb(2407),
+                nLayers: 16,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+
         // gpt-oss
         "gpt-oss-20b-4bit": ModelCard(
             shortId: "gpt-oss-20b-4bit",
