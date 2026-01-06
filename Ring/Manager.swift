@@ -63,36 +63,40 @@ public final class MLXManager {
         _ card: ModelCard,
         progressHandler: @Sendable @escaping (Progress) -> Void
     ) async throws -> ModelContext {
-        guard let group else { throw RingError.failed("group not initialized") }
         var context = try await LLMModelFactory.shared.load(
             configuration: ModelConfiguration(id: card.modelId),
+            lazy: group != nil,
             progressHandler: progressHandler
         )
-        if card.metadata.supportsTensor {
-            context.model = tensorAutoParallel(model: context.model, group: group) as! any LanguageModel
-        }
-        else {
-            // TODO: exo just uses mem % of total nodes mem * nLayers
-            // after getting hardware details should change to that
-            // for now just split equally
-            let rank = Int(group.rank)
-            let size = Int(group.size)
-            let batch = card.metadata.nLayers / size
-            context.model = pipelineAutoParallel(
-                model: context.model,
-                group: group,
-                modelShardMeta: PipelineShardMetadata(
-                    modelMeta: card.metadata,
-                    deviceRank: rank,
-                    worldSize: size,
-                    startLayer: rank * batch,
-                    endLayer: rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
-                    nLayers: card.metadata.nLayers
-                )
-            ) as! any LanguageModel
+
+        if let group {
+            if card.metadata.supportsTensor {
+                context.model = tensorAutoParallel(model: context.model, group: group) as! any LanguageModel
+            }
+            else {
+                // TODO: exo just uses mem % of total nodes mem * nLayers
+                // after getting hardware details should change to that
+                // for now just split equally
+                let rank = Int(group.rank)
+                let size = Int(group.size)
+                let batch = card.metadata.nLayers / size
+                context.model = pipelineAutoParallel(
+                    model: context.model,
+                    group: group,
+                    modelShardMeta: PipelineShardMetadata(
+                        modelMeta: card.metadata,
+                        deviceRank: rank,
+                        worldSize: size,
+                        startLayer: rank * batch,
+                        endLayer: rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
+                        nLayers: card.metadata.nLayers
+                    )
+                ) as! any LanguageModel
+            }
+
+            eval(context.model)
         }
 
-        eval(context.model)
         return context
     }
 
