@@ -50,118 +50,6 @@
 		0C76465B2F02D6300065F576 /* Ring.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ring.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0C7646FF2F02D7A30065F576 /* Exceptions for "Ring" folder in "Ring" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				python_ref/exo/__init__.py,
-				python_ref/exo/__main__.py,
-				python_ref/exo/main.py,
-				python_ref/exo/master/__init__.py,
-				python_ref/exo/master/api.py,
-				python_ref/exo/master/main.py,
-				python_ref/exo/master/placement_utils.py,
-				python_ref/exo/master/placement.py,
-				python_ref/exo/master/tests/conftest.py,
-				python_ref/exo/master/tests/test_master.py,
-				python_ref/exo/master/tests/test_placement_utils.py,
-				python_ref/exo/master/tests/test_placement.py,
-				python_ref/exo/master/tests/test_topology.py,
-				python_ref/exo/routing/__init__.py,
-				python_ref/exo/routing/connection_message.py,
-				python_ref/exo/routing/router.py,
-				python_ref/exo/routing/tests/test_event_buffer.py,
-				python_ref/exo/routing/topics.py,
-				python_ref/exo/shared/__init__.py,
-				python_ref/exo/shared/apply.py,
-				python_ref/exo/shared/constants.py,
-				python_ref/exo/shared/election.py,
-				python_ref/exo/shared/logging.py,
-				python_ref/exo/shared/models/model_cards.py,
-				python_ref/exo/shared/models/model_meta.py,
-				python_ref/exo/shared/tests/__init__.py,
-				python_ref/exo/shared/tests/conftest.py,
-				python_ref/exo/shared/tests/test_apply/test_apply_node_download.py,
-				python_ref/exo/shared/tests/test_election.py,
-				python_ref/exo/shared/tests/test_node_id_persistence.py,
-				python_ref/exo/shared/tests/test_state_serialization.py,
-				python_ref/exo/shared/tests/test_xdg_paths.py,
-				python_ref/exo/shared/topology.py,
-				python_ref/exo/shared/types/__init__.py,
-				python_ref/exo/shared/types/api.py,
-				python_ref/exo/shared/types/chunks.py,
-				python_ref/exo/shared/types/commands.py,
-				python_ref/exo/shared/types/common.py,
-				python_ref/exo/shared/types/events.py,
-				python_ref/exo/shared/types/memory.py,
-				python_ref/exo/shared/types/models.py,
-				python_ref/exo/shared/types/multiaddr.py,
-				python_ref/exo/shared/types/profiling.py,
-				python_ref/exo/shared/types/state.py,
-				python_ref/exo/shared/types/tasks.py,
-				python_ref/exo/shared/types/topology.py,
-				python_ref/exo/shared/types/worker/downloads.py,
-				python_ref/exo/shared/types/worker/instances.py,
-				python_ref/exo/shared/types/worker/resource_monitor.py,
-				python_ref/exo/shared/types/worker/runner_response.py,
-				python_ref/exo/shared/types/worker/runners.py,
-				python_ref/exo/shared/types/worker/shards.py,
-				python_ref/exo/utils/__init__.py,
-				python_ref/exo/utils/banner.py,
-				python_ref/exo/utils/channels.py,
-				python_ref/exo/utils/dashboard_path.py,
-				python_ref/exo/utils/event_buffer.py,
-				python_ref/exo/utils/fs.py,
-				python_ref/exo/utils/phantom.py,
-				python_ref/exo/utils/pydantic_ext.py,
-				python_ref/exo/utils/reactive.py,
-				python_ref/exo/utils/tests/test_tagged.py,
-				python_ref/exo/utils/tests/testing_mp.py,
-				python_ref/exo/worker/__init__.py,
-				python_ref/exo/worker/download/download_utils.py,
-				python_ref/exo/worker/download/huggingface_utils.py,
-				python_ref/exo/worker/download/impl_shard_downloader.py,
-				python_ref/exo/worker/download/shard_downloader.py,
-				python_ref/exo/worker/engines/__init__.py,
-				python_ref/exo/worker/engines/mlx/__init__.py,
-				python_ref/exo/worker/engines/mlx/auto_parallel.py,
-				python_ref/exo/worker/engines/mlx/cache.py,
-				python_ref/exo/worker/engines/mlx/constants.py,
-				python_ref/exo/worker/engines/mlx/generator/__init__.py,
-				python_ref/exo/worker/engines/mlx/generator/generate.py,
-				python_ref/exo/worker/engines/mlx/utils_mlx.py,
-				python_ref/exo/worker/main.py,
-				python_ref/exo/worker/plan.py,
-				python_ref/exo/worker/runner/bootstrap.py,
-				python_ref/exo/worker/runner/runner_supervisor.py,
-				python_ref/exo/worker/runner/runner.py,
-				python_ref/exo/worker/tests/__init__.py,
-				python_ref/exo/worker/tests/constants.py,
-				python_ref/exo/worker/tests/TODO.tests,
-				python_ref/exo/worker/tests/unittests/__init__.py,
-				python_ref/exo/worker/tests/unittests/conftest.py,
-				python_ref/exo/worker/tests/unittests/test_download/__init__.py,
-				python_ref/exo/worker/tests/unittests/test_mlx/__init__.py,
-				python_ref/exo/worker/tests/unittests/test_plan/__init__.py,
-				python_ref/exo/worker/tests/unittests/test_plan/test_download_and_loading.py,
-				python_ref/exo/worker/tests/unittests/test_plan/test_runner_lifecycle.py,
-				python_ref/exo/worker/tests/unittests/test_plan/test_task_forwarding.py,
-				python_ref/exo/worker/tests/unittests/test_plan/test_warmup.py,
-				python_ref/exo/worker/tests/unittests/test_runner/__init__.py,
-				python_ref/exo/worker/tests/unittests/test_runner/test_event_ordering.py,
-				python_ref/exo/worker/tests/unittests/test_runner/test_runner_supervisor.py,
-				python_ref/exo/worker/utils/__init__.py,
-				python_ref/exo/worker/utils/macmon.py,
-				python_ref/exo/worker/utils/net_profile.py,
-				python_ref/exo/worker/utils/profile.py,
-				python_ref/exo/worker/utils/system_info.py,
-				python_ref/exo/worker/utils/tests/__init__.py,
-				python_ref/exo/worker/utils/tests/test_macmon.py,
-			);
-			target = 0C76465A2F02D6300065F576 /* Ring */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0C76464A2F02D2FD0065F576 /* InferRing */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -170,9 +58,6 @@
 		};
 		0C76465C2F02D6300065F576 /* Ring */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0C7646FF2F02D7A30065F576 /* Exceptions for "Ring" folder in "Ring" target */,
-			);
 			path = Ring;
 			sourceTree = "<group>";
 		};
