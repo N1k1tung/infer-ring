@@ -398,6 +398,40 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
+        "qwen3-4B": ModelCard(
+            shortId: "qwen3-4B",
+            modelId: "mlx-community/Qwen3-4B-4bit",
+            name: "Qwen3 4B (4-bit)",
+            description: """
+        Qwen3 4B is a large language model trained on the Qwen3 4B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-4B-4bit",
+                prettyName: "Qwen3 4B (4-bit)",
+                storageSize: Memory.from_mb(2335),
+                nLayers: 36,
+                hiddenSize: 2560,
+                supportsTensor: false
+            )
+        ),
+        "qwen3-4B-8bit": ModelCard(
+            shortId: "qwen3-4B-8bit",
+            modelId: "mlx-community/Qwen3-4B-8bit",
+            name: "Qwen3 4B (8-bit)",
+            description: """
+        Qwen3 4B is a large language model trained on the Qwen3 4B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-4B-8bit",
+                prettyName: "Qwen3 4B (8-bit)",
+                storageSize: Memory.from_mb(4393),
+                nLayers: 36,
+                hiddenSize: 2560,
+                supportsTensor: false
+            )
+        ),
         "qwen3-30b": ModelCard(
             shortId: "qwen3-30b",
             modelId: "mlx-community/Qwen3-30B-A3B-4bit",
