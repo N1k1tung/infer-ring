@@ -37,7 +37,7 @@ public func pipelineAutoParallel(
     let safeStart = max(0, min(startLayer, layers.count))
     let safeEnd = max(safeStart, min(endLayer, layers.count))
     
-    let subsetLayers = Array(layers[safeStart..<safeEnd])
+    let subsetLayers = layers[safeStart..<safeEnd]
     guard !subsetLayers.isEmpty else {
         print("Warning: pipelineAutoParallel layer range [\(safeStart), \(safeEnd)) is empty")
         return model
@@ -51,8 +51,8 @@ public func pipelineAutoParallel(
     newLayers[0] = first
     newLayers[newLayers.count - 1] = last
     
-    setLayers(on: model, newLayers: newLayers)
-    
+    setLayers(on: model, newLayers: Array(newLayers))
+
     return model
 }
 
@@ -415,6 +415,9 @@ func getInnerModel(_ model: any LanguageModel) -> Module? {
     if let qwen = model as? Qwen3Model {
         return qwen.model
     }
+    if let lfm = model as? LFM2Model {
+        return lfm.model
+    }
 
     // Fallback:
     let children = model.children()
@@ -425,7 +428,7 @@ func getInnerModel(_ model: any LanguageModel) -> Module? {
 }
 
 /// Get transformer layers from a LanguageModel
-func getLayers(from model: any LanguageModel) -> [Module] {
+func getLayers(from model: any LanguageModel) -> [TransformerLayer] {
     if let llama = model as? LlamaModel {
         return llama.model.layers
     }
@@ -446,10 +449,10 @@ func getLayers(from model: any LanguageModel) -> [Module] {
     if let inner = getInnerModel(model) {
         let children = inner.children()
         if let layers = children[unwrapping: "layers"] {
-            return layers.modules()
+            return layers.modules() as? [TransformerLayer] ?? []
         }
         if let h = children[unwrapping: "h"] {
-            return h.modules()
+            return h.modules() as? [TransformerLayer] ?? []
         }
     }
     
@@ -458,29 +461,25 @@ func getLayers(from model: any LanguageModel) -> [Module] {
 
 /// Set transformer layers on a LanguageModel.
 /// Uses type-specific property access for reliable layer assignment.
-func setLayers(on model: any LanguageModel, newLayers: [Module]) {
-    // For LlamaModel
+func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
     if let llama = model as? LlamaModel {
-        // Access the inner model and update via updateModule
-        try? llama.model.updateModule(key: "layers", newLayers)
-        return
+        llama.model.layers = newLayers
     }
-    
-    // For DeepseekV3Model
-    if let deepseek = model as? DeepseekV3Model {
-        try? deepseek.model.updateModule(key: "layers", newLayers)
-        // Update DeepSeek V3 specific parameters when layers are shrunk
+    else if let deepseek = model as? DeepseekV3Model {
+        deepseek.model.layers = newLayers
         deepseek.model.endIdx = newLayers.count
         deepseek.model.numLayers = newLayers.count
-        return
     }
-    
-    // For Qwen3MoEModel
-    if let qwen = model as? Qwen3MoEModel {
-        try? qwen.model.updateModule(key: "layers", newLayers)
-        return
+    else if let qwen = model as? Qwen3MoEModel {
+        qwen.model.layers = newLayers
     }
-    
+    else if let qwen = model as? Qwen3Model {
+        qwen.model.layers = newLayers
+    }
+    if let lfm = model as? LFM2Model {
+        lfm.model.layers = newLayers
+    }
+
     // Fallback: try children() based approach
     guard let inner = getInnerModel(model) else { return }
     let children = inner.children()
@@ -493,6 +492,11 @@ func setLayers(on model: any LanguageModel, newLayers: [Module]) {
     } else {
         prefix = "layers"
     }
-    
-    try? inner.updateModule(key: prefix, newLayers)
+
+    do {
+        try inner.updateModule(key: prefix, newLayers)
+    }
+    catch {
+        print("Couldn't update inner model layers \(error)")
+    }
 }
