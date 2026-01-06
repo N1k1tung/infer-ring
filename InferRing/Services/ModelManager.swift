@@ -10,16 +10,23 @@ final class ModelManager {
     @ObservationIgnored
     @Inject
     var coordinator: RingCoordinator?
-
+    
     @ObservationIgnored
     @Inject
     private var mlxManager: MLXManager?
     
     // Current loaded model state
-    var currentModel: ModelContext?
+    @ObservationIgnored
+    private var currentModel: ModelContext? {
+        didSet {
+            resetChatSession()
+        }
+    }
+    @ObservationIgnored
+    private var chatSession: ChatSession?
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
-
+    
     // MARK: - Public API
     
     /// Load a model across all peers in the ring (only callable by leader)
@@ -34,20 +41,20 @@ final class ModelManager {
         
         isLoading = true
         var loadingProgress = 0.0
-
+        
         defer {
             isLoading = false
         }
-
+        
         let request = ModelLoadRequest(
             modelCard: modelCard,
             requestID: UUID().uuidString,
             timestamp: Date()
         )
-
+        
         let peers = coordinator.peers
         var responses: [ModelLoadResponse] = []
-
+        
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
                 try? await self?.loadModelLocally(modelCard) { progress in
@@ -55,43 +62,56 @@ final class ModelManager {
                     progressHandler(loadingProgress)
                 }
             }
-
+            
             for peer in peers {
                 group.addTask {
                     let client = DataClient.client(for: peer)
                     return await client.loadModel(request: request)
                 }
             }
-
+            
             for await response in group {
                 if let response {
                     responses.append(response)
                 }
             }
         }
-
+        
         // Check if all peers loaded successfully
         let failedPeers = responses.filter { !$0.success }
         if !failedPeers.isEmpty {
             let errorMessages = failedPeers.compactMap { $0.errorMessage }.joined(separator: ", ")
             throw ModelManagerError.peerLoadingFailed(errorMessages)
         }
-
+        
         // Update state
         currentModelCard = modelCard
         loadingProgress = 1.0
-            
-
     }
-    
-    // MARK: - Internal Methods
-    
+
+
+    /// stream chat response
+    /// - Parameter input: user input
+    /// - Returns: response stream
+    func streamResponse(to input: String) -> AsyncThrowingStream<String, any Error> {
+        guard let chatSession else {
+            return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
+        }
+        return chatSession.streamResponse(to: input)
+    }
+
+    /// starts a new chat session
+    func resetChatSession() {
+        guard let currentModel else { return }
+        chatSession = ChatSession(currentModel, instructions: ChatMessage.systemMessage.content)
+    }
+
     /// Handle model load request from coordinator
     func handleModelLoadRequest(_ request: ModelLoadRequest) async -> ModelLoadResponse {
         do {
             _ = try await loadModelLocally(request.modelCard) { _ in }
             currentModelCard = request.modelCard
-            
+
             return ModelLoadResponse(
                 requestID: request.requestID,
                 success: true,
@@ -108,6 +128,8 @@ final class ModelManager {
             )
         }
     }
+
+    // MARK: - Internal Methods
     
     /// Load model locally using MLXManager
     private func loadModelLocally(

@@ -6,20 +6,20 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
     enum Role: String, Sendable { case user, assistant, system }
     let id: UUID
     let role: Role
-    let content: String
+    var content: String
     init(id: UUID = UUID(), role: Role, content: String) {
         self.id = id
         self.role = role
         self.content = content
     }
+
+    static let systemMessage = ChatMessage(role: .system, content: "You are a helpful assistant.")
 }
 
 @Observable
 @MainActor
 class ChatViewModel {
-    var messages: [ChatMessage] = [
-        ChatMessage(role: .system, content: "You are a helpful assistant.")
-    ]
+    var messages: [ChatMessage] = [.systemMessage]
     var input: String = ""
     var isSending: Bool = false
     var selectedModel: ModelCard? {
@@ -68,8 +68,10 @@ class ChatViewModel {
 
     func send() async throws {
         let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedInput.isEmpty else { return }
-        guard !isSending else { return }
+        guard !trimmedInput.isEmpty,
+              !isSending,
+              let modelManager
+            else { return }
         isSending = true
         defer { isSending = false }
 
@@ -77,18 +79,19 @@ class ChatViewModel {
         messages.append(userMessage)
         input = ""
 
-        try await Task.sleep(nanoseconds: 600_000_000)
-
-        let assistantReply = "You said: \(trimmedInput)"
-        let assistantMessage = ChatMessage(role: .assistant, content: assistantReply)
+        let assistantMessage = ChatMessage(role: .assistant, content: "...")
         messages.append(assistantMessage)
+        var index = messages.count - 1
+        for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
+            messages[index].content = replyStream
+        }
+
     }
 
     func reset() {
-        messages = [
-            ChatMessage(role: .system, content: "You are a helpful assistant.")
-        ]
+        messages = [.systemMessage]
         input = ""
         isSending = false
+        modelManager?.resetChatSession()
     }
 }
