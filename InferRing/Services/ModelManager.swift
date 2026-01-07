@@ -26,7 +26,10 @@ final class ModelManager {
     private var chatSession: ChatSession?
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
-    
+    var tokensPerSecond: Double? {
+        chatSession?.lastGenerationInfo?.tokensPerSecond
+    }
+
     // MARK: - Public API
     
     /// Load a model across all peers in the ring (only callable by leader)

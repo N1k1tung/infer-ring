@@ -13,6 +13,14 @@ struct ChatView: View {
                         ForEach(viewModel.messages) { message in
                             ChatBubble(message: message)
                                 .id(message.id)
+                                .onTapGesture {
+                                    Pasteboard.setText(message.content)
+                                    viewModel.isShowingToast = true
+                                    Task { @MainActor in
+                                        try? await Task.sleep(nanoseconds: 2_000_000_000)
+                                        withAnimation { viewModel.isShowingToast = false }
+                                    }
+                                }
                         }
                     }
                     .padding(.horizontal)
@@ -25,6 +33,11 @@ struct ChatView: View {
             
             Divider()
             messageContainer
+        }
+        .overlay(alignment: .bottom) {
+            if viewModel.isShowingToast {
+                Toast(message: "Copied to Clipboard")
+            }
         }
         .navigationTitle("Chat")
         .toolbar {
@@ -48,8 +61,17 @@ struct ChatView: View {
                     .textFieldStyle(.plain)
                     .lineLimit(1...4)
                     .disabled(viewModel.isSending)
-
+                    .submitLabel(.send)
+                    .onSubmit {
+                        guard viewModel.canSend else { return }
+                        Task { try? await viewModel.send() }
+                    }
                 HStack {
+                    if let tps = viewModel.tokensPerSecond {
+                        Text("\(tps, specifier: "%.2f") tps")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Spacer()
                     if let loadingPercent = viewModel.loadingPercent {
                         ProgressView(value: loadingPercent)
@@ -71,14 +93,18 @@ struct ChatView: View {
                     } label: {
                         if viewModel.isSending {
                             ProgressView()
-                        } else {
+                        }
+                        else {
                             Image(systemName: "paperplane.fill")
                         }
                     }
+                    .frame(maxHeight: 30)
                     .buttonStyle(.borderedProminent)
-                    .disabled(viewModel.isSending || viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!viewModel.canSend)
+                    #if os(macOS)
+                    .keyboardShortcut(.return)
+                    #endif
                 }
-                .frame(maxHeight: 30)
             }
             .padding(.horizontal, 8)
             .padding(.top, 8)

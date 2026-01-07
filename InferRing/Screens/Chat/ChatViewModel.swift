@@ -46,9 +46,15 @@ class ChatViewModel {
             }
         }
     }
+    var canSend: Bool {
+        selectedModel != nil && !isSending && !input.trimmed.isEmpty
+    }
     var isShowingModelPicker: Bool = false
+    var isShowingToast: Bool = false
+
     var errorMessage: String? = nil
     var loadingPercent: Double? = nil
+    var tokensPerSecond: Double? = nil
 
     @ObservationIgnored
     @Inject
@@ -86,7 +92,7 @@ class ChatViewModel {
         for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
             messages[index].content += replyStream
         }
-
+        tokensPerSecond = modelManager.tokensPerSecond
     }
 
     func reset() {
