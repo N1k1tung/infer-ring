@@ -464,20 +464,25 @@ func getLayers(from model: any LanguageModel) -> [TransformerLayer] {
 func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
     if let llama = model as? LlamaModel {
         llama.model.layers = newLayers
+        llama.model.rebuildCaches()
     }
     else if let deepseek = model as? DeepseekV3Model {
         deepseek.model.layers = newLayers
         deepseek.model.endIdx = newLayers.count
         deepseek.model.numLayers = newLayers.count
+        deepseek.model.rebuildCaches()
     }
     else if let qwen = model as? Qwen3MoEModel {
         qwen.model.layers = newLayers
+        qwen.model.rebuildCaches()
     }
     else if let qwen = model as? Qwen3Model {
         qwen.model.layers = newLayers
+        qwen.model.rebuildCaches()
     }
     else if let lfm = model as? LFM2Model {
         lfm.model.layers = newLayers
+        lfm.model.rebuildCaches()
     }
     else {
         // Fallback: try children() based approach
@@ -495,6 +500,7 @@ func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
 
         do {
             try inner.updateModule(key: prefix, newLayers)
+            inner.rebuildCaches()
         }
         catch {
             print("Couldn't update inner model layers \(error) for model \(String(describing: type(of: model)))")
@@ -502,3 +508,4 @@ func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
     }
 
 }
+
