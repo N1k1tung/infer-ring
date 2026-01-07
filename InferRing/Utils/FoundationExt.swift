@@ -19,9 +19,11 @@ extension String {
     }
 }
 
-func dprint(_ item: Any) {
+func dprint(_ item: Any?) {
 #if DEBUG
-    print(item)
+    if let item {
+        print(item)
+    }
 #endif
 }
 

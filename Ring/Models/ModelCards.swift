@@ -432,6 +432,23 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
+        "qwen3-14B-8bit": ModelCard(
+            shortId: "qwen3-14B-8bit",
+            modelId: "Qwen/Qwen3-14B-MLX-8bit",
+            name: "Qwen3 14B (8-bit)",
+            description: """
+        Qwen3 14B is a large language model trained on the Qwen3 14B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3-14B-MLX-8bit",
+                prettyName: "Qwen3 14B (8-bit)",
+                storageSize: Memory.from_mb(15565),
+                nLayers: 40,
+                hiddenSize: 5120,
+                supportsTensor: false
+            )
+        ),
         "qwen3-30b": ModelCard(
             shortId: "qwen3-30b",
             modelId: "mlx-community/Qwen3-30B-A3B-4bit",

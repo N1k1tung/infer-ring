@@ -138,7 +138,8 @@ final class ModelManager {
         do {
             let response = try await chatSession.respond(to: request.input)
             dprint(response)
-
+            dprint(chatSession.lastGenerationInfo)
+            
             return GenerationResponse(
                 requestID: request.requestID,
                 success: true,
