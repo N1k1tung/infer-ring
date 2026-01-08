@@ -70,30 +70,31 @@ public final class MLXManager {
         )
 
         if let group {
-            if card.metadata.supportsTensor {
-                context.model = try tensorAutoParallel(model: context.model, group: group)
-            }
-            else {
-                // TODO: exo just uses mem % of total nodes mem * nLayers
-                // after getting hardware details should change to that
-                // for now just split equally
-                let rank = Int(group.rank)
-                let size = Int(group.size)
-                let batch = card.metadata.nLayers / size
-                context.model = pipelineAutoParallel(
-                    model: context.model,
-                    group: group,
-                    modelShardMeta: PipelineShardMetadata(
-                        modelMeta: card.metadata,
-                        deviceRank: rank,
-                        worldSize: size,
-                        startLayer: rank * batch,
-                        endLayer: rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
-                        nLayers: card.metadata.nLayers
-                    )
+            // TODO: exo just uses mem % of total nodes mem * nLayers
+            // after getting hardware details should change to that
+            // for now just split equally
+            let rank = Int(group.rank)
+            let size = Int(group.size)
+#if os(iOS)
+            let start = 40
+            let end = card.metadata.nLayers
+#else
+            let start = 0
+            let end = 40
+#endif
+            let batch = card.metadata.nLayers / size
+            context.model = pipelineAutoParallel(
+                model: context.model,
+                group: group,
+                modelShardMeta: PipelineShardMetadata(
+                    modelMeta: card.metadata,
+                    deviceRank: rank,
+                    worldSize: size,
+                    startLayer: start, //rank * batch,
+                    endLayer: end, //rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
+                    nLayers: card.metadata.nLayers
                 )
-            }
-
+            )
             eval(context.model)
         }
 

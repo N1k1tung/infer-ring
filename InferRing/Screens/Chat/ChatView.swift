@@ -59,7 +59,7 @@ struct ChatView: View {
             VStack(spacing: 4) {
                 TextField("Message", text: $viewModel.input, axis: .vertical)
                     .textFieldStyle(.plain)
-                    .lineLimit(1...4)
+                    .lineLimit(1...5)
                     .disabled(viewModel.isSending)
                     .submitLabel(.send)
                     .onSubmit {
@@ -69,11 +69,10 @@ struct ChatView: View {
                 HStack {
                     if let tps = viewModel.tokensPerSecond {
                         Text("\(tps, specifier: "%.2f") tps")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
                     }
                     Spacer()
                     if let loadingPercent = viewModel.loadingPercent {
+                        Text("\(loadingPercent * 100, specifier: "%.0f")%")
                         ProgressView(value: loadingPercent)
                             .progressViewStyle(.circular)
                     }
@@ -84,8 +83,6 @@ struct ChatView: View {
                             Text(viewModel.selectedModel?.metadata.prettyName ?? "Select model")
                             Image(systemName: "chevron.down")
                         }
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
                     }
                     .buttonStyle(.plain)
                     Button {
@@ -105,6 +102,8 @@ struct ChatView: View {
                     .keyboardShortcut(.return)
                     #endif
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 8)
             .padding(.top, 8)

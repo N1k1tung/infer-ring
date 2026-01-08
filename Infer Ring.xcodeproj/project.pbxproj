@@ -48,6 +48,7 @@
 		0C7379B42F052E06001EEFB6 /* Infer-Ring-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Infer-Ring-Info.plist"; sourceTree = "<group>"; };
 		0C7646482F02D2FD0065F576 /* Infer Ring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Infer Ring.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C76465B2F02D6300065F576 /* Ring.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ring.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C8C6F682F0EAF37000C3AF0 /* Infer Ring.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Infer Ring.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,6 +95,7 @@
 		0C76463F2F02D2FD0065F576 = {
 			isa = PBXGroup;
 			children = (
+				0C8C6F682F0EAF37000C3AF0 /* Infer Ring.entitlements */,
 				0C7379B42F052E06001EEFB6 /* Infer-Ring-Info.plist */,
 				0C76464A2F02D2FD0065F576 /* InferRing */,
 				0C76465C2F02D6300065F576 /* Ring */,
@@ -392,6 +394,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Infer Ring.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KKYSS74XUW;
@@ -456,6 +459,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Infer Ring.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KKYSS74XUW;

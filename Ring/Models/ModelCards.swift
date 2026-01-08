@@ -466,6 +466,23 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
+        "Qwen3-Coder-30B-A3B-Instruct-6bit": ModelCard(
+            shortId: "Qwen3-Coder-30B-6bit",
+            modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-6bit",
+            name: "Qwen3 Coder 30B A3B (6-bit)",
+            description: """
+        Qwen3 30B Coder is a large language model trained on the Qwen3 30B dataset and trained for coding.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-30B-A3B-8bit",
+                prettyName: "Qwen3 Coder 30B A3B (6-bit)",
+                storageSize: Memory.from_mb(25396),
+                nLayers: 48,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
         "qwen3-30b-8bit": ModelCard(
             shortId: "qwen3-30b-8bit",
             modelId: "mlx-community/Qwen3-30B-A3B-8bit",
@@ -483,6 +500,7 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
+
 
         // LFM2.5
         "LFM2.5-1.2B-Instruct-8bit": ModelCard(
