@@ -17,7 +17,7 @@ import MLXLLM
 public func pipelineAutoParallel(
     model: any LanguageModel,
     group: DistributedGroup,
-    modelShardMeta: PipelineShardMetadata
+    modelShardMeta: ShardMetadata
 ) -> any LanguageModel {
     let layers = getLayers(from: model)
     

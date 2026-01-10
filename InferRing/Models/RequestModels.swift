@@ -21,6 +21,7 @@ enum ElectionMessageType: Codable {
 
 struct ModelLoadRequest: Codable {
     let modelCard: ModelCard
+    let shardMeta: ShardMetadata
     let requestID: String
     let timestamp: Date
 }
@@ -42,5 +43,25 @@ struct GenerationResponse: Codable {
     let requestID: String
     let success: Bool
     let errorMessage: String?
+    let timestamp: Date
+}
+
+struct UpdateLastMessageRequest: Codable {
+    let content: String
+    let timestamp: Date
+}
+
+struct UpdateLastMessageResponse: Codable {
+    let success: Bool
+    let errorMessage: String?
+    let timestamp: Date
+}
+
+struct HardwareProfileRequest: Codable {
+    let timestamp: Date
+}
+
+struct HardwareProfileResponse: Codable {
+    let hardwareProfile: HardwareProfile
     let timestamp: Date
 }

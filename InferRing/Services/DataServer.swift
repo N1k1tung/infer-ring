@@ -14,6 +14,9 @@ final class FileServerHandler: ChannelInboundHandler {
     @Inject 
     private var modelManager: ModelManager?
 
+    @Inject
+    private var hardwareMonitor: HardwareMonitor?
+
     private var currentRequestHead: HTTPRequestHead?
     private var requestBodyBuffer: ByteBuffer?
 
@@ -87,6 +90,30 @@ final class FileServerHandler: ChannelInboundHandler {
                         self?.sendData(context: context, body: response, status: .ok)
                     }
                 }
+            }
+            else if path.hasPrefix("/updateLastMessage") {
+                guard let data = getData(context: context) else { return }
+                guard let request = parseBody(data: data, context: context, type: UpdateLastMessageRequest.self)
+                    else { return }
+
+                let response =  modelManager?.handleUpdateLastMessageRequest(request) ?? UpdateLastMessageResponse(
+                    success: false,
+                    errorMessage: "ModelManager not available",
+                    timestamp: Date()
+                )
+                sendData(context: context, body: response, status: .ok)
+            }
+            else if path.hasPrefix("/getHardwareProfile") {
+                guard let data = getData(context: context) else { return }
+                guard let _ = parseBody(data: data, context: context, type: HardwareProfileRequest.self)
+                    else { return }
+                
+                let response = HardwareProfileResponse(
+                    hardwareProfile: hardwareMonitor?.currentProfile ?? .init(totalRAM: 0, recommendedUsageRAM: 0, hasNeuralAcceleration: false),
+                    timestamp: Date()
+                )
+                        
+                sendData(context: context, body: response, status: .ok)
             }
             else {
                 sendText(context: context, body: "OK", status: .ok)

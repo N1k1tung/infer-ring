@@ -40,6 +40,10 @@ struct RingDevice: Identifiable {
     var id: DeviceID { device.id }
     let device: DiscoveredDevice
     let rank: Int
+
+    var client: DataClient {
+        .client(for: device)
+    }
 }
 
 struct Ring {

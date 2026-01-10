@@ -2,6 +2,7 @@
 
 import Foundation
 import Ring
+import MLX
 import MLXLMCommon
 import MLXLLM
 
@@ -35,33 +36,7 @@ final class ModelManager {
     }
 
     // MARK: - Public API
-    
-    /// Check if the system has sufficient resources for a model
-    // TODO: rewrite slop
-//    func canLoadModel(_ modelCard: ModelCard) async -> (canLoad: Bool, reason: String?) {
-//        guard let hardwareMonitor = hardwareMonitor else {
-//            return (false, "Hardware monitor not available")
-//        }
-//        
-//        let profile = await hardwareMonitor.getCurrentProfile()
-//        let mlxMemory = hardwareMonitor.getMLXMemoryInfo()
-//        
-//        // Rough estimation: assume model needs ~2GB per billion parameters
-//        let estimatedMemoryNeeded = UInt64(modelCard.metadata.nParams) * 2 * 1024 * 1024 * 1024 / 1_000_000_000
-//        
-//        if profile.availableRAM < estimatedMemoryNeeded {
-//            let needed = ByteCountFormatter.string(fromByteCount: Int64(estimatedMemoryNeeded), countStyle: .memory)
-//            let available = profile.formattedAvailableRAM
-//            return (false, "Insufficient memory: need ~\(needed), have \(available) available")
-//        }
-//        
-//        if profile.isLowMemory {
-//            return (false, "System memory pressure is high (\(Int(profile.memoryUtilization * 100))% used)")
-//        }
-//        
-//        return (true, nil)
-//    }
-    
+
     /// Load a model across all peers in the ring (only callable by leader)
     func loadModelAcrossPeers(_ modelCard: ModelCard, progressHandler: @Sendable @escaping (_ progress: Double) -> Void = { _ in }) async throws {
         guard let coordinator else {
@@ -72,30 +47,21 @@ final class ModelManager {
             throw ModelManagerError.alreadyLoading
         }
         
-//        let (canLoad, reason) = await canLoadModel(modelCard)
-//        if !canLoad, let reason = reason {
-//            throw ModelManagerError.insufficientResources(reason)
-//        }
-        
         isLoading = true
         var loadingProgress = 0.0
         
         defer {
             isLoading = false
         }
-        
-        let request = ModelLoadRequest(
-            modelCard: modelCard,
-            requestID: UUID().uuidString,
-            timestamp: Date()
-        )
-        
-        let peers = coordinator.peers
+
+        let peers = coordinator.ringPeers
         var responses: [ModelLoadResponse] = []
-        
+        let requestId = UUID().uuidString
+        let shardMeta = try assignShardMetadata(modelCard: modelCard)
+
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
-                try? await self?.loadModelLocally(modelCard) { progress in
+                try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
                     loadingProgress = progress.fractionCompleted * 0.5 // Local loading is 50% of total
                     progressHandler(loadingProgress)
                 }
@@ -103,8 +69,16 @@ final class ModelManager {
             
             for peer in peers {
                 group.addTask {
-                    let client = DataClient.client(for: peer)
-                    return await client.loadModel(request: request)
+                    let request = ModelLoadRequest(
+                        modelCard: modelCard,
+                        shardMeta: shardMeta[peer.rank],
+                        requestID: requestId,
+                        timestamp: Date()
+                    )
+                    let response = await peer.client.loadModel(request: request)
+                    loadingProgress += 0.5 * (1.0 / Double(peers.count))
+                    progressHandler(loadingProgress)
+                    return response
                 }
             }
             
@@ -124,7 +98,7 @@ final class ModelManager {
         
         // Update state
         currentModelCard = modelCard
-        loadingProgress = 1.0
+        Memory.clearCache()
     }
 
 
@@ -142,21 +116,55 @@ final class ModelManager {
             input: input,
             timestamp: Date()
         )
-        
-        if let peers = coordinator?.peers {
-            Task {
-                await withTaskGroup(of: GenerationResponse?.self) { group in
-                    for peer in peers {
-                        group.addTask {
-                            let client = DataClient.client(for: peer)
-                            return await client.startGeneration(request: request)
-                        }
+
+        let peers = coordinator?.ringPeers ?? []
+        let peerGenerationTask = Task {
+            await withTaskGroup(of: GenerationResponse?.self) { group in
+                for peer in peers {
+                    group.addTask {
+                        await peer.client.startGeneration(request: request)
                     }
                 }
             }
         }
-        
-        return chatSession.streamResponse(to: input)
+
+        let originalStream = chatSession.streamResponse(to: input)
+
+        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
+        let task = Task {
+            do {
+                for try await chunk in originalStream {
+                    continuation.yield(chunk)
+                }
+                defer { continuation.finish() }
+
+                // Sync last message content to peers
+                guard let lastMessage = chatSession.messages.last else {
+                    return
+                }
+
+                let updateRequest = UpdateLastMessageRequest(
+                    content: lastMessage.content,
+                    timestamp: Date()
+                )
+
+                await peerGenerationTask.value
+                await withTaskGroup(of: Void.self) { group in
+                    for peer in peers {
+                        group.addTask {
+                            _ = await peer.client.updateLastMessage(request: updateRequest)
+                        }
+                    }
+                }
+            }
+            catch {
+                continuation.finish(throwing: error)
+            }
+        }
+        continuation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
     }
 
     /// Handle generation request from remote peer
@@ -181,7 +189,8 @@ final class ModelManager {
                 errorMessage: nil,
                 timestamp: Date()
             )
-        } catch {
+        }
+        catch {
             return GenerationResponse(
                 requestID: request.requestID,
                 success: false,
@@ -200,7 +209,7 @@ final class ModelManager {
     /// Handle model load request from coordinator
     func handleModelLoadRequest(_ request: ModelLoadRequest) async -> ModelLoadResponse {
         do {
-            _ = try await loadModelLocally(request.modelCard) { _ in }
+            _ = try await loadModelLocally(request.modelCard, shardMeta: request.shardMeta) { _ in }
             currentModelCard = request.modelCard
 
             return ModelLoadResponse(
@@ -219,20 +228,78 @@ final class ModelManager {
             )
         }
     }
-
-    // MARK: - Internal Methods
     
+    /// Handle update last message request from peer
+    func handleUpdateLastMessageRequest(_ request: UpdateLastMessageRequest) -> UpdateLastMessageResponse {
+        guard let chatSession else {
+            return UpdateLastMessageResponse(
+                success: false,
+                errorMessage: "ChatSession not initialized",
+                timestamp: Date()
+            )
+        }
+        
+        if !chatSession.messages.isEmpty {
+            let lastIndex = chatSession.messages.count - 1
+            chatSession.messages[lastIndex].content = request.content
+            
+            return UpdateLastMessageResponse(
+                success: true,
+                errorMessage: nil,
+                timestamp: Date()
+            )
+        }
+        else {
+            return UpdateLastMessageResponse(
+                success: false,
+                errorMessage: "Chat session has no messages",
+                timestamp: Date()
+            )
+        }
+    }
+
+    // MARK: - Private Methods
+
     /// Load model locally using MLXManager
     private func loadModelLocally(
         _ modelCard: ModelCard,
+        shardMeta: ShardMetadata,
         progressHandler: @Sendable @escaping (Progress) -> Void
     ) async throws -> ModelLoadResponse? {
         guard let mlxManager = mlxManager else {
             throw ModelManagerError.notInitialized
         }
         
-        currentModel = try await mlxManager.loadModel(modelCard, progressHandler: progressHandler)
+        currentModel = try await mlxManager.loadModel(modelCard, shardMeta: shardMeta, progressHandler: progressHandler)
         return nil
+    }
+    
+    /// assigns shards for ring devices per their memory % of total
+    /// - Returns: shard metadatas, sorted by rank
+    private func assignShardMetadata(modelCard: ModelCard) throws -> [ShardMetadata] {
+        guard let coordinator else {
+            throw ModelManagerError.notInitialized
+        }
+        let devices = coordinator.ringDevices.sorted { $0.rank < $1.rank }
+        let totalMemory = devices.compactMap { $0.device.hardwareProfile?.recommendedUsageRAM }.reduce(0, +)
+        var metas = [ShardMetadata]()
+        var assignedLayers = 0
+        let size = devices.count
+        let nLayers = modelCard.metadata.nLayers
+        for device in devices {
+            let deviceMemory = device.device.hardwareProfile?.recommendedUsageRAM ?? 1024 * 1024 * 1024
+            let shardLayers = nLayers *  deviceMemory / totalMemory
+            metas.append(ShardMetadata(
+                modelMeta: modelCard.metadata,
+                deviceRank: device.rank,
+                worldSize: size,
+                startLayer: assignedLayers,
+                endLayer: device.rank < size - 1 ? assignedLayers+shardLayers : nLayers,
+                nLayers: nLayers
+            ))
+            assignedLayers += shardLayers
+        }
+        return metas
     }
 }
 

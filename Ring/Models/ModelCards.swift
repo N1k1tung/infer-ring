@@ -2,21 +2,21 @@ import Foundation
 
 // adapted from https://github.com/exo-explore/exo/blob/main/src/exo/shared/models/model_cards.py
 
-extension Memory {
-    static func from_kb(_ kb: Int) -> Memory {
-        return Memory(inBytes: kb * 1024)
+extension MemorySize {
+    static func from_kb(_ kb: Int) -> MemorySize {
+        return MemorySize(inBytes: kb * 1024)
     }
     
-    static func from_mb(_ mb: Int) -> Memory {
-        return Memory(inBytes: mb * 1024 * 1024)
+    static func from_mb(_ mb: Int) -> MemorySize {
+        return MemorySize(inBytes: mb * 1024 * 1024)
     }
     
-    static func from_gb(_ gb: Int) -> Memory {
-        return Memory(inBytes: gb * 1024 * 1024 * 1024)
+    static func from_gb(_ gb: Int) -> MemorySize {
+        return MemorySize(inBytes: gb * 1024 * 1024 * 1024)
     }
     
-    static func from_bytes(_ bytes: Int) -> Memory {
-        return Memory(inBytes: bytes)
+    static func from_bytes(_ bytes: Int) -> MemorySize {
+        return MemorySize(inBytes: bytes)
     }
 }
 
@@ -43,7 +43,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/DeepSeek-V3.1-4bit",
                 prettyName: "DeepSeek V3.1 (4-bit)",
-                storageSize: Memory.from_gb(378),
+                storageSize: MemorySize.from_gb(378),
                 nLayers: 61,
                 hiddenSize: 7168,
                 supportsTensor: true
@@ -60,7 +60,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/DeepSeek-V3.1-8bit",
                 prettyName: "DeepSeek V3.1 (8-bit)",
-                storageSize: Memory.from_gb(713),
+                storageSize: MemorySize.from_gb(713),
                 nLayers: 61,
                 hiddenSize: 7168,
                 supportsTensor: true
@@ -78,7 +78,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Kimi-K2-Instruct-4bit",
                 prettyName: "Kimi K2 Instruct (4-bit)",
-                storageSize: Memory.from_gb(578),
+                storageSize: MemorySize.from_gb(578),
                 nLayers: 61,
                 hiddenSize: 7168,
                 supportsTensor: true
@@ -95,7 +95,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Kimi-K2-Thinking",
                 prettyName: "Kimi K2 Thinking (4-bit)",
-                storageSize: Memory.from_gb(658),
+                storageSize: MemorySize.from_gb(658),
                 nLayers: 61,
                 hiddenSize: 7168,
                 supportsTensor: true
@@ -113,7 +113,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
                 prettyName: "Llama 3.1 70B (4-bit)",
-                storageSize: Memory.from_mb(38769),
+                storageSize: MemorySize.from_mb(38769),
                 nLayers: 80,
                 hiddenSize: 8192,
                 supportsTensor: true
@@ -131,7 +131,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Llama-3.3-70B-Instruct-4bit",
                 prettyName: "Llama 3.3 70B",
-                storageSize: Memory.from_mb(38769),
+                storageSize: MemorySize.from_mb(38769),
                 nLayers: 80,
                 hiddenSize: 8192,
                 supportsTensor: true
@@ -148,7 +148,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Llama-3.3-70B-Instruct-8bit",
                 prettyName: "Llama 3.3 70B (8-bit)",
-                storageSize: Memory.from_mb(73242),
+                storageSize: MemorySize.from_mb(73242),
                 nLayers: 80,
                 hiddenSize: 8192,
                 supportsTensor: true
@@ -165,7 +165,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/llama-3.3-70b-instruct-fp16",
                 prettyName: "Llama 3.3 70B (FP16)",
-                storageSize: Memory.from_mb(137695),
+                storageSize: MemorySize.from_mb(137695),
                 nLayers: 80,
                 hiddenSize: 8192,
                 supportsTensor: true
@@ -183,7 +183,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Instruct-4bit",
                 prettyName: "Qwen3 80B A3B (4-bit)",
-                storageSize: Memory.from_mb(44800),
+                storageSize: MemorySize.from_mb(44800),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -200,7 +200,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Instruct-8bit",
                 prettyName: "Qwen3 80B A3B (8-bit)",
-                storageSize: Memory.from_mb(84700),
+                storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -217,7 +217,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-4bit",
                 prettyName: "Qwen3 80B A3B (4-bit)",
-                storageSize: Memory.from_mb(84700),
+                storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -234,7 +234,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-8bit",
                 prettyName: "Qwen3 80B A3B (8-bit)",
-                storageSize: Memory.from_mb(84700),
+                storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -251,7 +251,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-235B-A22B-Instruct-2507-4bit",
                 prettyName: "Qwen3 235B A22B (4-bit)",
-                storageSize: Memory.from_gb(132),
+                storageSize: MemorySize.from_gb(132),
                 nLayers: 94,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -268,7 +268,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-235B-A22B-Instruct-2507-8bit",
                 prettyName: "Qwen3 235B A22B (8-bit)",
-                storageSize: Memory.from_gb(250),
+                storageSize: MemorySize.from_gb(250),
                 nLayers: 94,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -285,7 +285,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Coder-480B-A35B-Instruct-4bit",
                 prettyName: "Qwen3 Coder 480B A35B (4-bit)",
-                storageSize: Memory.from_gb(270),
+                storageSize: MemorySize.from_gb(270),
                 nLayers: 62,
                 hiddenSize: 6144,
                 supportsTensor: true
@@ -302,7 +302,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Coder-480B-A35B-Instruct-8bit",
                 prettyName: "Qwen3 Coder 480B A35B (8-bit)",
-                storageSize: Memory.from_gb(540),
+                storageSize: MemorySize.from_gb(540),
                 nLayers: 62,
                 hiddenSize: 6144,
                 supportsTensor: true
@@ -320,7 +320,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
                 prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
-                storageSize: Memory.from_kb(68_996_301),
+                storageSize: MemorySize.from_kb(68_996_301),
                 nLayers: 36,
                 hiddenSize: 2880,
                 supportsTensor: true
@@ -338,7 +338,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/GLM-4.5-Air-8bit",
                 prettyName: "GLM 4.5 Air 8bit",
-                storageSize: Memory.from_gb(114),
+                storageSize: MemorySize.from_gb(114),
                 nLayers: 46,
                 hiddenSize: 4096,
                 supportsTensor: false
@@ -355,7 +355,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/GLM-4.5-Air-bf16",
                 prettyName: "GLM 4.5 Air bf16",
-                storageSize: Memory.from_gb(214),
+                storageSize: MemorySize.from_gb(214),
                 nLayers: 46,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -375,7 +375,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-0.6B-4bit",
                 prettyName: "Qwen3 0.6B (4-bit)",
-                storageSize: Memory.from_mb(327),
+                storageSize: MemorySize.from_mb(327),
                 nLayers: 28,
                 hiddenSize: 1024,
                 supportsTensor: false
@@ -392,7 +392,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-0.6B-8bit",
                 prettyName: "Qwen3 0.6B (8-bit)",
-                storageSize: Memory.from_mb(666),
+                storageSize: MemorySize.from_mb(666),
                 nLayers: 28,
                 hiddenSize: 1024,
                 supportsTensor: false
@@ -409,7 +409,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-4B-4bit",
                 prettyName: "Qwen3 4B (4-bit)",
-                storageSize: Memory.from_mb(2335),
+                storageSize: MemorySize.from_mb(2335),
                 nLayers: 36,
                 hiddenSize: 2560,
                 supportsTensor: false
@@ -426,7 +426,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-4B-8bit",
                 prettyName: "Qwen3 4B (8-bit)",
-                storageSize: Memory.from_mb(4393),
+                storageSize: MemorySize.from_mb(4393),
                 nLayers: 36,
                 hiddenSize: 2560,
                 supportsTensor: false
@@ -443,7 +443,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3-14B-MLX-8bit",
                 prettyName: "Qwen3 14B (8-bit)",
-                storageSize: Memory.from_mb(15565),
+                storageSize: MemorySize.from_mb(15565),
                 nLayers: 40,
                 hiddenSize: 5120,
                 supportsTensor: false
@@ -460,7 +460,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-30B-A3B-4bit",
                 prettyName: "Qwen3 30B A3B (4-bit)",
-                storageSize: Memory.from_mb(16797),
+                storageSize: MemorySize.from_mb(16797),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -477,7 +477,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-30B-A3B-8bit",
                 prettyName: "Qwen3 Coder 30B A3B (6-bit)",
-                storageSize: Memory.from_mb(25396),
+                storageSize: MemorySize.from_mb(25396),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -494,7 +494,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-30B-A3B-8bit",
                 prettyName: "Qwen3 30B A3B (8-bit)",
-                storageSize: Memory.from_mb(31738),
+                storageSize: MemorySize.from_mb(31738),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -514,7 +514,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/LFM2.5-1.2B-Instruct-8bit",
                 prettyName: "LFM2.5 1.2B (8-bit)",
-                storageSize: Memory.from_mb(1280),
+                storageSize: MemorySize.from_mb(1280),
                 nLayers: 16,
                 hiddenSize: 2048,
                 supportsTensor: false
@@ -531,7 +531,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/LFM2.5-1.2B-Instruct-bf16",
                 prettyName: "LFM2.5 1.2B (bf16)",
-                storageSize: Memory.from_mb(2407),
+                storageSize: MemorySize.from_mb(2407),
                 nLayers: 16,
                 hiddenSize: 2048,
                 supportsTensor: false
@@ -550,7 +550,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
                 prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-                storageSize: Memory.from_kb(11_744_051),
+                storageSize: MemorySize.from_kb(11_744_051),
                 nLayers: 24,
                 hiddenSize: 2880,
                 supportsTensor: true
@@ -569,7 +569,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
                 prettyName: "Llama 3.1 8B (4-bit)",
-                storageSize: Memory.from_mb(4423),
+                storageSize: MemorySize.from_mb(4423),
                 nLayers: 32,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -586,7 +586,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
                 prettyName: "Llama 3.1 8B (8-bit)",
-                storageSize: Memory.from_mb(8540),
+                storageSize: MemorySize.from_mb(8540),
                 nLayers: 32,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -603,7 +603,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
                 prettyName: "Llama 3.1 8B (BF16)",
-                storageSize: Memory.from_mb(16100),
+                storageSize: MemorySize.from_mb(16100),
                 nLayers: 32,
                 hiddenSize: 4096,
                 supportsTensor: true
@@ -622,7 +622,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
                 prettyName: "Llama 3.2 1B (4-bit)",
-                storageSize: Memory.from_mb(696),
+                storageSize: MemorySize.from_mb(696),
                 nLayers: 16,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -639,7 +639,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
                 prettyName: "Llama 3.2 3B (4-bit)",
-                storageSize: Memory.from_mb(1777),
+                storageSize: MemorySize.from_mb(1777),
                 nLayers: 28,
                 hiddenSize: 3072,
                 supportsTensor: true
@@ -656,7 +656,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
                 prettyName: "Llama 3.2 3B (8-bit)",
-                storageSize: Memory.from_mb(3339),
+                storageSize: MemorySize.from_mb(3339),
                 nLayers: 28,
                 hiddenSize: 3072,
                 supportsTensor: true

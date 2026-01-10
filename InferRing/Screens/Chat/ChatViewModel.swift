@@ -28,7 +28,9 @@ class ChatViewModel {
                   selectedModel != oldValue,
                   selectedModel != modelManager?.currentModelCard
             else { return }
-            // TODO: check mem
+
+            
+
             Task {
                 do {
                     try await modelManager?.loadModelAcrossPeers(selectedModel) { [weak self] progress in

@@ -12,9 +12,9 @@ final class RingCoordinator {
 
     // MARK: - State
     var currentRing: Ring?
-    var peers: [DiscoveredDevice] = []
-    var allDevices: [DiscoveredDevice] = [] // peers including self, sorted
-    var myIndex: Int = 0
+    private var peers: [DiscoveredDevice] = []
+    private var allDevices: [DiscoveredDevice] = [] // peers including self, sorted
+    private var myIndex: Int = 0
     var coordinatorID: DeviceID?
     var state: CoordinatorState = .inactive
     var electionInProgress: Bool {
@@ -23,6 +23,15 @@ final class RingCoordinator {
     var isLeader: Bool {
         guard let coordinatorID, currentRing != nil else { return false }
         return localDeviceID == coordinatorID
+    }
+    var ringPeers: [RingDevice] {
+        currentRing?.devices.filter { $0.id != localDeviceID } ?? []
+    }
+    var ringDevices: [RingDevice] {
+        currentRing?.devices ?? [RingDevice(device: localDevice, rank: 0)]
+    }
+    var myRank: Int {
+        currentRing?.devices.first { $0.id == localDeviceID }?.rank ?? 0
     }
 
     // Local identity
@@ -37,7 +46,6 @@ final class RingCoordinator {
         )
         self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: hardwareMonitor.currentProfile)
 
-        self.peers = []
         DI.register(mlxManager)
         DI.register(hardwareMonitor)
     }
@@ -147,6 +155,10 @@ final class RingCoordinator {
                 coordinator: message.candidateID
             )
 
+            Task {
+                await requestMissingProfiles()
+            }
+
             do {
                 try mlxManager.initMLX(rank: myIndex, devices: allDevices.map { $0.host })
                 Task {
@@ -205,6 +217,27 @@ final class RingCoordinator {
             return nil // Ring of one
         }
         return successor
+    }
+
+    private func requestMissingProfiles() async {
+        var updated = false
+        for index in allDevices.indices {
+            let device = allDevices[index]
+            if device.id != localDeviceID && device.hardwareProfile == nil {
+                let client = DataClient.client(for: device)
+                if let response = await client.getHardwareProfile(request: .init(timestamp: Date())) {
+                    allDevices[index].hardwareProfile = response.hardwareProfile
+                    updated = true
+                }
+            }
+        }
+        
+        if updated, let coordinatorID {
+             currentRing = Ring(
+                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
+                coordinator: coordinatorID
+            )
+        }
     }
 
 }
