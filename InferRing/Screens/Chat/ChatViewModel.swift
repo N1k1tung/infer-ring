@@ -87,11 +87,14 @@ class ChatViewModel {
         messages.append(userMessage)
         input = ""
 
-        let assistantMessage = ChatMessage(role: .assistant, content: "")
+        let assistantMessage = ChatMessage(role: .assistant, content: "...")
         messages.append(assistantMessage)
         let index = messages.count - 1
+        var fullReply = ""
         for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
-            messages[index].content += replyStream
+            fullReply += replyStream
+            // TODO: optimize for UI
+            messages[index].content = fullReply
         }
         tokensPerSecond = modelManager.tokensPerSecond
     }

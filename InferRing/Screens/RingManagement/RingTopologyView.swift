@@ -24,7 +24,11 @@ struct RingTopologyView: View {
                     isCoordinator: device.id == coordinator.currentRing?.coordinator
                 )
             }
+            #if os(iOS)
             .presentationDetents([.medium, .large])
+            #else
+            .frame(minHeight: 400)
+            #endif
         }
     }
 }

@@ -1,6 +1,7 @@
 //
 
 import SwiftUI
+import Ring
 
 struct ContentView: View {
     @Environment(RingCoordinator.self) var coordinator
@@ -27,10 +28,15 @@ struct ContentView: View {
                 ChatView()
             }
         }
-        .navigationTitle("Home")
+        .navigationTitle("Infer Ring")
         .toolbar {
             ToolbarItem {
                 StatusBadge()
+            }
+        }
+        .onAppear {
+            Task {
+                await ModelCards.checkLoadedModels()
             }
         }
     }

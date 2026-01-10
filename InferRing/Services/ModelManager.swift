@@ -71,10 +71,12 @@ final class ModelManager {
 
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
-                try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
-                    loadingProgress = progress.fractionCompleted * 0.5 // Local loading is 50% of total
-                    progressHandler(loadingProgress)
+                let result = try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
+                    // Local loading is 50% of total
+                    progressHandler(progress.fractionCompleted * 0.5)
                 }
+                loadingProgress += 0.5
+                return result
             }
             
             for peer in peers {

@@ -48,23 +48,17 @@ struct ModelPickerView: View {
                                 .lineLimit(3)
 
                             HStack(spacing: 8) {
-                                Text(readableSize(card.metadata.storageSize))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.secondary.opacity(0.12))
-                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                tagView(readableSize(card.metadata.storageSize))
 
-                                if card.metadata.supportsTensor {
-                                    Text("Tensor")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.secondary.opacity(0.12))
-                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                if card.isLoaded {
+                                    tagView("Downloaded")
                                 }
+                                else if card.isPartiallyLoaded {
+                                    tagView("Partially loaded")
+                                }
+//                                if card.metadata.supportsTensor {
+//                                    tagView("Tensor")
+//                                }
                             }
                         }
                         Spacer()
@@ -93,10 +87,26 @@ struct ModelPickerView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
+            .onAppear {
+                Task {
+                    await ModelCards.checkLoadedModels()
+                }
+            }
         }
     }
 
     // MARK: - Helpers
+
+    @ViewBuilder
+    private func tagView(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
 
     private func readableSize(_ memory: MemorySize) -> String {
         byteCountFormatter.string(fromByteCount: Int64(memory.inBytes))
