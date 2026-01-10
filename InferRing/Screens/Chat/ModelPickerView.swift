@@ -98,7 +98,7 @@ struct ModelPickerView: View {
 
     // MARK: - Helpers
 
-    private func readableSize(_ memory: Memory) -> String {
+    private func readableSize(_ memory: MemorySize) -> String {
         byteCountFormatter.string(fromByteCount: Int64(memory.inBytes))
     }
 

@@ -37,6 +37,14 @@ final class ModelManager {
 
     // MARK: - Public API
 
+    private func checkIfCanLoad(_ modelCard: ModelCard) throws {
+        let devices = coordinator?.ringDevices ?? []
+        let totalMemory = devices.compactMap { $0.device.hardwareProfile?.recommendedUsageRAM }.reduce(0, +)
+        if modelCard.metadata.storageSize.inBytes > totalMemory {
+            throw ModelManagerError.insufficientResources("total ring memory: \(totalMemory.formattedMemory), required: \(modelCard.metadata.storageSize.inBytes.formattedMemory)")
+        }
+    }
+
     /// Load a model across all peers in the ring (only callable by leader)
     func loadModelAcrossPeers(_ modelCard: ModelCard, progressHandler: @Sendable @escaping (_ progress: Double) -> Void = { _ in }) async throws {
         guard let coordinator else {
@@ -46,7 +54,9 @@ final class ModelManager {
         guard !isLoading else {
             throw ModelManagerError.alreadyLoading
         }
-        
+
+        try checkIfCanLoad(modelCard)
+
         isLoading = true
         var loadingProgress = 0.0
         

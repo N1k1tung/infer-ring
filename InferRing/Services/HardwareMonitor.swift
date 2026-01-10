@@ -45,10 +45,18 @@ final class HardwareMonitor {
 
 extension HardwareProfile {
     static func from(gpuInfo: GPU.DeviceInfo) -> Self {
+        #if os(iOS)
+        .init(
+            totalRAM: gpuInfo.memorySize,
+            recommendedUsageRAM: Int(Double(gpuInfo.maxRecommendedWorkingSetSize) * 0.8), // in practice iOS watchdog will kill when allocating as much as recommended set size
+            hasNeuralAcceleration: false
+        )
+        #else
         .init(
             totalRAM: gpuInfo.memorySize,
             recommendedUsageRAM: Int(gpuInfo.maxRecommendedWorkingSetSize),
             hasNeuralAcceleration: false
         )
+        #endif
     }
 }
