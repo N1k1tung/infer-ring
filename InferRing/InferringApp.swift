@@ -1,6 +1,6 @@
 //
-
 import SwiftUI
+import Ring
 
 @main
 struct InferringApp: App {
@@ -16,6 +16,10 @@ struct InferringApp: App {
         DI.register(modelManager)
         dataServer.start()
         ringCoordinator.start()
+
+        Task.detached(priority: .background) {
+            await ModelCards.checkLoadedModels()
+        }
     }
 
     var body: some Scene {

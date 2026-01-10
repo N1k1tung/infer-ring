@@ -7,6 +7,7 @@ struct ModelPickerView: View {
     @Binding var selectedModel: ModelCard?
 
     @State private var searchText: String = ""
+    @State private var showDownloadedOnly = false
 
     private var allCards: [ModelCard] {
         ModelCards.allModels.values
@@ -14,9 +15,12 @@ struct ModelPickerView: View {
     }
 
     private var filteredCards: [ModelCard] {
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return allCards }
+        let cards = showDownloadedOnly ? allCards.filter { $0.isLoaded } : allCards
+        guard !searchText.trimmed.isEmpty else {
+            return cards
+        }
         let term = searchText.lowercased()
-        return allCards.filter { card in
+        return cards.filter { card in
             let fields: [String] = [
                 card.name,
                 card.metadata.prettyName,
@@ -86,9 +90,17 @@ struct ModelPickerView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem {
+                    Toggle("Show downloaded only", isOn: $showDownloadedOnly)
+                    #if os(iOS)
+                        .toggleStyle(DefaultToggleStyle())
+                    #else
+                        .toggleStyle(CheckboxToggleStyle())
+                    #endif
+                }
             }
             .onAppear {
-                Task {
+                Task.detached {
                     await ModelCards.checkLoadedModels()
                 }
             }

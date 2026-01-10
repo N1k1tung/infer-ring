@@ -1,7 +1,6 @@
 //
 
 import SwiftUI
-import Ring
 
 struct ContentView: View {
     @Environment(RingCoordinator.self) var coordinator
@@ -32,11 +31,6 @@ struct ContentView: View {
         .toolbar {
             ToolbarItem {
                 StatusBadge()
-            }
-        }
-        .onAppear {
-            Task {
-                await ModelCards.checkLoadedModels()
             }
         }
     }
