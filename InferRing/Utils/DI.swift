@@ -2,11 +2,11 @@
 
 import Foundation
 
-struct DI {
+final class DI {
     private init() {}
     private var storage: [String: Any] = [:]
 
-    private mutating func setObject<T>(_ object: T) {
+    private func setObject<T>(_ object: T) {
         storage[String(describing: T.self)] = object
     }
     
@@ -14,7 +14,7 @@ struct DI {
         storage[String(describing: key)] as? T
     }
 
-    fileprivate static var shared = DI()
+    fileprivate static let shared = DI()
     static func register<T>(_ object: T) {
         DI.shared.setObject(object)
     }
