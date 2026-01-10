@@ -42,6 +42,7 @@ class ChatViewModel {
                     dprint(error)
                     errorMessage = "Failed to load model: \(error.localizedDescription)"
                     loadingPercent = nil
+                    self.selectedModel = oldValue
                 }
             }
         }

@@ -11,18 +11,25 @@ struct DeviceID: Hashable, Codable, Identifiable {
 }
 
 struct HardwareProfile: Codable, Equatable {
-    let totalRAM: UInt64
-    let availableRAM: UInt64
-    let cpuCores: Int
-    let hasNeuralEngine: Bool
-    let gpuMemory: UInt64?
+    let totalRAM: Int
+    let recommendedUsageRAM: Int
+    let hasNeuralAcceleration: Bool
+
+    static func<=(lhs: HardwareProfile, rhs: HardwareProfile) -> Bool {
+        lhs < rhs || lhs == rhs
+    }
+
+    static func<(lhs: HardwareProfile, rhs: HardwareProfile) -> Bool {
+        // weighted comparison
+        lhs.recommendedUsageRAM * 3 + lhs.totalRAM * 2 < rhs.recommendedUsageRAM * 3 + rhs.totalRAM * 2
+    }
 }
 
 struct DiscoveredDevice: Identifiable, Equatable {
     var id: DeviceID { deviceID }
     let name: String
     let host: String
-    let hardwareProfile: HardwareProfile?
+    var hardwareProfile: HardwareProfile?
 
     var deviceID: DeviceID {
         DeviceID(name: name)

@@ -15,6 +15,10 @@ final class ModelManager {
     @Inject
     private var mlxManager: MLXManager?
     
+    @ObservationIgnored
+    @Inject
+    private var hardwareMonitor: HardwareMonitor?
+    
     // Current loaded model state
     @ObservationIgnored
     private var currentModel: ModelContext? {
@@ -32,6 +36,32 @@ final class ModelManager {
 
     // MARK: - Public API
     
+    /// Check if the system has sufficient resources for a model
+    // TODO: rewrite slop
+//    func canLoadModel(_ modelCard: ModelCard) async -> (canLoad: Bool, reason: String?) {
+//        guard let hardwareMonitor = hardwareMonitor else {
+//            return (false, "Hardware monitor not available")
+//        }
+//        
+//        let profile = await hardwareMonitor.getCurrentProfile()
+//        let mlxMemory = hardwareMonitor.getMLXMemoryInfo()
+//        
+//        // Rough estimation: assume model needs ~2GB per billion parameters
+//        let estimatedMemoryNeeded = UInt64(modelCard.metadata.nParams) * 2 * 1024 * 1024 * 1024 / 1_000_000_000
+//        
+//        if profile.availableRAM < estimatedMemoryNeeded {
+//            let needed = ByteCountFormatter.string(fromByteCount: Int64(estimatedMemoryNeeded), countStyle: .memory)
+//            let available = profile.formattedAvailableRAM
+//            return (false, "Insufficient memory: need ~\(needed), have \(available) available")
+//        }
+//        
+//        if profile.isLowMemory {
+//            return (false, "System memory pressure is high (\(Int(profile.memoryUtilization * 100))% used)")
+//        }
+//        
+//        return (true, nil)
+//    }
+    
     /// Load a model across all peers in the ring (only callable by leader)
     func loadModelAcrossPeers(_ modelCard: ModelCard, progressHandler: @Sendable @escaping (_ progress: Double) -> Void = { _ in }) async throws {
         guard let coordinator else {
@@ -41,6 +71,11 @@ final class ModelManager {
         guard !isLoading else {
             throw ModelManagerError.alreadyLoading
         }
+        
+//        let (canLoad, reason) = await canLoadModel(modelCard)
+//        if !canLoad, let reason = reason {
+//            throw ModelManagerError.insufficientResources(reason)
+//        }
         
         isLoading = true
         var loadingProgress = 0.0
@@ -207,6 +242,7 @@ enum ModelManagerError: LocalizedError {
     case notInitialized
     case alreadyLoading
     case peerLoadingFailed(String)
+    case insufficientResources(String)
     
     var errorDescription: String? {
         switch self {
@@ -216,6 +252,8 @@ enum ModelManagerError: LocalizedError {
             return "Model loading is already in progress"
         case .peerLoadingFailed(let message):
             return "Failed to load model on some peers: \(message)"
+        case .insufficientResources(let message):
+            return "Insufficient system resources: \(message)"
         }
     }
 }

@@ -29,21 +29,22 @@ final class RingCoordinator {
     private let localDeviceID: DeviceID
     private let localDevice: DiscoveredDevice
     private let mlxManager = MLXManager()
+    private let hardwareMonitor = HardwareMonitor()
 
     init() {
         self.localDeviceID = DeviceID(
             name: ServiceInfo.bonjourName
         )
-        self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: nil)
+        self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: hardwareMonitor.currentProfile)
 
         self.peers = []
         DI.register(mlxManager)
+        DI.register(hardwareMonitor)
     }
     
     // MARK: - Public API
     
     func start() {
-        bonjourClient?.startSearching()
         Task {
             for await nodes in Observations({ [weak self] in
                 self?.bonjourClient?.nodes ?? []
@@ -51,6 +52,7 @@ final class RingCoordinator {
                 updatePeers(nodes: nodes)
             }
         }
+        bonjourClient?.startSearching()
     }
 
     func handleElectionRequest(_ message: ElectionMessage) {
@@ -74,12 +76,7 @@ final class RingCoordinator {
         allDevices = (peers + [localDevice]).sorted { $0.deviceID < $1.deviceID }
         myIndex = allDevices.firstIndex { $0.id == localDeviceID } ?? 0
 
-        // Check if we need to start election (e.g. if we have no coordinator)
-        if peers.isEmpty && coordinatorID != localDeviceID {
-            coordinatorID = localDeviceID
-            state = .coordinator
-        }
-        else if !peers.isEmpty && currentRing == nil {
+        if !peers.isEmpty && currentRing == nil && state == .inactive {
             initiateElection()
         }
     }
@@ -88,8 +85,9 @@ final class RingCoordinator {
         dprint("Starting Election from \(localDeviceID.name)")
         state = .candidate
         let message = ElectionMessage(
-            type: .election(localDeviceID),
+            type: .election,
             candidateID: localDeviceID,
+            hardwareProfile: hardwareMonitor.currentProfile,
             timestamp: Date()
         )
         sendToSuccessor(message)
@@ -108,17 +106,22 @@ final class RingCoordinator {
 
     private func processElectionMessage(_ message: ElectionMessage) async {
         dprint("Processing election message: \(message.type)")
-        
+
+        if message.candidateID != localDeviceID,
+           let index = allDevices.firstIndex(where: { $0.deviceID == message.candidateID }),
+           allDevices[index].hardwareProfile == nil {
+            allDevices[index].hardwareProfile = message.hardwareProfile
+        }
+
         switch message.type {
-        case .election(let candidateID):
-            if localDeviceID < candidateID  {
-                // Candidate is higher ID, so they win over us. Forward.
+        case .election:
+            if hardwareMonitor.currentProfile < message.hardwareProfile  {
                 state = .follower
                 sendToSuccessor(message)
             }
-            else if candidateID < localDeviceID {
+            else if message.candidateID != localDeviceID {
                 if state != .candidate {
-                    // Start our own election to overtake
+                    // Start our own election to overtake if it's not yet in progress
                     initiateElection()
                 }
             }
@@ -128,11 +131,11 @@ final class RingCoordinator {
                 becomeCoordinator()
             }
             
-        case .coordinator(let leaderID):
-            coordinatorID = leaderID
-            state = (leaderID == localDeviceID) ? .coordinator : .follower
-            
-            if leaderID != localDeviceID {
+        case .coordinator:
+            coordinatorID = message.candidateID
+            state = (message.candidateID == localDeviceID) ? .coordinator : .follower
+
+            if message.candidateID != localDeviceID {
                 sendToSuccessor(message)
             }
             else {
@@ -141,7 +144,7 @@ final class RingCoordinator {
             bonjourClient?.stopSearching()
             currentRing = Ring(
                 devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
-                coordinator: leaderID
+                coordinator: message.candidateID
             )
 
             do {
@@ -163,22 +166,31 @@ final class RingCoordinator {
         state = .coordinator
         
         let message = ElectionMessage(
-            type: .coordinator(localDeviceID),
+            type: .coordinator,
             candidateID: localDeviceID,
+            hardwareProfile: hardwareMonitor.currentProfile,
             timestamp: Date()
         )
         sendToSuccessor(message)
     }
     
     private func sendToSuccessor(_ message: ElectionMessage) {
-        guard let successor = getSuccessor() else {
-            dprint("No successor to send to.")
-            return
-        }
-        
-        dprint("Sending to successor: \(successor.name) (\(successor.host))")
-        
         Task {
+            var attempts = 4
+            var successor = getSuccessor()
+            while successor == nil && attempts > 0 {
+                attempts -= 1
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                successor = getSuccessor()
+            }
+            guard let successor else {
+                dprint("No successor to send to.")
+                state = .inactive
+                return
+            }
+
+            dprint("Sending to successor: \(successor.name) (\(successor.host))")
+
             let client = DataClient.client(for: successor)
             
             await client.elect(message: message)

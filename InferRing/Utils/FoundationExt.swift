@@ -44,3 +44,9 @@ extension JSONEncoder {
         $0.dateEncodingStrategy = .millisecondsSince1970
     }
 }
+
+extension Int {
+    var formattedMemory: String {
+        ByteCountFormatter.string(fromByteCount: Int64(self), countStyle: .memory)
+    }
+}

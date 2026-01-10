@@ -44,11 +44,7 @@ final class FileServerHandler: ChannelInboundHandler {
             }
 
             let path = url.path
-            if path.hasPrefix("/download") {
-                let filePath = "/path/to/file"
-                sendFile(context: context, path: filePath)
-            }
-            else if path.hasPrefix("/elect") {
+            if path.hasPrefix("/elect") {
                 guard let data = getData(context: context) else { return }
                 guard let message = parseBody(data: data, context: context, type: ElectionMessage.self)
                     else { return }
@@ -58,7 +54,7 @@ final class FileServerHandler: ChannelInboundHandler {
             else if path.hasPrefix("/ping") {
                 sendData(context: context, body: Ping(isAlive: true), status: .ok)
             }
-            else if path.hasPrefix("/loadModel") { // TODO: instead of long timeout request just notify progress/failure
+            else if path.hasPrefix("/loadModel") {
                 guard let data = getData(context: context) else { return }
                 guard let request = parseBody(data: data, context: context, type: ModelLoadRequest.self)
                     else { return }
@@ -112,29 +108,6 @@ final class FileServerHandler: ChannelInboundHandler {
             return nil
         }
         return payload
-    }
-
-    private func sendFile(context: ChannelHandlerContext, path: String) {
-        do {
-            let fileHandle = try NIOFileHandle(path: path)
-            let region = try FileRegion(fileHandle: fileHandle)
-
-            var headers = HTTPHeaders()
-            headers.add(name: "Content-Length", value: "\(region.endIndex)")
-            headers.add(name: "Content-Type", value: "application/octet-stream")
-
-            let responseHead = HTTPResponseHead(version: .http1_1, status: .ok, headers: headers)
-            context.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
-
-            // Stream the file without loading it into memory
-            context.write(self.wrapOutboundOut(.body(.fileRegion(region))), promise: nil)
-
-            context.writeAndFlush(self.wrapOutboundOut(.end(nil))).whenComplete { _ in
-                try? fileHandle.close()
-            }
-        } catch {
-            sendText(context: context, body: "File Not Found", status: .notFound)
-        }
     }
 
     private func sendText(context: ChannelHandlerContext, body: String, status: HTTPResponseStatus) {

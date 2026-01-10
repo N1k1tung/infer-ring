@@ -14,7 +14,7 @@ public final class MLXManager {
     public func initMLX(rank: Int, devices: [String]) throws {
         let port = 13373
         let json = try JSONEncoder().encode(devices.map {
-            ["\($0):\(port)"]
+            devices.count == 2 ? ["\($0):\(port)"] : ["\($0):\(port)", "\($0):\(port+1)"]
         })
         let cachesDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         if !FileManager.default.fileExists(atPath: cachesDir.path) {
@@ -90,8 +90,8 @@ public final class MLXManager {
                     modelMeta: card.metadata,
                     deviceRank: rank,
                     worldSize: size,
-                    startLayer: start, //rank * batch,
-                    endLayer: end, //rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
+                    startLayer: rank * batch,
+                    endLayer: rank < size - 1 ? (rank + 1) * batch : card.metadata.nLayers,
                     nLayers: card.metadata.nLayers
                 )
             )

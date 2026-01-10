@@ -18,7 +18,7 @@ final class DataClient {
         return DataClient(baseUrl: url)
     }
 
-    private func get<T: Decodable>(path: String, timeout: TimeAmount = .seconds(5)) async -> T? {
+    private func get<T: Decodable>(path: String, timeout: TimeAmount = .seconds(8)) async -> T? {
         do {
             let request = HTTPClientRequest(url: "\(baseUrl)\(path)")
             let response = try await HTTPClient.shared.execute(request, timeout: timeout)
@@ -59,7 +59,7 @@ final class DataClient {
         return nil
     }
 
-    private func post<T: Encodable>(path: String, body: T, timeout: TimeAmount = .seconds(5)) async {
+    private func post<T: Encodable>(path: String, body: T, timeout: TimeAmount = .seconds(8)) async {
         do {
             var request = HTTPClientRequest(url: "\(baseUrl)\(path)")
             request.method = .POST

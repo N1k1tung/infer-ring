@@ -51,6 +51,11 @@ public func pipelineAutoParallel(
     
     setLayers(on: model, newLayers: newLayers)
 
+    // handle custom cache allocation for LFM2
+    if let lfm2 = model as? LFM2Model {
+        lfm2.shardOffset = safeStart
+    }
+
     return model
 }
 

@@ -14,13 +14,9 @@ struct RingDeviceDetailView: View {
 
             Section("Hardware Profile") {
                 if let hardwareProfile = ringDevice.device.hardwareProfile {
-                    LabeledContent("Total RAM", value: ByteCountFormatter.string(fromByteCount: Int64(hardwareProfile.totalRAM), countStyle: .memory))
-                    LabeledContent("Available RAM", value: ByteCountFormatter.string(fromByteCount: Int64(hardwareProfile.availableRAM), countStyle: .memory))
-                    LabeledContent("CPU Cores", value: "\(hardwareProfile.cpuCores)")
-                    LabeledContent("Neural Engine", value: hardwareProfile.hasNeuralEngine ? "Yes" : "No")
-                    if let gpuMem = hardwareProfile.gpuMemory {
-                        LabeledContent("GPU Memory", value: ByteCountFormatter.string(fromByteCount: Int64(gpuMem), countStyle: .memory))
-                    }
+                    LabeledContent("Total RAM", value: hardwareProfile.totalRAM.formattedMemory)
+                    LabeledContent("Recommended RAM Usage", value: hardwareProfile.recommendedUsageRAM.formattedMemory)
+                    LabeledContent("Has Neural Acceleration", value: hardwareProfile.hasNeuralAcceleration ? "Yes" : "No")
                 }
                 else {
                     Text("No hardware profile available")
@@ -37,10 +33,8 @@ struct RingDeviceDetailView: View {
 #Preview {
     let profile = HardwareProfile(
         totalRAM: 16 * 1024 * 1024 * 1024,
-        availableRAM: 8 * 1024 * 1024 * 1024,
-        cpuCores: 8,
-        hasNeuralEngine: true,
-        gpuMemory: nil
+        recommendedUsageRAM: 8 * 1024 * 1024 * 1024,
+        hasNeuralAcceleration: true,
     )
     let discDevice = DiscoveredDevice(
         name: "Preview Device",

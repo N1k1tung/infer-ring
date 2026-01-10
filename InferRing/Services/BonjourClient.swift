@@ -64,7 +64,10 @@ extension BonjourClient: NetServiceDelegate {
     func netServiceDidResolveAddress(_ sender: NetService) {
         resolvingServices.removeAll { $0 == sender }
 
-        let ipAddress = sender.addresses?.compactMap { ipString(from: $0) }.first
+        let addresses = sender.addresses?.compactMap { ipString(from: $0) }
+        dprint("available addresses")
+        dprint(addresses)
+        let ipAddress = addresses?.first { !$0.hasPrefix("192.") && !$0.hasPrefix("fe80:") } ?? addresses?.first { $0.hasPrefix("192.") }
         if let host = ipAddress ?? sender.hostName {
             nodes.removeAll { $0.host == host }
             nodes.append(Node(name: sender.name, host: host))

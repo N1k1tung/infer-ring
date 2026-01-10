@@ -10,12 +10,13 @@ struct Ping: Codable {
 struct ElectionMessage: Codable {
     let type: ElectionMessageType
     let candidateID: DeviceID
+    let hardwareProfile: HardwareProfile
     let timestamp: Date
 }
 
 enum ElectionMessageType: Codable {
-    case election(DeviceID)
-    case coordinator(DeviceID)
+    case election
+    case coordinator
 }
 
 struct ModelLoadRequest: Codable {
