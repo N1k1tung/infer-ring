@@ -4,13 +4,13 @@ import Foundation
 
 // MARK: - Memory
 
-public struct MemorySize: Codable, Hashable {
+public struct MemorySize: Codable, Hashable, Sendable {
     public var inBytes: Int = 0
 }
 
 // MARK: - ModelMetadata
 
-public struct ModelMetadata: Codable, Hashable {
+public struct ModelMetadata: Codable, Hashable, Sendable {
     public let modelId: String
     public let prettyName: String
     public let storageSize: MemorySize

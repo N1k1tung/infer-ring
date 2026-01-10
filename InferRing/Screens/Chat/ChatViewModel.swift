@@ -18,7 +18,7 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
 
 @Observable
 @MainActor
-class ChatViewModel {
+final class ChatViewModel {
     var messages: [ChatMessage] = [.systemMessage]
     var input: String = ""
     var isSending: Bool = false

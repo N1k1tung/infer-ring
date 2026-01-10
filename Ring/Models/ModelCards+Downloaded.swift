@@ -34,6 +34,7 @@ extension FileManager {
     }
 }
 
+@MainActor
 public extension ModelCard {
     var isLoaded: Bool {
         ModelCards.loadedModels.contains(modelId)
@@ -44,9 +45,9 @@ public extension ModelCard {
 }
 
 extension ModelCards {
-    static var loadedModels: [String] = []
-    static var partiallyLoadedModels: [String] = []
-    
+    @MainActor static var loadedModels: [String] = []
+    @MainActor static var partiallyLoadedModels: [String] = []
+
     public static func checkLoadedModels() async {
         let fm = FileManager.default
         let cachesDir = fm.urls(for: .cachesDirectory, in: .userDomainMask).first!
@@ -65,7 +66,9 @@ extension ModelCards {
                 }
             }
         }
-        loadedModels = loaded
-        partiallyLoadedModels = partiallyLoaded
+        Task { @MainActor in
+            loadedModels = loaded
+            partiallyLoadedModels = partiallyLoaded
+        }
     }
 }

@@ -20,7 +20,7 @@ extension MemorySize {
     }
 }
 
-public struct ModelCard: Codable, Equatable {
+public struct ModelCard: Codable, Equatable, Sendable {
     public let shortId: String
     public let modelId: String
     public let name: String
