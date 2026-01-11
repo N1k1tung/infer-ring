@@ -109,7 +109,7 @@ final class FileServerHandler: ChannelInboundHandler {
                     else { return }
                 
                 let response = HardwareProfileResponse(
-                    hardwareProfile: hardwareMonitor?.currentProfile ?? .init(totalRAM: 0, recommendedUsageRAM: 0, hasNeuralAcceleration: false),
+                    hardwareProfile: hardwareMonitor?.currentProfile ?? .init(totalRAM: 0, recommendedUsageRAM: 0, idiom: .current),
                     timestamp: Date()
                 )
                         

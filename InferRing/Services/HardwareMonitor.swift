@@ -49,13 +49,13 @@ extension HardwareProfile {
         .init(
             totalRAM: gpuInfo.memorySize,
             recommendedUsageRAM: Int(Double(gpuInfo.maxRecommendedWorkingSetSize) * 0.8), // in practice iOS watchdog will kill when allocating as much as recommended set size
-            hasNeuralAcceleration: false
+            idiom: .current
         )
         #else
         .init(
             totalRAM: gpuInfo.memorySize,
             recommendedUsageRAM: Int(gpuInfo.maxRecommendedWorkingSetSize),
-            hasNeuralAcceleration: false
+            idiom: .current
         )
         #endif
     }

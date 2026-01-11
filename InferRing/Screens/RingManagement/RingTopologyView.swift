@@ -110,10 +110,17 @@ struct RingDeviceNode: View {
                         Circle()
                             .stroke(isCoordinator ? Color.orange : Color.gray.opacity(0.3), lineWidth: isCoordinator ? 2 : 1)
                     )
-                
-                Image(systemName: isCoordinator ? "crown.fill" : "desktopcomputer")
-                    .foregroundColor(isCoordinator ? .orange : .primary)
-                    .font(.system(size: 24))
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: device.device.hardwareProfile?.idiom.systemIcon ?? "desktopcomputer")
+                        .foregroundColor(.primary)
+                        .font(.system(size: 24))
+                    
+                    if isCoordinator {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 14))
+                    }
+                }
             }
             
             VStack(spacing: 1) {
@@ -134,46 +141,43 @@ struct RingDeviceNode: View {
     }
 }
 
-#if SKIP_FOR_NOW
+extension DeviceIdiom {
+    var systemIcon: String {
+        switch self {
+        case .mac: return "desktopcomputer"
+        case .iPad: return "tablet"
+        case .iPhone: return "iphone"
+        }
+    }
+}
+
 #Preview {
-    // Mock Data for Preview
-    let coord = RingCoordinator(
-        localDeviceID: DeviceID(uuid: UUID(), name: "Local")
-    )
-    
-    // Create a fake ring
     let dev1 = RingDevice(
         device: DiscoveredDevice(
-            id: UUID(), name: "MacBook Pro", host: "local",
-            hardwareProfile: HardwareProfile(totalRAM: 16, availableRAM: 8, cpuCores: 8, hasNeuralEngine: true, gpuMemory: nil)
+            name: "MacBook Pro", host: "local",
+            hardwareProfile: HardwareProfile(totalRAM: 16 * 1024 * 1024 * 1024, recommendedUsageRAM: 12 * 1024 * 1024 * 1024, idiom: .mac)
         ),
-        rank: 0, position: RingPosition(index: 0, predecessor: nil, successor: nil), status: .active
-    )
-    
+        rank: 0)
+
     let dev2 = RingDevice(
         device: DiscoveredDevice(
-            id: UUID(), name: "iPad Pro", host: "local",
-            hardwareProfile: HardwareProfile(totalRAM: 16, availableRAM: 8, cpuCores: 8, hasNeuralEngine: true, gpuMemory: nil)
+            name: "iPad", host: "local",
+            hardwareProfile: HardwareProfile(totalRAM: 8 * 1024 * 1024 * 1024, recommendedUsageRAM: 4 * 1024 * 1024 * 1024, idiom: .iPad)
         ),
-        rank: 1, position: RingPosition(index: 0, predecessor: nil, successor: nil), status: .active
-    )
-    
-     let dev3 = RingDevice(
+        rank: 0)
+
+    let dev3 = RingDevice(
         device: DiscoveredDevice(
-            id: UUID(), name: "Mac Studio", host: "local",
-            hardwareProfile: HardwareProfile(totalRAM: 128, availableRAM: 64, cpuCores: 20, hasNeuralEngine: true, gpuMemory: nil)
+            name: "iPhone", host: "local",
+            hardwareProfile: HardwareProfile(totalRAM: 12 * 1024 * 1024 * 1024, recommendedUsageRAM: 6 * 1024 * 1024 * 1024, idiom: .iPhone)
         ),
-        rank: 2, position: RingPosition(index: 0, predecessor: nil, successor: nil), status: .active
-    )
-    
-    coord.currentRing = Ring(
-        id: UUID(),
+        rank: 0)
+
+
+    let ring = Ring(
         devices: [dev1, dev2, dev3],
         coordinator: dev3.device.deviceID,
-        createdAt: Date()
     )
     
-    RingTopologyView()
-        .environment(coord)
+    RingVisualizer(ring: ring, selectedDevice: .constant(nil))
 }
-#endif

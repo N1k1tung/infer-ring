@@ -14,9 +14,9 @@ struct RingDeviceDetailView: View {
 
             Section("Hardware Profile") {
                 if let hardwareProfile = ringDevice.device.hardwareProfile {
+                    LabeledContent("Type", value: hardwareProfile.idiom.rawValue)
                     LabeledContent("Total RAM", value: hardwareProfile.totalRAM.formattedMemory)
                     LabeledContent("Recommended RAM Usage", value: hardwareProfile.recommendedUsageRAM.formattedMemory)
-                    LabeledContent("Has Neural Acceleration", value: hardwareProfile.hasNeuralAcceleration ? "Yes" : "No")
                 }
                 else {
                     Text("No hardware profile available")
@@ -34,7 +34,7 @@ struct RingDeviceDetailView: View {
     let profile = HardwareProfile(
         totalRAM: 16 * 1024 * 1024 * 1024,
         recommendedUsageRAM: 8 * 1024 * 1024 * 1024,
-        hasNeuralAcceleration: true,
+        idiom: .mac
     )
     let discDevice = DiscoveredDevice(
         name: "Preview Device",

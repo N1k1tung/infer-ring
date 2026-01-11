@@ -25,7 +25,9 @@ public final class MLXManager {
         print("Initializing MLX ring with rank \(rank)")
         setenv("MLX_HOSTFILE", hostfileUrl.path, 1)
         setenv("MLX_RANK", "\(rank)", 1)
+        #if DEBUG
         setenv("MLX_RING_VERBOSE", "1", 1)
+        #endif
 
         group = DistributedGroup.initialize(strict: true)
     }

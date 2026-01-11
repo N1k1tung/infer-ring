@@ -1,5 +1,7 @@
 import Foundation
-
+#if os(iOS)
+import UIKit
+#endif
 // MARK: - Device identification and capabilities
 struct DeviceID: Hashable, Codable, Identifiable {
     var id: String { name }
@@ -10,18 +12,31 @@ struct DeviceID: Hashable, Codable, Identifiable {
     }
 }
 
+enum DeviceIdiom: String, Codable, Hashable {
+    case iPhone
+    case iPad
+    case mac
+
+    static let current: DeviceIdiom = {
+        #if os(iOS)
+        UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone
+        #else
+        .mac
+        #endif
+    }()
+}
+
 struct HardwareProfile: Codable, Equatable {
     let totalRAM: Int
     let recommendedUsageRAM: Int
-    let hasNeuralAcceleration: Bool
+    let idiom: DeviceIdiom
 
     static func<=(lhs: HardwareProfile, rhs: HardwareProfile) -> Bool {
         lhs < rhs || lhs == rhs
     }
 
     static func<(lhs: HardwareProfile, rhs: HardwareProfile) -> Bool {
-        // weighted comparison
-        lhs.recommendedUsageRAM * 3 + lhs.totalRAM * 2 < rhs.recommendedUsageRAM * 3 + rhs.totalRAM * 2
+        lhs.recommendedUsageRAM < rhs.recommendedUsageRAM
     }
 }
 
