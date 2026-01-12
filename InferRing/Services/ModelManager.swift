@@ -216,6 +216,7 @@ final class ModelManager {
     func resetChatSession() {
         guard let currentModel else { return }
         chatSession = ChatSession(currentModel, instructions: ChatMessage.systemMessage.content)
+        Memory.clearCache()
     }
 
     /// Handle model load request from coordinator

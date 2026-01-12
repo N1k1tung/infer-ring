@@ -2,19 +2,11 @@ import Foundation
 import Observation
 import Ring
 
-struct ChatMessage: Identifiable, Equatable, Sendable {
-    enum Role: String, Sendable { case user, assistant, system }
-    let id: UUID
-    let role: Role
-    var content: String
-    init(id: UUID = UUID(), role: Role, content: String) {
-        self.id = id
-        self.role = role
-        self.content = content
-    }
-
-    static let systemMessage = ChatMessage(role: .system, content: "You are a helpful assistant.")
-}
+#if os(iOS)
+import UIKit
+#else
+import AppKit
+#endif
 
 @Observable
 @MainActor
@@ -57,6 +49,10 @@ final class ChatViewModel {
     var loadingPercent: Double? = nil
     var tokensPerSecond: Double? = nil
 
+    private var displayLink: CADisplayLink?
+    private var displayedContent: String = ""
+    private var streamedMessageIndex: Int?
+
     @ObservationIgnored
     @Inject
     private var modelManager: ModelManager?
@@ -69,7 +65,7 @@ final class ChatViewModel {
                 self?.modelManager?.currentModelCard
             }) {
                 selectedModel = loadedModel
-                resetChat()
+                resetChatUI()
             }
         }
     }
@@ -90,23 +86,55 @@ final class ChatViewModel {
         let assistantMessage = ChatMessage(role: .assistant, content: "...")
         messages.append(assistantMessage)
         let index = messages.count - 1
+
+        streamedMessageIndex = index
+        displayedContent = "..."
+        startDisplayLinkIfNeeded()
+
         var fullReply = ""
         for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
             fullReply += replyStream
-            // TODO: optimize for UI
-            messages[index].content = fullReply
+            displayedContent = fullReply
         }
+        messages[index].content = fullReply
         tokensPerSecond = modelManager.tokensPerSecond
+
+        stopDisplayLink()
     }
 
     func reset() {
-        resetChat()
+        resetChatUI()
         modelManager?.resetChatSession()
     }
 
-    private func resetChat() {
+    private func resetChatUI() {
         messages = [.systemMessage]
         input = ""
         isSending = false
+        stopDisplayLink()
+    }
+
+    // MARK: display optimizations
+    private func startDisplayLinkIfNeeded() {
+        guard displayLink == nil else { return }
+#if os(iOS)
+        let link = CADisplayLink(target: self, selector: #selector(handleDisplayLinkTick))
+#else
+        let link = NSApplication.shared.keyWindow?.displayLink(target: self, selector: #selector(handleDisplayLinkTick)) ?? CADisplayLink()
+#endif
+        link.add(to: .main, forMode: .common)
+        displayLink = link
+    }
+
+    private func stopDisplayLink() {
+        displayedContent = ""
+        streamedMessageIndex = nil
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+    @objc private func handleDisplayLinkTick() {
+        guard let index = streamedMessageIndex, !displayedContent.isEmpty else { return }
+        messages[index].content = displayedContent
     }
 }
