@@ -6,6 +6,7 @@ import Observation
 struct Node: Hashable {
     let name: String
     let host: String
+    let interface: NWInterface
 }
 
 protocol BonjourClientProtocol: Observable {
@@ -22,7 +23,7 @@ final class BonjourClient: BonjourClientProtocol {
     private var browser: NWBrowser?
     
     @ObservationIgnored
-    private var resolvers: [String: IPResolver] = [:]
+    private var resolvers: [String: [IPResolver]] = [:]
     
     var nodes: [Node] = []
     var isSearching = false
@@ -49,7 +50,7 @@ final class BonjourClient: BonjourClientProtocol {
         isSearching = false
         browser?.cancel()
         browser = nil
-        resolvers.values.forEach { $0.cancel() }
+        resolvers.values.flatMap { $0 }.forEach { $0.cancel() }
         resolvers.removeAll()
     }
     
@@ -58,69 +59,87 @@ final class BonjourClient: BonjourClientProtocol {
         
         for result in results {
             guard case .service(let name, _, _, _) = result.endpoint else { continue }
-            
+
             guard name.hasPrefix(ServiceInfo.servicePrefix),
-                  name != ServiceInfo.bonjourName else { continue }
-            
+                  name != ServiceInfo.bonjourName
+            else { continue }
+
             currentNames.insert(name)
-            
-            // check if we already have a stable node for this
-            if resolvers[name] == nil && !nodes.contains(where: { $0.name == name }) {
-                resolve(result)
+
+            if !nodes.contains(where: { $0.name == name }) {
+                resolve(result, name: name)
             }
         }
         
         // cleanup absent nodes & resolvers
         nodes.removeAll { !currentNames.contains($0.name) }
-        for (name, resolver) in resolvers {
+        for name in resolvers.keys {
             if !currentNames.contains(name) {
-                resolver.cancel()
-                resolvers.removeValue(forKey: name)
+                resolvers[name]?.forEach { $0.cancel() }
+                resolvers[name] = nil
             }
         }
     }
     
-    private func resolve(_ result: NWBrowser.Result) {
-        guard case .service(let name, _, _, _) = result.endpoint else { return }
-        
-        let sortedInterfaces = result.interfaces.sorted { lhs, rhs in
-            if lhs.type == .wiredEthernet { return true }
-            if rhs.type == .wiredEthernet { return false }
-            if lhs.type == .wifi { return true }
-            if rhs.type == .wifi { return false }
-            return false
+    private func resolve(_ result: NWBrowser.Result, name: String) {
+        let sortedInterfaces = result.interfaces.sorted(by: <)
+
+        if resolvers[name] == nil {
+            resolvers[name] = []
         }
-        
-        let targetInterface = sortedInterfaces.first
-        
-        let resolver = IPResolver(endpoint: result.endpoint, interface: targetInterface) { [weak self] resolvedIP in
-            guard let self else { return }
-            
-            if let index = nodes.firstIndex(where: { $0.name == name }) {
-                if nodes[index].host != resolvedIP {
-                     nodes[index] = Node(name: name, host: resolvedIP)
-                }
-            }
-            else {
-                nodes.append(Node(name: name, host: resolvedIP))
+
+        for interface in sortedInterfaces {
+            if let active = resolvers[name], active.contains(where: { $0.interface == interface }) {
+                continue
             }
             
-            resolvers.removeValue(forKey: name)
+            let resolver = IPResolver(endpoint: result.endpoint, interface: interface) { [weak self] resolvedIP, usedInterface in
+                self?.handleResolutionSuccess(name: name, ip: resolvedIP, interface: usedInterface)
+            }
+            
+            resolver.onEnded = { [weak self, weak resolver] in
+                guard let self, let resolver else { return }
+                removeResolver(resolver, name: name)
+            }
+            
+            resolvers[name]?.append(resolver)
+            resolver.start()
         }
-        
-        resolvers[name] = resolver
-        resolver.start()
+    }
+    
+    private func handleResolutionSuccess(name: String, ip: String, interface: NWInterface) {
+        if let index = nodes.firstIndex(where: { $0.name == name }) {
+            if nodes[index].host != ip && interface <= nodes[index].interface {
+                nodes[index] = Node(name: name, host: ip, interface: interface)
+            }
+        }
+        else {
+            nodes.append(Node(name: name, host: ip, interface: interface))
+        }
+    }
+    
+    private func removeResolver(_ resolver: IPResolver, name: String) {
+        if var list = resolvers[name] {
+            list.removeAll { $0 === resolver }
+            resolvers[name] = list
+            if list.isEmpty {
+                resolvers[name] = nil
+            }
+        }
     }
 }
 
 private class IPResolver {
     let endpoint: NWEndpoint
-    let interface: NWInterface?
-    let completion: (String) -> Void
+    let interface: NWInterface
+    let completion: (String, NWInterface) -> Void
+    var onEnded: (() -> Void)?
+    
     private var connection: NWConnection?
     private var isCancelled = false
+    private var timer: Timer?
     
-    init(endpoint: NWEndpoint, interface: NWInterface?, completion: @escaping (String) -> Void) {
+    init(endpoint: NWEndpoint, interface: NWInterface, completion: @escaping (String, NWInterface) -> Void) {
         self.endpoint = endpoint
         self.interface = interface
         self.completion = completion
@@ -128,6 +147,7 @@ private class IPResolver {
     
     func start() {
         let tcpOptions = NWProtocolTCP.Options()
+        tcpOptions.connectionTimeout = 2 // Does not fire
         let parameters = NWParameters(tls: nil, tcp: tcpOptions)
 
         // MLX ring requires IPv4, it also works out of the box for http server
@@ -143,18 +163,29 @@ private class IPResolver {
             case .ready:
                 extractIP()
             case .failed(let error):
-                dprint("Bonjour Resolution Failed for \(endpoint): \(error)")
+                dprint("Bonjour Resolution Failed for \(endpoint) on \(interface)): \(error)")
                 cancel()
             case .cancelled:
                 break
             case .waiting(let error):
                 dprint("Bonjour Resolution Waiting for \(endpoint): \(error)")
-            default:
+            case .preparing, .setup:
+                break
+            @unknown default:
                 break
             }
         }
         
         connection?.start(queue: .main)
+
+        // manual timeout instead of relying on tcp connectionTimeout
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            if !isCancelled {
+                dprint("Bonjour Resolution Timed Out for \(endpoint) on \(String(describing: interface))")
+                cancel()
+            }
+        }
     }
     
     private func extractIP() {
@@ -167,19 +198,38 @@ private class IPResolver {
             case .ipv4(let ipv4):
                 let rawAddress = "\(ipv4)"
                 let ipString = rawAddress.split(separator: "%", maxSplits: 1).first.map(String.init) ?? rawAddress
-                completion(ipString)
+                completion(ipString, interface)
                 cancel()
             default:
                 dprint("Resolved to non-IPv4: \(host)")
                 cancel()
             }
         }
+        else {
+            cancel()
+        }
     }
     
     func cancel() {
+        if isCancelled { return }
         isCancelled = true
+        timer?.invalidate()
+        timer = nil
         connection?.cancel()
         connection = nil
+        onEnded?()
     }
 }
 
+extension NWInterface {
+    static func <(_ lhs: NWInterface, _ rhs: NWInterface) -> Bool {
+        if lhs.type == .wiredEthernet { return true }
+        if rhs.type == .wiredEthernet { return false }
+        if lhs.type == .wifi { return true }
+        if rhs.type == .wifi { return false }
+        return false
+    }
+    static func <=(_ lhs: NWInterface, _ rhs: NWInterface) -> Bool {
+        lhs < rhs || lhs == rhs
+    }
+}

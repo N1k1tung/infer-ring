@@ -5,6 +5,9 @@ import Ring
 import MLX
 import MLXLMCommon
 import MLXLLM
+#if os(iOS)
+import UIKit
+#endif
 
 @Observable
 final class ModelManager {
@@ -279,10 +282,16 @@ final class ModelManager {
         shardMeta: ShardMetadata,
         progressHandler: @Sendable @escaping (Progress) -> Void
     ) async throws -> ModelLoadResponse? {
-        guard let mlxManager = mlxManager else {
+        guard let mlxManager else {
             throw ModelManagerError.notInitialized
         }
-        
+        // assume user is actively using the app after this point
+#if os(iOS)
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+#endif
+
         currentModel = try await mlxManager.loadModel(modelCard, shardMeta: shardMeta, progressHandler: progressHandler)
         return nil
     }

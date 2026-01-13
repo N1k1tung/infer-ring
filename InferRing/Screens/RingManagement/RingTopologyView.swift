@@ -101,7 +101,7 @@ struct RingDeviceNode: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            ZStack {
+            ZStack(alignment: .topTrailing) {
                 Circle()
                     .fill(Color.secondary)
                     .frame(width: 60, height: 60)
@@ -110,21 +110,20 @@ struct RingDeviceNode: View {
                         Circle()
                             .stroke(isCoordinator ? Color.orange : Color.gray.opacity(0.3), lineWidth: isCoordinator ? 2 : 1)
                     )
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: device.device.hardwareProfile?.idiom.systemIcon ?? "desktopcomputer")
-                        .foregroundColor(.primary)
-                        .font(.system(size: 24))
-                    
-                    if isCoordinator {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.orange)
-                            .font(.system(size: 14))
-                    }
+                    .overlay(
+                        Image(systemName: device.device.hardwareProfile?.idiom.systemIcon ?? "desktopcomputer")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 24))
+                    )
+                if isCoordinator {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.orange)
+                        .font(.system(size: 14))
                 }
             }
-            
+
             VStack(spacing: 1) {
-                Text(device.device.name)
+                Text(device.device.host)
                     .font(.caption)
                     .bold()
                     .lineLimit(1)
@@ -145,7 +144,7 @@ extension DeviceIdiom {
     var systemIcon: String {
         switch self {
         case .mac: return "desktopcomputer"
-        case .iPad: return "tablet"
+        case .iPad: return "ipad"
         case .iPhone: return "iphone"
         }
     }

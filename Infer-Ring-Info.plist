@@ -11,10 +11,5 @@
 	<array>
 		<string>_http._tcp</string>
 	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>processing</string>
-		<string>fetch</string>
-	</array>
 </dict>
 </plist>

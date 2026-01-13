@@ -44,21 +44,3 @@ struct ServiceBrowserView: View {
         }
     }
 }
-
-// Defensive protocols and environment key for preview only
-#if DEBUG
-@Observable
-private class MockBonjourClient {
-    var services = [
-        Node(name: "Printer", host: "printer.local"),
-        Node(name: "Music Server", host: "music.local"),
-    ]
-    func startSearching() {}
-    func stopSearching() {}
-}
-
-#Preview {
-    ServiceBrowserView()
-        .environment(MockBonjourClient())
-}
-#endif
