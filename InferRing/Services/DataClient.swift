@@ -5,6 +5,17 @@ import NIOCore
 import NIOHTTP1
 import NIOFoundationCompat
 
+enum DataClientError: LocalizedError {
+    case downloadFailed(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .downloadFailed(let message):
+            return "Download failed: \(message)"
+        }
+    }
+}
+
 final class DataClient {
 
     private let baseUrl: String
@@ -79,32 +90,48 @@ final class DataClient {
         }
     }
 
-    func download() async {
-        do {
-            let request = HTTPClientRequest(url: "https://apple.com/")
-            let response = try await HTTPClient.shared.execute(request, timeout: .seconds(120))
-            dprint(response)
-
-            // if defined, the content-length headers announces the size of the body
-            let expectedBytes = response.headers.first(name: "content-length").flatMap(Int.init)
-
-            var receivedBytes = 0
-            // asynchronously iterates over all body fragments
-            // this loop will automatically propagate backpressure correctly
-            for try await buffer in response.body {
-                // for this example, we are just interested in the size of the fragment
-                receivedBytes += buffer.readableBytes
-
-                if let expectedBytes = expectedBytes {
-                    // if the body size is known, we calculate a progress indicator
-                    let progress = Double(receivedBytes) / Double(expectedBytes)
-                    dprint("progress: \(Int(progress * 100))%")
-                }
-            }
-            dprint("did receive \(receivedBytes) bytes")
-        } catch {
-            dprint("request failed: \(error)")
+    func download(modelId: String, fileName: String, destinationURL: URL) async throws {
+        let encodedModelId = modelId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? modelId
+        let encodedFileName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? fileName
+        let request = HTTPClientRequest(url: "\(baseUrl)/download/\(encodedModelId)/\(encodedFileName)")
+        
+        let response = try await HTTPClient.shared.execute(request, timeout: .seconds(600))
+        
+        guard response.status == .ok else {
+            throw DataClientError.downloadFailed("HTTP \(response.status)")
         }
+        
+        let expectedBytes = response.headers.first(name: "Content-Length").flatMap(Int.init)
+        var receivedBytes = 0
+        
+        // Create destination directory if needed
+        let directory = destinationURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        
+        // Create empty file
+        FileManager.default.createFile(atPath: destinationURL.path, contents: nil)
+        
+        // Write to file
+        guard let fileHandle = FileHandle(forWritingAtPath: destinationURL.path) else {
+            throw DataClientError.downloadFailed("Could not open file for writing")
+        }
+        defer {
+            try? fileHandle.close()
+        }
+        
+        for try await buffer in response.body {
+            if let data = buffer.getData(at: buffer.readerIndex, length: buffer.readableBytes) {
+                try fileHandle.write(contentsOf: data)
+                receivedBytes += buffer.readableBytes
+                // skip progress reporting for now
+//                if let expectedBytes {
+//                    let progress = Double(receivedBytes) / Double(expectedBytes)
+//                    dprint("download progress: \(Int(progress * 100))% (\(receivedBytes)/\(expectedBytes) bytes)")
+//                }
+            }
+        }
+        
+        dprint("download complete: \(receivedBytes) bytes written to \(destinationURL.path)")
     }
 
 }

@@ -42,16 +42,53 @@ public extension ModelCard {
     var isPartiallyLoaded: Bool {
         ModelCards.partiallyLoadedModels.contains(modelId)
     }
+    var downloadedFiles: [String] {
+        guard isLoaded else { return [] }
+        var fileNames: [String] = []
+        let keys: [URLResourceKey] = [.isRegularFileKey]
+        if let enumerator = FileManager.default.enumerator(
+            at: cacheDirectory,
+            includingPropertiesForKeys: keys,
+            options: [.skipsHiddenFiles],
+            errorHandler: nil
+        ) {
+            for case let fileURL as URL in enumerator {
+                do {
+                    let values = try fileURL.resourceValues(forKeys: Set(keys))
+                    if values.isRegularFile == true {
+                        fileNames.append(fileURL.lastPathComponent)
+                    }
+                }
+                catch {
+                    // Ignore unreadable files
+                    continue
+                }
+            }
+        }
+        return fileNames
+    }
+}
+
+public extension ModelCard {
+    var cacheDirectory: URL {
+        ModelCards.modelsDirectory.appendingPathComponent(modelId)
+    }
 }
 
 extension ModelCards {
     @MainActor static var loadedModels: [String] = []
     @MainActor static var partiallyLoadedModels: [String] = []
 
-    public static func checkLoadedModels() async {
+    static var modelsDirectory: URL {
         let fm = FileManager.default
         let cachesDir = fm.urls(for: .cachesDirectory, in: .userDomainMask).first!
         let modelsDir = cachesDir.appendingPathComponent("models")
+        return modelsDir
+    }
+
+    public static func checkLoadedModels() async {
+        let fm = FileManager.default
+        let modelsDir = modelsDirectory
         var loaded = [String]()
         var partiallyLoaded = [String]()
         for (_, card) in allModels {

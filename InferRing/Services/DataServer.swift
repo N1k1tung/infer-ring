@@ -21,6 +21,8 @@ final class FileServerHandler: ChannelInboundHandler {
     private var currentRequestHead: HTTPRequestHead?
     private var requestBodyBuffer: ByteBuffer?
 
+    private lazy var fileIO = NonBlockingFileIO(threadPool: .singleton)
+
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let part = self.unwrapInboundIn(data)
 
@@ -48,7 +50,36 @@ final class FileServerHandler: ChannelInboundHandler {
             }
 
             let path = url.path
-            if path.hasPrefix("/elect") {
+            let remoteIP = context.remoteAddress?.ipAddress
+            let eventLoop = context.eventLoop
+            let loopBoundContext = NIOLoopBound(context, eventLoop: eventLoop)
+            let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
+
+            if path.hasPrefix("/download") {
+                // Extract modelId and fileName from path: /download/{modelId}/{fileName}
+                let components = path.components(separatedBy: "/").filter { !$0.isEmpty }
+                guard components.count >= 3,
+                      components[0] == "download",
+                      let modelId = components[1].removingPercentEncoding,
+                      let fileName = components[2].removingPercentEncoding else {
+                    sendText(context: context, body: "Bad Request: Invalid download path", status: .badRequest)
+                    return
+                }
+
+                guard let modelCard = ModelCards.allModels[modelId] else {
+                    sendText(context: context, body: "Model not found", status: .notFound)
+                    return
+                }
+
+                let fileURL = modelCard.cacheDirectory.appendingPathComponent(fileName)
+                guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                    sendText(context: context, body: "File not found", status: .notFound)
+                    return
+                }
+
+                sendFile(context: context, path: fileURL.path)
+            }
+            else if path.hasPrefix("/elect") {
                 guard let data = getData(context: context) else { return }
                 guard let message = parseBody(data: data, context: context, type: ElectionMessage.self)
                 else { return }
@@ -64,14 +95,14 @@ final class FileServerHandler: ChannelInboundHandler {
                 else { return }
 
                 Task {
-                    let response = await modelManager?.handleModelLoadRequest(request) ?? ModelLoadResponse(
+                    let response = await modelManager?.handleModelLoadRequest(request, remoteHost: remoteIP) ?? ModelLoadResponse(
                         requestID: request.requestID,
                         success: false,
                         errorMessage: "ModelManager not available",
                         timestamp: Date()
                     )
-                    context.eventLoop.execute { [weak self] in
-                        self?.sendData(context: context, body: response, status: .ok)
+                    eventLoop.execute {
+                        loopBoundSelf.value.sendData(context: loopBoundContext.value, body: response, status: .ok)
                     }
                 }
             }
@@ -87,8 +118,8 @@ final class FileServerHandler: ChannelInboundHandler {
                         errorMessage: "ModelManager not available",
                         timestamp: Date()
                     )
-                    context.eventLoop.execute { [weak self] in
-                        self?.sendData(context: context, body: response, status: .ok)
+                    eventLoop.execute {
+                        loopBoundSelf.value.sendData(context: loopBoundContext.value, body: response, status: .ok)
                     }
                 }
             }
@@ -121,8 +152,8 @@ final class FileServerHandler: ChannelInboundHandler {
             }
             else if path.hasPrefix("/v1/chat/completions") {
                 guard let data = getData(context: context) else { return }
-                Task { [weak self] in
-                    await self?.handleChatCompletions(context: context, data: data)
+                Task {
+                    await loopBoundSelf.value.handleChatCompletions(context: loopBoundContext, data: data)
                 }
             }
             else {
@@ -149,8 +180,11 @@ final class FileServerHandler: ChannelInboundHandler {
                 sendText(context: context, body: "Bad Request: Invalid JSON", status: .badRequest)
             }
             else {
-                context.eventLoop.execute { [weak self] in
-                    self?.sendText(context: context, body: "Bad Request: Invalid JSON", status: .badRequest)
+                let eventLoop = context.eventLoop
+                let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
+                let loopBoundContext = NIOLoopBound(context, eventLoop: eventLoop)
+                eventLoop.execute {
+                    loopBoundSelf.value.sendText(context: loopBoundContext.value, body: "Bad Request: Invalid JSON", status: .badRequest)
                 }
             }
 
@@ -158,17 +192,59 @@ final class FileServerHandler: ChannelInboundHandler {
         }
     }
 
+    private func sendFile(context: ChannelHandlerContext, path: String) {
+        dprint("Sending file \(path)")
+        let eventLoop = context.eventLoop
+        let loopBoundContext = NIOLoopBound(context, eventLoop: eventLoop)
+        let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
+        let fileHandleAndRegion = fileIO.openFile(_deprecatedPath: path, eventLoop: context.eventLoop)
+        fileHandleAndRegion.whenFailure { [weak self] in
+            self?.sendText(context: context, body: "File Not Found: \($0)", status: .notFound)
+        }
+
+        fileHandleAndRegion.whenSuccess { (file, region) in
+            let context = loopBoundContext.value
+            let loopBoundFile = NIOLoopBound(file, eventLoop: eventLoop)
+
+            var headers = HTTPHeaders()
+            headers.add(name: "Content-Length", value: "\(region.endIndex)")
+            headers.add(name: "Content-Type", value: "application/octet-stream")
+            let responseHead = HTTPResponseHead(version: .http1_1, status: .ok, headers: headers)
+            context.write(Self.wrapOutboundOut(.head(responseHead)), promise: nil)
+
+            loopBoundSelf.value.fileIO.readChunked(
+                fileRegion: region,
+                chunkSize: 128 * 1024,
+                allocator: context.channel.allocator,
+                eventLoop: context.eventLoop
+            ) { buffer in
+                loopBoundContext.value.writeAndFlush(Self.wrapOutboundOut(.body(.byteBuffer(buffer))))
+            }.flatMap { () -> EventLoopFuture<Void> in
+                let context = loopBoundContext.value
+                let p = context.eventLoop.makePromise(of: Void.self)
+                context.writeAndFlush(Self.wrapOutboundOut(.end(nil)), promise: p)
+                return p.futureResult
+            }.flatMapError { error in
+                loopBoundContext.value.close()
+            }.whenComplete { (_: Result<Void, Error>) in
+                _ = try? loopBoundFile.value.close()
+            }
+        }
+
+
+    }
+
     private func sendText(context: ChannelHandlerContext, body: String, status: HTTPResponseStatus) {
         var headers = HTTPHeaders()
         headers.add(name: "Content-Length", value: "\(body.utf8.count)")
         let head = HTTPResponseHead(version: .http1_1, status: status, headers: headers)
-        context.write(self.wrapOutboundOut(.head(head)), promise: nil)
+        context.write(wrapOutboundOut(.head(head)), promise: nil)
 
         var buffer = context.channel.allocator.buffer(capacity: body.utf8.count)
         buffer.writeString(body)
-        context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+        context.write(wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
 
-        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+        context.writeAndFlush(wrapOutboundOut(.end(nil)), promise: nil)
     }
 
     private func sendData<T: Encodable>(context: ChannelHandlerContext, body: T, status: HTTPResponseStatus) {
@@ -176,12 +252,12 @@ final class FileServerHandler: ChannelInboundHandler {
         var headers = HTTPHeaders()
         headers.add(name: "Content-Length", value: "\(data.count)")
         let head = HTTPResponseHead(version: .http1_1, status: status, headers: headers)
-        context.write(self.wrapOutboundOut(.head(head)), promise: nil)
+        context.write(wrapOutboundOut(.head(head)), promise: nil)
 
         let buffer = context.channel.allocator.buffer(data: data)
-        context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+        context.write(wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
 
-        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+        context.writeAndFlush(wrapOutboundOut(.end(nil)), promise: nil)
     }
 
     private func handleModels(context: ChannelHandlerContext) {
@@ -204,17 +280,20 @@ final class FileServerHandler: ChannelInboundHandler {
         sendData(context: context, body: response, status: .ok)
     }
 
-    private func handleChatCompletions(context: ChannelHandlerContext, data: Data) async {
-        guard let request = parseBody(data: data, context: context, type: OpenAPIChatCompletionRequest.self) else {
+    private func handleChatCompletions(context: NIOLoopBound<ChannelHandlerContext>, data: Data) async {
+        guard let request = parseBody(data: data, context: context.value, type: OpenAPIChatCompletionRequest.self) else {
             dprint(String(data: data, encoding: .utf8))
             return
         }
 
+        let eventLoop = context.eventLoop
+        let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
+
         let lastMessage = request.messages.last(where: { $0.role == "user" })?.content?.text ?? ""
 
         if request.stream == true {
-            context.eventLoop.execute { [weak self] in
-                self?.startSSE(context: context)
+            eventLoop.execute {
+                loopBoundSelf.value.startSSE(context: context.value)
             }
 
             let stream = modelManager?.streamResponse(to: lastMessage)
@@ -236,21 +315,21 @@ final class FileServerHandler: ChannelInboundHandler {
                             ]
                         )
                         if let data = try? JSONEncoder().encode(chunk), let jsonString = String(data: data, encoding: .utf8) {
-                            context.eventLoop.execute { [weak self] in
-                                self?.sendSSEData(context: context, string: "data: \(jsonString)\n\n")
+                            eventLoop.execute {
+                                loopBoundSelf.value.sendSSEData(context: context.value, string: "data: \(jsonString)\n\n")
                             }
                         }
                     }
                 }
 
-                context.eventLoop.execute { [weak self] in
-                    self?.sendSSEData(context: context, string: "data: [DONE]\n\n")
-                    self?.endSSE(context: context)
+                eventLoop.execute {
+                    loopBoundSelf.value.sendSSEData(context: context.value, string: "data: [DONE]\n\n")
+                    loopBoundSelf.value.endSSE(context: context.value)
                 }
             }
             catch {
-                context.eventLoop.execute { [weak self] in
-                    self?.endSSE(context: context)
+                eventLoop.execute {
+                    loopBoundSelf.value.endSSE(context: context.value)
                 }
             }
         }
@@ -278,8 +357,8 @@ final class FileServerHandler: ChannelInboundHandler {
                     )
                 ]
             )
-            context.eventLoop.execute { [weak self] in
-                self?.sendData(context: context, body: response, status: .ok)
+            eventLoop.execute {
+                loopBoundSelf.value.sendData(context: context.value, body: response, status: .ok)
             }
         }
     }
@@ -290,26 +369,22 @@ final class FileServerHandler: ChannelInboundHandler {
         headers.add(name: "Cache-Control", value: "no-cache")
         headers.add(name: "Connection", value: "keep-alive")
         let head = HTTPResponseHead(version: .http1_1, status: .ok, headers: headers)
-        context.writeAndFlush(self.wrapOutboundOut(.head(head)), promise: nil)
+        context.writeAndFlush(wrapOutboundOut(.head(head)), promise: nil)
     }
 
     private func sendSSEData(context: ChannelHandlerContext, string: String) {
         var buffer = context.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
-        context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+        context.writeAndFlush(wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
     }
 
     private func endSSE(context: ChannelHandlerContext) {
-        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+        context.writeAndFlush(wrapOutboundOut(.end(nil)), promise: nil)
     }
 }
 
 final class DataServer {
-#if os(iOS)
-    let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-#else
-    let group = MultiThreadedEventLoopGroup(numberOfThreads:System.coreCount)
-#endif
+    let group = MultiThreadedEventLoopGroup.singleton
     var channel: Channel?
 
     func start() {
@@ -327,7 +402,8 @@ final class DataServer {
         do {
             channel = try bootstrap.bind(host: ServiceInfo.host, port: ServiceInfo.port).wait()
             dprint("Server started")
-        } catch {
+        }
+        catch {
             dprint("Failed to start server: \(error)")
         }
     }

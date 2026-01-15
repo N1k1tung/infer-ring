@@ -21,6 +21,7 @@ enum ElectionMessageType: Codable {
 
 struct ModelLoadRequest: Codable {
     let modelCard: ModelCard
+    let availableFiles: [String]
     let shardMeta: ShardMetadata
     let requestID: String
     let timestamp: Date

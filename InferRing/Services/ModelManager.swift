@@ -72,6 +72,8 @@ final class ModelManager {
         let requestId = UUID().uuidString
         let shardMeta = try assignShardMetadata(modelCard: modelCard)
 
+        let availableFiles = await modelCard.downloadedFiles
+
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
                 let result = try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
@@ -86,6 +88,7 @@ final class ModelManager {
                 group.addTask {
                     let request = ModelLoadRequest(
                         modelCard: modelCard,
+                        availableFiles: availableFiles,
                         shardMeta: shardMeta[peer.rank],
                         requestID: requestId,
                         timestamp: Date()
@@ -223,8 +226,43 @@ final class ModelManager {
     }
 
     /// Handle model load request from coordinator
-    func handleModelLoadRequest(_ request: ModelLoadRequest) async -> ModelLoadResponse {
+    func handleModelLoadRequest(_ request: ModelLoadRequest, remoteHost: String?) async -> ModelLoadResponse {
         do {
+            // Download cached files from peer if available
+            if !request.availableFiles.isEmpty,
+               let remoteHost,
+               let peer = coordinator?.ringPeers.first(where: { $0.device.host == remoteHost }) {
+                
+                let cacheDir = request.modelCard.cacheDirectory
+
+                dprint("Downloading \(request.availableFiles.count) cached files from peer \(remoteHost)")
+                
+                for fileName in request.availableFiles {
+                    let destinationURL = cacheDir.appendingPathComponent(fileName)
+                    
+                    if FileManager.default.fileExists(atPath: destinationURL.path) {
+                        // temp xD
+                        try? FileManager.default.removeItem(at: destinationURL)
+//                        dprint("File already exists, skipping: \(fileName)")
+//                        continue
+                    }
+                    
+                    do {
+                        dprint("Downloading \(fileName) from peer...")
+                        try await peer.client.download(
+                            modelId: request.modelCard.shortId,
+                            fileName: fileName,
+                            destinationURL: destinationURL
+                        )
+                        dprint("Successfully downloaded: \(fileName)")
+                    }
+                    catch {
+                        dprint("Failed to download \(fileName): \(error.localizedDescription)")
+                        // Continue with other files
+                    }
+                }
+            }
+            
             _ = try await loadModelLocally(request.modelCard, shardMeta: request.shardMeta) { _ in }
             currentModelCard = request.modelCard
 
