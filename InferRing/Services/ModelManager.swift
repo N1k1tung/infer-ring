@@ -232,7 +232,12 @@ final class ModelManager {
             if !request.availableFiles.isEmpty,
                let remoteHost,
                let peer = coordinator?.ringPeers.first(where: { $0.device.host == remoteHost }) {
-                
+
+#if os(iOS)
+                Task { @MainActor in
+                    UIApplication.shared.isIdleTimerDisabled = true
+                }
+#endif
                 let cacheDir = request.modelCard.cacheDirectory
 
                 dprint("Downloading \(request.availableFiles.count) cached files from peer \(remoteHost)")
@@ -241,10 +246,8 @@ final class ModelManager {
                     let destinationURL = cacheDir.appendingPathComponent(fileName)
                     
                     if FileManager.default.fileExists(atPath: destinationURL.path) {
-                        // temp xD
-                        try? FileManager.default.removeItem(at: destinationURL)
-//                        dprint("File already exists, skipping: \(fileName)")
-//                        continue
+                        dprint("File already exists, skipping: \(fileName)")
+                        continue
                     }
                     
                     do {
