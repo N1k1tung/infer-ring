@@ -73,14 +73,14 @@ final class ModelManager {
         let shardMeta = try assignShardMetadata(modelCard: modelCard)
 
         let availableFiles = await modelCard.downloadedFiles
+        let localProgressMulti = peers.isEmpty ? 0.5 : 1.0 // Local loading is 50% of total if peers present
 
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
                 let result = try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
-                    // Local loading is 50% of total
-                    progressHandler(progress.fractionCompleted * 0.5)
+                    progressHandler(progress.fractionCompleted * localProgressMulti)
                 }
-                loadingProgress += 0.5
+                loadingProgress += localProgressMulti
                 return result
             }
             

@@ -30,7 +30,60 @@ public struct ModelCard: Codable, Equatable, Sendable {
 }
 
 public struct ModelCards {
-    public static let largeModels: [String: ModelCard] = [
+    public static let otherModels: [String: ModelCard] = [
+        // gpt-oss
+        "gpt-oss-20b-MXFP4-Q4": ModelCard(
+            shortId: "gpt-oss-20b-MXFP4-Q4",
+            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
+            description: """
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
+                storageSize: MemorySize.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880,
+                supportsTensor: true
+            )
+        ),
+        "gpt-oss-120b-MXFP4-Q4": ModelCard(
+            shortId: "gpt-oss-120b-MXFP4-Q4",
+            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
+            name: "GPT-OSS 120B (MXFP4-Q4, MLX)",
+            description: """
+        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 4-bit MLX conversion for Apple Silicon.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
+                prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
+                storageSize: MemorySize.from_kb(34_500_000),
+                nLayers: 36,
+                hiddenSize: 2880,
+                supportsTensor: true
+            )
+        ),
+        "gpt-oss-120b-MXFP4-Q8": ModelCard(
+            shortId: "gpt-oss-120b-MXFP4-Q8",
+            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
+            name: "GPT-OSS 120B (MXFP4-Q8, MLX)",
+            description: """
+        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 8-bit MLX conversion for Apple Silicon.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
+                prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
+                storageSize: MemorySize.from_kb(68_996_301),
+                nLayers: 36,
+                hiddenSize: 2880,
+                supportsTensor: true
+            )
+        ),
+
         // deepseek v3
         "DeepSeek-V3.1-4bit": ModelCard(
             shortId: "DeepSeek-V3.1-4bit",
@@ -445,59 +498,6 @@ public struct ModelCards {
                 nLayers: 16,
                 hiddenSize: 2048,
                 supportsTensor: false
-            )
-        ),
-
-        // gpt-oss
-        "gpt-oss-20b-MXFP4-Q4": ModelCard(
-            shortId: "gpt-oss-20b-MXFP4-Q4",
-            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-            description: """
-        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-                storageSize: MemorySize.from_kb(11_744_051),
-                nLayers: 24,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
-        "gpt-oss-120b-MXFP4-Q4": ModelCard(
-            shortId: "gpt-oss-120b-MXFP4-Q4",
-            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
-            name: "GPT-OSS 120B (MXFP4-Q4, MLX)",
-            description: """
-        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 4-bit MLX conversion for Apple Silicon.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
-                prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
-                storageSize: MemorySize.from_kb(34_500_000),
-                nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
-        "gpt-oss-120b-MXFP4-Q8": ModelCard(
-            shortId: "gpt-oss-120b-MXFP4-Q8",
-            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
-            name: "GPT-OSS 120B (MXFP4-Q8, MLX)",
-            description: """
-        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 8-bit MLX conversion for Apple Silicon.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
-                prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
-                storageSize: MemorySize.from_kb(68_996_301),
-                nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
             )
         ),
 
