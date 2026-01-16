@@ -377,8 +377,8 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
-        "qwen3-80b-a3B-thinking-4bit": ModelCard(
-            shortId: "qwen3-80b-a3B-thinking-4bit",
+        "Qwen3-Next-80B-A3B-Thinking-4bit": ModelCard(
+            shortId: "Qwen3-Next-80B-A3B-Thinking-4bit",
             modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-4bit",
             name: "Qwen3 80B A3B Thinking (4-bit)",
             description: """
@@ -387,7 +387,7 @@ public struct ModelCards {
             tags: [],
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-4bit",
-                prettyName: "Qwen3 80B A3B (4-bit)",
+                prettyName: "Qwen3 80B A3B Thinking (4-bit)",
                 storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
                 hiddenSize: 2048,
@@ -404,7 +404,7 @@ public struct ModelCards {
             tags: [],
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-8bit",
-                prettyName: "Qwen3 80B A3B (8-bit)",
+                prettyName: "Qwen3 80B A3B Thinking (8-bit)",
                 storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
                 hiddenSize: 2048,
@@ -476,7 +476,7 @@ public struct ModelCards {
             tags: [],
             metadata: ModelMetadata(
                 modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
-                prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
+                prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
                 storageSize: MemorySize.from_kb(34_500_000),
                 nLayers: 36,
                 hiddenSize: 2880,

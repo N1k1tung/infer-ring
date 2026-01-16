@@ -37,6 +37,7 @@ struct ModelLoadResponse: Codable {
 struct GenerationRequest: Codable {
     let requestID: String
     let input: String
+    let history: [OpenAPIMessage]?
     let timestamp: Date
 }
 

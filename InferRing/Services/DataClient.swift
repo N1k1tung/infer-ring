@@ -147,7 +147,7 @@ extension DataClient {
     }
     
     func loadModel(request: ModelLoadRequest) async -> ModelLoadResponse? {
-        await post(path: "/loadModel", body: request, timeout: .seconds(600))
+        await post(path: "/loadModel", body: request, timeout: .seconds(1200))
     }
     
     func startGeneration(request: GenerationRequest) async -> GenerationResponse? {

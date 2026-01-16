@@ -23,7 +23,7 @@ struct OpenAPIChatCompletionRequest: Codable {
 }
 
 struct OpenAPIMessage: Codable {
-    let role: String
+    let role: ChatMessage.Role
     let content: OpenAPIMessageContent?
 }
 
@@ -107,6 +107,6 @@ struct OpenAPIChoice: Codable {
 }
 
 struct OpenAPIDelta: Codable {
-    let role: String?
+    let role: ChatMessage.Role?
     let content: String?
 }

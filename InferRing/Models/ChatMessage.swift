@@ -2,7 +2,7 @@
 import Foundation
 
 struct ChatMessage: Identifiable, Equatable, Sendable {
-    enum Role: String, Sendable { case user, assistant, system }
+    enum Role: String, Sendable, Codable { case user, assistant, system, tool }
     let id: UUID
     let role: Role
     var content: String

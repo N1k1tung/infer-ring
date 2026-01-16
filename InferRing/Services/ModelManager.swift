@@ -119,11 +119,22 @@ final class ModelManager {
         Memory.clearCache()
     }
 
+    /// stream response
+    /// - Parameter messages: full message history including system
+    /// - Returns: response stream
+    func streamResponse(to messages: [OpenAPIMessage]) -> AsyncThrowingStream<String, any Error> {
+        guard let currentModel else { return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) } }
+        var messages = messages
+        let lastMessage = messages.removeLast()
+        resetChatSession(history: messages)
+
+        return streamResponse(to: lastMessage.content?.text ?? "", history: messages)
+    }
 
     /// stream chat response
     /// - Parameter input: user input
     /// - Returns: response stream
-    func streamResponse(to input: String) -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(to input: String, history: [OpenAPIMessage]? = nil) -> AsyncThrowingStream<String, any Error> {
         guard let chatSession else {
             return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
         }
@@ -132,6 +143,7 @@ final class ModelManager {
         let request = GenerationRequest(
             requestID: UUID().uuidString,
             input: input,
+            history: history,
             timestamp: Date()
         )
 
@@ -195,7 +207,11 @@ final class ModelManager {
                 timestamp: Date()
             )
         }
-        
+
+        if let history = request.history {
+            resetChatSession(history: history)
+        }
+
         do {
             let response = try await chatSession.respond(to: request.input)
             dprint(response)
@@ -219,9 +235,27 @@ final class ModelManager {
     }
 
     /// starts a new chat session
-    func resetChatSession() {
+    /// - Parameter history: previous history, if nil starts with default system message
+    func resetChatSession(history: [OpenAPIMessage]? = nil) {
         guard let currentModel else { return }
-        chatSession = ChatSession(currentModel, instructions: ChatMessage.systemMessage.content)
+        if let history {
+            chatSession = ChatSession(currentModel, history: history.compactMap {
+                guard let text = $0.content?.text else { return nil }
+                switch $0.role {
+                case .user:
+                    return .user(text)
+                case .assistant:
+                    return .assistant(text)
+                case .system:
+                    return .system(text)
+                case .tool:
+                    return .tool(text)
+                }
+            })
+        }
+        else {
+            chatSession = ChatSession(currentModel, instructions: ChatMessage.systemMessage.content)
+        }
         Memory.clearCache()
     }
 

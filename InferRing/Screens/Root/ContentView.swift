@@ -26,6 +26,9 @@ struct ContentView: View {
             NavigationLink("Chat") {
                 ChatView()
             }
+            NavigationLink("OpenAPI Server") {
+                ServerView()
+            }
         }
         .navigationTitle("Infer Ring")
         .toolbar {

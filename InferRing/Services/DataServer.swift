@@ -152,12 +152,10 @@ final class FileServerHandler: ChannelInboundHandler {
             }
             else if path.hasPrefix("/v1/chat/completions") {
                 guard let data = getData(context: context) else { return }
-                Task {
-                    await loopBoundSelf.value.handleChatCompletions(context: loopBoundContext, data: data)
-                }
+                handleChatCompletions(context: loopBoundContext, data: data)
             }
             else {
-                sendText(context: context, body: "OK", status: .ok)
+                sendText(context: context, body: "Not Found", status: .notFound)
             }
         }
     }
@@ -280,7 +278,7 @@ final class FileServerHandler: ChannelInboundHandler {
         sendData(context: context, body: response, status: .ok)
     }
 
-    private func handleChatCompletions(context: NIOLoopBound<ChannelHandlerContext>, data: Data) async {
+    private func handleChatCompletions(context: NIOLoopBound<ChannelHandlerContext>, data: Data) {
         guard let request = parseBody(data: data, context: context.value, type: OpenAPIChatCompletionRequest.self) else {
             dprint(String(data: data, encoding: .utf8))
             return
@@ -289,76 +287,76 @@ final class FileServerHandler: ChannelInboundHandler {
         let eventLoop = context.eventLoop
         let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
 
-        let lastMessage = request.messages.last(where: { $0.role == "user" })?.content?.text ?? ""
+        Task {
+            if request.stream == true {
+                eventLoop.execute {
+                    loopBoundSelf.value.startSSE(context: context.value)
+                }
 
-        if request.stream == true {
-            eventLoop.execute {
-                loopBoundSelf.value.startSSE(context: context.value)
-            }
+                let stream = modelManager?.streamResponse(to: request.messages)
 
-            let stream = modelManager?.streamResponse(to: lastMessage)
-
-            do {
-                if let stream {
-                    for try await text in stream {
-                        let chunk = OpenAPIChatCompletionChunk(
-                            id: "chatcmpl-\(UUID().uuidString)",
-                            object: "chat.completion.chunk",
-                            created: Int(Date().timeIntervalSince1970),
-                            model: request.model ?? "unknown",
-                            choices: [
-                                OpenAPIChoice(
-                                    index: 0,
-                                    delta: OpenAPIDelta(role: "assistant", content: text),
-                                    finishReason: nil
-                                )
-                            ]
-                        )
-                        if let data = try? JSONEncoder().encode(chunk), let jsonString = String(data: data, encoding: .utf8) {
-                            eventLoop.execute {
-                                loopBoundSelf.value.sendSSEData(context: context.value, string: "data: \(jsonString)\n\n")
+                do {
+                    if let stream {
+                        for try await text in stream {
+                            let chunk = OpenAPIChatCompletionChunk(
+                                id: "chatcmpl-\(UUID().uuidString)",
+                                object: "chat.completion.chunk",
+                                created: Int(Date().timeIntervalSince1970),
+                                model: request.model ?? "unknown",
+                                choices: [
+                                    OpenAPIChoice(
+                                        index: 0,
+                                        delta: OpenAPIDelta(role: .assistant, content: text),
+                                        finishReason: nil
+                                    )
+                                ]
+                            )
+                            if let data = try? JSONEncoder().encode(chunk), let jsonString = String(data: data, encoding: .utf8) {
+                                eventLoop.execute {
+                                    loopBoundSelf.value.sendSSEData(context: context.value, string: "data: \(jsonString)\n\n")
+                                }
                             }
                         }
                     }
-                }
 
-                eventLoop.execute {
-                    loopBoundSelf.value.sendSSEData(context: context.value, string: "data: [DONE]\n\n")
-                    loopBoundSelf.value.endSSE(context: context.value)
-                }
-            }
-            catch {
-                eventLoop.execute {
-                    loopBoundSelf.value.endSSE(context: context.value)
-                }
-            }
-        }
-        else {
-            var fullText = ""
-            let stream = modelManager?.streamResponse(to: lastMessage)
-            if let stream {
-                try? await {
-                    for try await text in stream {
-                        fullText += text
+                    eventLoop.execute {
+                        loopBoundSelf.value.sendSSEData(context: context.value, string: "data: [DONE]\n\n")
+                        loopBoundSelf.value.endSSE(context: context.value)
                     }
-                }()
+                }
+                catch {
+                    eventLoop.execute {
+                        loopBoundSelf.value.endSSE(context: context.value)
+                    }
+                }
             }
+            else {
+                var fullText = ""
+                let stream = modelManager?.streamResponse(to: request.messages)
+                if let stream {
+                    try? await {
+                        for try await text in stream {
+                            fullText += text
+                        }
+                    }()
+                }
 
-            let response = OpenAPIChatCompletionResponse(
-                id: "chatcmpl-\(UUID().uuidString)",
-                object: "chat.completion",
-                created: Int(Date().timeIntervalSince1970),
-                model: request.model ?? "unknown",
-                choices: [
-                    OpenAPIChoiceFull(
-                        index: 0,
-                        message: OpenAPIMessage(role: "assistant", content: .text(fullText)),
-                        finishReason: "stop"
-                    )
-                ]
-            )
-            eventLoop.execute {
-                loopBoundSelf.value.sendData(context: context.value, body: response, status: .ok)
+                let response = OpenAPIChatCompletionResponse(
+                    id: "chatcmpl-\(UUID().uuidString)",
+                    object: "chat.completion",
+                    created: Int(Date().timeIntervalSince1970),
+                    model: request.model ?? "unknown",
+                    choices: [
+                        OpenAPIChoiceFull(
+                            index: 0,
+                            message: OpenAPIMessage(role: .assistant, content: .text(fullText)),
+                            finishReason: "stop"
+                        )
+                    ]
+                )
+                eventLoop.execute {
+                    loopBoundSelf.value.sendData(context: context.value, body: response, status: .ok)
+                }
             }
         }
     }

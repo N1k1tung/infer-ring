@@ -137,8 +137,8 @@ private struct ChatBubble: View {
     
     private var bubble: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if message.role == .system {
-                Text("System")
+            if message.role == .system || message.role == .tool {
+                Text(message.role.rawValue.localizedCapitalized)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -158,7 +158,7 @@ private struct ChatBubble: View {
             return Color.accentColor.opacity(0.15)
         case .assistant:
             return Color.gray.opacity(0.15)
-        case .system:
+        case .system, .tool:
             return Color.secondary.opacity(0.1)
         }
     }
