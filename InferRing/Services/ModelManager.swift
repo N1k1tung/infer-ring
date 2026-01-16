@@ -123,7 +123,6 @@ final class ModelManager {
     /// - Parameter messages: full message history including system
     /// - Returns: response stream
     func streamResponse(to messages: [OpenAPIMessage]) -> AsyncThrowingStream<String, any Error> {
-        guard let currentModel else { return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) } }
         var messages = messages
         let lastMessage = messages.removeLast()
         resetChatSession(history: messages)

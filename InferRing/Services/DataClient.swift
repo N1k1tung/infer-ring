@@ -101,7 +101,7 @@ final class DataClient {
             throw DataClientError.downloadFailed("HTTP \(response.status)")
         }
         
-        let expectedBytes = response.headers.first(name: "Content-Length").flatMap(Int.init)
+//        let expectedBytes = response.headers.first(name: "Content-Length").flatMap(Int.init)
         var receivedBytes = 0
         
         // Create destination directory if needed
