@@ -318,8 +318,24 @@ final class FileServerHandler: ChannelInboundHandler {
                             }
                         }
                     }
+                    let chunk = OpenAPIChatCompletionChunk(
+                        id: "chatcmpl-\(UUID().uuidString)",
+                        object: "chat.completion.chunk",
+                        created: Int(Date().timeIntervalSince1970),
+                        model: request.model ?? "unknown",
+                        choices: [
+                            OpenAPIChoice(
+                                index: 0,
+                                delta: OpenAPIDelta(role: .assistant, content: ""),
+                                finishReason: "stop"
+                            )
+                        ]
+                    )
 
                     eventLoop.execute {
+                        if let data = try? JSONEncoder().encode(chunk), let jsonString = String(data: data, encoding: .utf8) {
+                            loopBoundSelf.value.sendSSEData(context: context.value, string: "data: \(jsonString)\n\n")
+                        }
                         loopBoundSelf.value.sendSSEData(context: context.value, string: "data: [DONE]\n\n")
                         loopBoundSelf.value.endSSE(context: context.value)
                     }
