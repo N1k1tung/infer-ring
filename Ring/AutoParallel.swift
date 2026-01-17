@@ -48,13 +48,11 @@ public func pipelineAutoParallel(
     var newLayers = subsetLayers
     newLayers[0] = first
     newLayers[newLayers.count - 1] = last
-    
-    setLayers(on: model, newLayers: newLayers)
-
-    // handle custom cache allocation for LFM2
-    if let lfm2 = model as? LFM2Model {
-        lfm2.shardOffset = safeStart
+    if model is GPTOSSModel {
+        last.forceDType = .bfloat16
     }
+
+    setLayers(on: model, newLayers: newLayers, shardOffset: safeStart)
 
     return model
 }
@@ -102,7 +100,8 @@ public class PipelineLastLayer: CustomMlxLayer, TransformerLayer {
     public let r: Int
     public let s: Int
     public let group: DistributedGroup
-    
+    var forceDType: DType? = nil // MLX GPTOSS is bugged? layer output becomes f32 from bf16
+
     public init(originalLayer: Module, r: Int, s: Int, group: DistributedGroup) {
         self.r = r
         self.s = s
@@ -122,6 +121,10 @@ public class PipelineLastLayer: CustomMlxLayer, TransformerLayer {
             fatalError("PipelineLastLayer: originalLayer signature not supported")
         }
 
+        if let forceDType {
+            output = output.asType(forceDType)
+        }
+
         if r != s - 1 {
             output = group.send(output, dest: Int32((r + 1) % s))
         }
@@ -137,32 +140,6 @@ public class PipelineLastLayer: CustomMlxLayer, TransformerLayer {
 }
 
 // MARK: - Helpers
-
-/// Get the inner model from a LanguageModel.
-func getInnerModel(_ model: any LanguageModel) -> Module? {
-    if let llama = model as? LlamaModel {
-        return llama.model
-    }
-    if let deepseek = model as? DeepseekV3Model {
-        return deepseek.model
-    }
-    if let qwen = model as? Qwen3MoEModel {
-        return qwen.model
-    }
-    if let qwen = model as? Qwen3Model {
-        return qwen.model
-    }
-    if let lfm = model as? LFM2Model {
-        return lfm.model
-    }
-
-    // Fallback:
-    let children = model.children()
-    if let m = children[unwrapping: "model"] { return m }
-    if let t = children[unwrapping: "transformer"] { return t }
-    
-    return nil
-}
 
 /// Get transformer layers from a LanguageModel
 func getLayers(from model: any LanguageModel) -> [TransformerLayer] {
@@ -181,23 +158,15 @@ func getLayers(from model: any LanguageModel) -> [TransformerLayer] {
     if let lfm = model as? LFM2Model {
         return lfm.model.layers
     }
-
-    // Fallback:
-    if let inner = getInnerModel(model) {
-        let children = inner.children()
-        if let layers = children[unwrapping: "layers"] {
-            return layers.modules() as? [TransformerLayer] ?? []
-        }
-        if let h = children[unwrapping: "h"] {
-            return h.modules() as? [TransformerLayer] ?? []
-        }
+    if let gpt = model as? GPTOSSModel {
+        return gpt.model.layers
     }
-    
+
     return []
 }
 
 /// Set transformer layers on a LanguageModel
-func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
+func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer], shardOffset: Int) {
     if let llama = model as? LlamaModel {
         llama.model.layers = newLayers
         llama.model.rebuildCaches()
@@ -218,29 +187,18 @@ func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer]) {
     }
     else if let lfm = model as? LFM2Model {
         lfm.model.layers = newLayers
+        lfm.shardOffset = shardOffset
         lfm.model.rebuildCaches()
     }
+    else if let gpt = model as? GPTOSSModel {
+        gpt.model.layers = newLayers
+        gpt.model.layerTypes = Array(gpt.model.layerTypes[shardOffset..<shardOffset+newLayers.count])
+        gpt.model.slidingAttentionIndex = gpt.model.layerTypes.firstIndex(of: "sliding_attention") ?? 0
+        gpt.model.fullAttentionIndex = gpt.model.layerTypes.firstIndex(of: "full_attention") ?? 0
+        gpt.model.rebuildCaches()
+    }
     else {
-        // Fallback:
-        guard let inner = getInnerModel(model) else { return }
-        let children = inner.children()
-
-        let prefix: String
-        if children["layers"] != nil {
-            prefix = "layers"
-        } else if children["h"] != nil {
-            prefix = "h"
-        } else {
-            prefix = "layers"
-        }
-
-        do {
-            try inner.updateModule(key: prefix, newLayers)
-            inner.rebuildCaches()
-        }
-        catch {
-            print("Couldn't update inner model layers \(error) for model \(String(describing: type(of: model)))")
-        }
+        print("Couldn't update hidden layers for model \(String(describing: type(of: model)))")
     }
 
 }

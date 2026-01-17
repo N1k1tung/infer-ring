@@ -34,9 +34,18 @@ struct ServiceBrowserView: View {
             }
             .toolbar {
                 ToolbarItem() {
-                    Button("Refresh") {
-                        Task {
-                            bonjourClient.startSearching()
+                    if bonjourClient.isSearching {
+                        Button("Stop") {
+                            Task {
+                                bonjourClient.stopSearching()
+                            }
+                        }
+                    }
+                    else {
+                        Button("Refresh") {
+                            Task {
+                                bonjourClient.startSearching()
+                            }
                         }
                     }
                 }

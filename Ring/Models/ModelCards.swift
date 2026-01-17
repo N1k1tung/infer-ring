@@ -31,59 +31,6 @@ public struct ModelCard: Codable, Equatable, Sendable {
 
 public struct ModelCards {
     public static let otherModels: [String: ModelCard] = [
-        // gpt-oss
-        "gpt-oss-20b-MXFP4-Q4": ModelCard(
-            shortId: "gpt-oss-20b-MXFP4-Q4",
-            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-            description: """
-        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
-                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
-                storageSize: MemorySize.from_kb(11_744_051),
-                nLayers: 24,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
-        "gpt-oss-120b-MXFP4-Q4": ModelCard(
-            shortId: "gpt-oss-120b-MXFP4-Q4",
-            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
-            name: "GPT-OSS 120B (MXFP4-Q4, MLX)",
-            description: """
-        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 4-bit MLX conversion for Apple Silicon.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
-                prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
-                storageSize: MemorySize.from_kb(34_500_000),
-                nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
-        "gpt-oss-120b-MXFP4-Q8": ModelCard(
-            shortId: "gpt-oss-120b-MXFP4-Q8",
-            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
-            name: "GPT-OSS 120B (MXFP4-Q8, MLX)",
-            description: """
-        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 8-bit MLX conversion for Apple Silicon.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
-                prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
-                storageSize: MemorySize.from_kb(68_996_301),
-                nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
-            )
-        ),
-
         // deepseek v3
         "DeepSeek-V3.1-4bit": ModelCard(
             shortId: "DeepSeek-V3.1-4bit",
@@ -255,7 +202,165 @@ public struct ModelCards {
                 hiddenSize: 4096,
                 supportsTensor: true
             )
-        )
+        ),
+
+        // llama-3.1
+        "Meta-Llama-3.1-8B-Instruct-4bit": ModelCard(
+            shortId: "Meta-Llama-3.1-8B-Instruct-4bit",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+            name: "Llama 3.1 8B (4-bit)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+                prettyName: "Llama 3.1 8B (4-bit)",
+                storageSize: MemorySize.from_mb(4423),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+        "Meta-Llama-3.1-8B-Instruct-8bit": ModelCard(
+            shortId: "Meta-Llama-3.1-8B-Instruct-8bit",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
+            name: "Llama 3.1 8B (8-bit)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
+                prettyName: "Llama 3.1 8B (8-bit)",
+                storageSize: MemorySize.from_mb(8540),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+        "Meta-Llama-3.1-8B-Instruct-bf16": ModelCard(
+            shortId: "Meta-Llama-3.1-8B-Instruct-bf16",
+            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
+            name: "Llama 3.1 8B (BF16)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
+                prettyName: "Llama 3.1 8B (BF16)",
+                storageSize: MemorySize.from_mb(16100),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: true
+            )
+        ),
+        // llama
+        "Meta-Llama-3.1-70B-Instruct-4bit": ModelCard(
+            shortId: "Meta-Llama-3.1-70B-Instruct-4bit",
+            modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
+            name: "Llama 3.1 70B (4-bit)",
+            description: """
+        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
+                prettyName: "Llama 3.1 70B (4-bit)",
+                storageSize: MemorySize.from_mb(38769),
+                nLayers: 80,
+                hiddenSize: 8192,
+                supportsTensor: true
+            )
+        ),
+        // llama-3.2
+        "Llama-3.2-1B-Instruct-4bit": ModelCard(
+            shortId: "Llama-3.2-1B-Instruct-4bit",
+            modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
+            name: "Llama 3.2 1B (4-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
+                prettyName: "Llama 3.2 1B (4-bit)",
+                storageSize: MemorySize.from_mb(696),
+                nLayers: 16,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "Llama-3.2-3B-Instruct-4bit": ModelCard(
+            shortId: "Llama-3.2-3B-Instruct-4bit",
+            modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+            name: "Llama 3.2 3B (4-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+                prettyName: "Llama 3.2 3B (4-bit)",
+                storageSize: MemorySize.from_mb(1777),
+                nLayers: 28,
+                hiddenSize: 3072,
+                supportsTensor: true
+            )
+        ),
+        "Llama-3.2-3B-Instruct-8bit": ModelCard(
+            shortId: "Llama-3.2-3B-Instruct-8bit",
+            modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
+            name: "Llama 3.2 3B (8-bit)",
+            description: """
+        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
+                prettyName: "Llama 3.2 3B (8-bit)",
+                storageSize: MemorySize.from_mb(3339),
+                nLayers: 28,
+                hiddenSize: 3072,
+                supportsTensor: true
+            )
+        ),
+        // llama-3.3
+        "Llama-3.3-70B-Instruct-4bit": ModelCard(
+            shortId: "Llama-3.3-70B-Instruct-4bit",
+            modelId: "mlx-community/Llama-3.3-70B-Instruct-4bit",
+            name: "Llama 3.3 70B (4-bit)",
+            description: """
+        The Meta Llama 3.3 multilingual large language model (LLM) is an instruction tuned generative model in 70B (text in/text out)
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.3-70B-Instruct-4bit",
+                prettyName: "Llama 3.3 70B",
+                storageSize: MemorySize.from_mb(38769),
+                nLayers: 80,
+                hiddenSize: 8192,
+                supportsTensor: true
+            )
+        ),
+        "Llama-3.3-70B-Instruct-8bit": ModelCard(
+            shortId: "Llama-3.3-70B-Instruct-8bit",
+            modelId: "mlx-community/Llama-3.3-70B-Instruct-8bit",
+            name: "Llama 3.3 70B (8-bit)",
+            description: """
+        The Meta Llama 3.3 multilingual large language model (LLM) is an instruction tuned generative model in 70B (text in/text out)
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Llama-3.3-70B-Instruct-8bit",
+                prettyName: "Llama 3.3 70B (8-bit)",
+                storageSize: MemorySize.from_mb(73242),
+                nLayers: 80,
+                hiddenSize: 8192,
+                supportsTensor: true
+            )
+        ),
         ]
     public static let allModels: [String: ModelCard] = [
         // qwen3
@@ -500,161 +605,55 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
-
-        // llama-3.1
-        "Meta-Llama-3.1-8B-Instruct-4bit": ModelCard(
-            shortId: "Meta-Llama-3.1-8B-Instruct-4bit",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
-            name: "Llama 3.1 8B (4-bit)",
+        // gpt-oss
+        "gpt-oss-20b-MXFP4-Q4": ModelCard(
+            shortId: "gpt-oss-20b-MXFP4-Q4",
+            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+            name: "GPT-OSS 20B (MXFP4-Q4, MLX)",
             description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 4-bit quantization.
         """,
             tags: [],
             metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
-                prettyName: "Llama 3.1 8B (4-bit)",
-                storageSize: MemorySize.from_mb(4423),
-                nLayers: 32,
-                hiddenSize: 4096,
+                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
+                prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
+                storageSize: MemorySize.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880,
                 supportsTensor: true
             )
         ),
-        "Meta-Llama-3.1-8B-Instruct-8bit": ModelCard(
-            shortId: "Meta-Llama-3.1-8B-Instruct-8bit",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
-            name: "Llama 3.1 8B (8-bit)",
+        "gpt-oss-120b-MXFP4-Q4": ModelCard(
+            shortId: "gpt-oss-120b-MXFP4-Q4",
+            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
+            name: "GPT-OSS 120B (MXFP4-Q4, MLX)",
             description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 4-bit MLX conversion for Apple Silicon.
         """,
             tags: [],
             metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit",
-                prettyName: "Llama 3.1 8B (8-bit)",
-                storageSize: MemorySize.from_mb(8540),
-                nLayers: 32,
-                hiddenSize: 4096,
+                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q4",
+                prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
+                storageSize: MemorySize.from_kb(34_500_000),
+                nLayers: 36,
+                hiddenSize: 2880,
                 supportsTensor: true
             )
         ),
-        "Meta-Llama-3.1-8B-Instruct-bf16": ModelCard(
-            shortId: "Meta-Llama-3.1-8B-Instruct-bf16",
-            modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
-            name: "Llama 3.1 8B (BF16)",
+        "gpt-oss-120b-MXFP4-Q8": ModelCard(
+            shortId: "gpt-oss-120b-MXFP4-Q8",
+            modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
+            name: "GPT-OSS 120B (MXFP4-Q8, MLX)",
             description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
+        OpenAI's GPT-OSS 120B is a 117B-parameter Mixture-of-Experts model designed for high-reasoning and general-purpose use; this variant is a 8-bit MLX conversion for Apple Silicon.
         """,
             tags: [],
             metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-8B-Instruct-bf16",
-                prettyName: "Llama 3.1 8B (BF16)",
-                storageSize: MemorySize.from_mb(16100),
-                nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
-            )
-        ),
-        // llama
-        "Meta-Llama-3.1-70B-Instruct-4bit": ModelCard(
-            shortId: "Meta-Llama-3.1-70B-Instruct-4bit",
-            modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
-            name: "Llama 3.1 70B (4-bit)",
-            description: """
-        Llama 3.1 is a large language model trained on the Llama 3.1 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
-                prettyName: "Llama 3.1 70B (4-bit)",
-                storageSize: MemorySize.from_mb(38769),
-                nLayers: 80,
-                hiddenSize: 8192,
-                supportsTensor: true
-            )
-        ),
-        // llama-3.2
-        "Llama-3.2-1B-Instruct-4bit": ModelCard(
-            shortId: "Llama-3.2-1B-Instruct-4bit",
-            modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
-            name: "Llama 3.2 1B (4-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit",
-                prettyName: "Llama 3.2 1B (4-bit)",
-                storageSize: MemorySize.from_mb(696),
-                nLayers: 16,
-                hiddenSize: 2048,
-                supportsTensor: true
-            )
-        ),
-        "Llama-3.2-3B-Instruct-4bit": ModelCard(
-            shortId: "Llama-3.2-3B-Instruct-4bit",
-            modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
-            name: "Llama 3.2 3B (4-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-3B-Instruct-4bit",
-                prettyName: "Llama 3.2 3B (4-bit)",
-                storageSize: MemorySize.from_mb(1777),
-                nLayers: 28,
-                hiddenSize: 3072,
-                supportsTensor: true
-            )
-        ),
-        "Llama-3.2-3B-Instruct-8bit": ModelCard(
-            shortId: "Llama-3.2-3B-Instruct-8bit",
-            modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
-            name: "Llama 3.2 3B (8-bit)",
-            description: """
-        Llama 3.2 is a large language model trained on the Llama 3.2 dataset.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.2-3B-Instruct-8bit",
-                prettyName: "Llama 3.2 3B (8-bit)",
-                storageSize: MemorySize.from_mb(3339),
-                nLayers: 28,
-                hiddenSize: 3072,
-                supportsTensor: true
-            )
-        ),
-        // llama-3.3
-        "Llama-3.3-70B-Instruct-4bit": ModelCard(
-            shortId: "Llama-3.3-70B-Instruct-4bit",
-            modelId: "mlx-community/Llama-3.3-70B-Instruct-4bit",
-            name: "Llama 3.3 70B (4-bit)",
-            description: """
-        The Meta Llama 3.3 multilingual large language model (LLM) is an instruction tuned generative model in 70B (text in/text out)
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.3-70B-Instruct-4bit",
-                prettyName: "Llama 3.3 70B",
-                storageSize: MemorySize.from_mb(38769),
-                nLayers: 80,
-                hiddenSize: 8192,
-                supportsTensor: true
-            )
-        ),
-        "Llama-3.3-70B-Instruct-8bit": ModelCard(
-            shortId: "Llama-3.3-70B-Instruct-8bit",
-            modelId: "mlx-community/Llama-3.3-70B-Instruct-8bit",
-            name: "Llama 3.3 70B (8-bit)",
-            description: """
-        The Meta Llama 3.3 multilingual large language model (LLM) is an instruction tuned generative model in 70B (text in/text out)
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/Llama-3.3-70B-Instruct-8bit",
-                prettyName: "Llama 3.3 70B (8-bit)",
-                storageSize: MemorySize.from_mb(73242),
-                nLayers: 80,
-                hiddenSize: 8192,
+                modelId: "mlx-community/gpt-oss-120b-MXFP4-Q8",
+                prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
+                storageSize: MemorySize.from_kb(68_996_301),
+                nLayers: 36,
+                hiddenSize: 2880,
                 supportsTensor: true
             )
         ),
