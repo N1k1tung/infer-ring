@@ -46,11 +46,15 @@ final class RingCoordinator {
     private let mlxManager = MLXManager()
     private let hardwareMonitor = HardwareMonitor()
 
+    @ObservationIgnored
+    private var mlxInitTask: Task<Void, Error>?
+
     init() {
         self.localDeviceID = DeviceID(
             name: ServiceInfo.bonjourName
         )
         self.localDevice = DiscoveredDevice(name: localDeviceID.name, host: "0.0.0.0", hardwareProfile: hardwareMonitor.currentProfile)
+        self.allDevices = [localDevice]
 
         DI.register(mlxManager)
         DI.register(hardwareMonitor)
@@ -85,7 +89,8 @@ final class RingCoordinator {
                 hardwareProfile: nil
             )
         }
-        
+
+        guard peers != currentDiscovered else { return }
         peers = currentDiscovered
         allDevices = (peers + [localDevice]).sorted { $0.deviceID < $1.deviceID }
         myIndex = allDevices.firstIndex { $0.id == localDeviceID } ?? 0
@@ -113,6 +118,7 @@ final class RingCoordinator {
     }
 
     func stopFormation() {
+        mlxInitTask?.cancel()
         currentRing = nil
         state = .inactive
         bonjourClient?.stopSearching()
@@ -130,12 +136,14 @@ final class RingCoordinator {
         switch message.type {
         case .election:
             if hardwareMonitor.currentProfile < message.hardwareProfile  {
+                mlxInitTask?.cancel()
                 state = .follower
                 sendToSuccessor(message)
             }
             else if message.candidateID != localDeviceID {
                 if state != .candidate {
                     // Start our own election to overtake if it's not yet in progress
+                    mlxInitTask?.cancel()
                     initiateElection()
                 }
             }
@@ -148,6 +156,10 @@ final class RingCoordinator {
         case .coordinator:
             coordinatorID = message.candidateID
             state = (message.candidateID == localDeviceID) ? .coordinator : .follower
+            currentRing = Ring(
+                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
+                coordinator: message.candidateID
+            )
 
             if message.candidateID != localDeviceID {
                 sendToSuccessor(message)
@@ -155,25 +167,17 @@ final class RingCoordinator {
             else {
                 dprint("Coordinator announcement returned to leader. Ring stable.")
             }
-            bonjourClient?.stopSearching()
-            currentRing = Ring(
-                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
-                coordinator: message.candidateID
-            )
 
-            Task {
+            mlxInitTask = Task {
                 await requestMissingProfiles()
-            }
-
-            do {
+                // wait for other devices to join before initalizing MLX ring
+                try await Task.sleep(nanoseconds: 3_000_000_000)
+                guard !Task.isCancelled else { return }
                 try mlxManager.initMLX(rank: myIndex, devices: allDevices.map { $0.host })
-                Task {
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    mlxManager.synchronize()
-                    dprint("MLX ring started")
-                }
-            } catch {
-                dprint(error)
+                try await Task.sleep(nanoseconds: 500_000_000)
+                mlxManager.synchronize()
+                dprint("MLX ring started")
+                bonjourClient?.stopSearching()
             }
         }
     }

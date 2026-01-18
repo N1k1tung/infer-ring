@@ -29,7 +29,9 @@ public final class MLXManager {
         setenv("MLX_RING_VERBOSE", "1", 1)
         #endif
 
-        group = DistributedGroup.initialize(strict: true)
+        try MLX.withError {
+            group = DistributedGroup.initialize(strict: true)
+        }
     }
 
     public func synchronize() {

@@ -59,6 +59,7 @@ final class ChatViewModel {
     
     init() {
         selectedModel = modelManager?.currentModelCard
+        refreshMessages()
 
         Task { @MainActor in
             for await loadedModel in Observations({ [weak self] in
@@ -103,15 +104,20 @@ final class ChatViewModel {
     }
 
     func reset() {
-        resetChatUI()
         modelManager?.resetChatSession()
+        resetChatUI()
     }
 
     private func resetChatUI() {
-        messages = [.systemMessage]
         input = ""
         isSending = false
         stopDisplayLink()
+        refreshMessages()
+    }
+
+    func refreshMessages() {
+        guard !isSending else { return }
+        messages = modelManager?.messages ?? [.systemMessage]
     }
 
     // MARK: display optimizations

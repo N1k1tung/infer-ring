@@ -37,6 +37,11 @@ final class ModelManager {
     var tokensPerSecond: Double? {
         chatSession?.lastGenerationInfo?.tokensPerSecond
     }
+    var messages: [ChatMessage] {
+        chatSession?.messages.map {
+            ChatMessage(role: $0.role.toRole, content: $0.content)
+        } ?? [.systemMessage]
+    }
 
     // MARK: - Public API
 
@@ -239,16 +244,7 @@ final class ModelManager {
         if let history {
             chatSession = ChatSession(currentModel, history: history.compactMap {
                 guard let text = $0.content?.text else { return nil }
-                switch $0.role {
-                case .user:
-                    return .user(text)
-                case .assistant:
-                    return .assistant(text)
-                case .system:
-                    return .system(text)
-                case .tool:
-                    return .tool(text)
-                }
+                return Chat.Message(role: $0.role.toRole, content: text)
             })
         }
         else {

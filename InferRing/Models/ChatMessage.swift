@@ -1,5 +1,6 @@
 //
 import Foundation
+import MLXLMCommon
 
 struct ChatMessage: Identifiable, Equatable, Sendable {
     enum Role: String, Sendable, Codable { case user, assistant, system, tool }
@@ -13,4 +14,16 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
     }
 
     static let systemMessage = ChatMessage(role: .system, content: "You are a helpful assistant.")
+}
+
+extension Chat.Message.Role {
+    var toRole: ChatMessage.Role {
+        .init(rawValue: rawValue)!
+    }
+}
+
+extension ChatMessage.Role {
+    var toRole: Chat.Message.Role {
+        .init(rawValue: rawValue)!
+    }
 }

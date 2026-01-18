@@ -29,6 +29,7 @@ struct ChatView: View {
                 .onChange(of: viewModel.messages) { _, _ in
                     if let last = viewModel.messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
             
             Divider()
@@ -51,6 +52,9 @@ struct ChatView: View {
                 .frame(minHeight: 560)
         }
         .errorAlert($viewModel.errorMessage)
+        .onAppear {
+            viewModel.refreshMessages()
+        }
     }
 
     @ViewBuilder
