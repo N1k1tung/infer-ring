@@ -108,4 +108,16 @@ extension ModelCards {
             partiallyLoadedModels = partiallyLoaded
         }
     }
+
+    public static func deleteModel(_ card: ModelCard) async throws {
+        let fm = FileManager.default
+        let modelDir = modelsDirectory.appendingPathComponent(card.modelId)
+        if fm.fileExists(atPath: modelDir.path) {
+            try fm.removeItem(at: modelDir)
+        }
+        await Task { @MainActor in
+            partiallyLoadedModels.removeAll(where: { $0 == card.modelId })
+            loadedModels.removeAll(where: { $0 == card.modelId })
+        }.value
+    }
 }

@@ -3,34 +3,8 @@ import Ring
 
 struct ModelPickerView: View {
     @Environment(\.dismiss) private var dismiss
-
     @Binding var selectedModel: ModelCard?
-
-    @State private var searchText: String = ""
-    @State private var showDownloadedOnly = false
-
-    private var allCards: [ModelCard] {
-        ModelCards.allModels.values
-            .sorted { $0.metadata.prettyName.localizedCaseInsensitiveCompare($1.metadata.prettyName) == .orderedAscending }
-    }
-
-    private var filteredCards: [ModelCard] {
-        let cards = showDownloadedOnly ? allCards.filter { $0.isLoaded } : allCards
-        guard !searchText.trimmed.isEmpty else {
-            return cards
-        }
-        let term = searchText.lowercased()
-        return cards.filter { card in
-            let fields: [String] = [
-                card.name,
-                card.metadata.prettyName,
-                card.modelId,
-                card.shortId,
-                card.description
-            ] + card.tags
-            return fields.joined(separator: " ").lowercased().contains(term)
-        }
-    }
+    @State private var viewModel = ModelPickerViewModel()
 
     init(selectedModel: Binding<ModelCard?>) {
         self._selectedModel = selectedModel
@@ -39,7 +13,7 @@ struct ModelPickerView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(filteredCards, id: \.shortId) { card in
+                ForEach(viewModel.filteredCards, id: \.shortId) { card in
                     HStack(alignment: .center, spacing: 12) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(card.metadata.prettyName)
@@ -60,9 +34,6 @@ struct ModelPickerView: View {
                                 else if card.isPartiallyLoaded {
                                     tagView("Partially loaded")
                                 }
-//                                if card.metadata.supportsTensor {
-//                                    tagView("Tensor")
-//                                }
                             }
                         }
                         Spacer()
@@ -77,32 +48,50 @@ struct ModelPickerView: View {
                         selectedModel = card
                         dismiss()
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        if card.isLoaded || card.isPartiallyLoaded {
+                            Button(role: .destructive) {
+                                viewModel.requestDelete(card: card, selectedModel: selectedModel)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
                 }
             }
-            #if os(iOS)
+#if os(iOS)
             .listStyle(.insetGrouped)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-            #else
-            .searchable(text: $searchText)
-            #endif
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+#else
+            .searchable(text: $viewModel.searchText)
+#endif
             .navigationTitle("Select Model")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem {
-                    Toggle("Show downloaded only", isOn: $showDownloadedOnly)
-                    #if os(iOS)
+                    Toggle("Show downloaded only", isOn: $viewModel.showDownloadedOnly)
+#if os(iOS)
                         .toggleStyle(DefaultToggleStyle())
-                    #else
+#else
                         .toggleStyle(CheckboxToggleStyle())
-                    #endif
+#endif
                 }
             }
-            .onAppear {
-                Task.detached {
-                    await ModelCards.checkLoadedModels()
+            .confirmationDialog("Delete Model?", isPresented: $viewModel.showDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete \(viewModel.modelToDelete?.metadata.prettyName ?? "")", role: .destructive) {
+                    viewModel.deleteModel()
                 }
+                Button("Cancel", role: .cancel) {
+                    viewModel.modelToDelete = nil
+                }
+            } message: {
+                Text("This will remove the model files from your device.")
+            }
+            .errorAlert($viewModel.error)
+            .onAppear {
+                viewModel.checkLoadedModels()
             }
         }
     }
@@ -130,13 +119,6 @@ struct ModelPickerView: View {
     }
 }
 
-#Preview("Model Picker") {
-    // Provide a simple preview with a local state
-    struct PreviewHost: View {
-        @State private var selection: ModelCard? = nil
-        var body: some View {
-            ModelPickerView(selectedModel: $selection)
-        }
-    }
-    return PreviewHost()
+#Preview {
+    ModelPickerView(selectedModel: .constant(nil))
 }
