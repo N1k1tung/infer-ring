@@ -34,8 +34,11 @@ struct ServerView: View {
                         .font(.title)
                         .bold()
                 }
+                else {
+                    Text("Server is automatically started after loading a model.")
+                        .font(.caption)
+                }
             }
-
         }
         .navigationTitle("OpenAPI Server")
         .sheet(isPresented: $viewModel.isShowingModelPicker) {

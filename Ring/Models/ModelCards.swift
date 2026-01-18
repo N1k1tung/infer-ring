@@ -639,40 +639,6 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
-        "LFM2-8B-A1B-4bit": ModelCard(
-            shortId: "LFM2-8B-A1B-4bit",
-            modelId: "mlx-community/LFM2-8B-A1B-4bit",
-            name: "LFM2 8B A1B (4-bit)",
-            description: """
-        LFM2 8B A1B is a new family of hybrid models designed for edge AI and on-device deployment.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/LFM2-8B-A1B-4bit",
-                prettyName: "LFM2 8B A1B (4-bit)",
-                storageSize: MemorySize.from_mb(5345),
-                nLayers: 24,
-                hiddenSize: 2048,
-                supportsTensor: false
-            )
-        ),
-        "LFM2-8B-A1B-8bit": ModelCard(
-            shortId: "LFM2-8B-A1B-8bit",
-            modelId: "mlx-community/LFM2-8B-A1B-8bit",
-            name: "LFM2 8B A1B (8-bit)",
-            description: """
-        LFM2 8B A1B is a new family of hybrid models designed for edge AI and on-device deployment.
-        """,
-            tags: [],
-            metadata: ModelMetadata(
-                modelId: "mlx-community/LFM2-8B-A1B-8bit",
-                prettyName: "LFM2 8B A1B (8-bit)",
-                storageSize: MemorySize.from_mb(9615),
-                nLayers: 24,
-                hiddenSize: 2048,
-                supportsTensor: false
-            )
-        ),
         // gpt-oss
         "gpt-oss-20b-MXFP4-Q4": ModelCard(
             shortId: "gpt-oss-20b-MXFP4-Q4",

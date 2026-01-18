@@ -71,7 +71,27 @@ struct ModelPickerView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem {
-                    Toggle("Show downloaded only", isOn: $viewModel.showDownloadedOnly)
+                    Button {
+                        viewModel.showHelp.toggle()
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                    .buttonStyle(.glass)
+                    .popover(isPresented: $viewModel.showHelp) {
+                        Text("""
+                            Models are downloaded from [Huggingface](https://huggingface.co/), or from the ring coordinator (if fully downloaded). 
+                            Thus for optimizing network usage you can download on one device first, then form a ring, and open the same model triggering sharing across other peers.
+                            
+                            Models license information is available [here](https://n1k1tung.github.io/InferRingPrivacyPolicy/MODELS.html).
+                            
+                            You can swipe left to delete a downloaded model.
+                            """)
+                        .frame(minWidth: 280)
+                        .padding()
+                    }
+                }
+                ToolbarItem {
+                    Toggle("Show downloaded only", isOn: $viewModel.displayDownloadedOnly)
 #if os(iOS)
                         .toggleStyle(DefaultToggleStyle())
 #else

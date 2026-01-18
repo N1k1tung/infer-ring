@@ -7,9 +7,10 @@ import Observation
 @MainActor
 class ModelPickerViewModel {
     var searchText: String = ""
-    var showDownloadedOnly = false
+    var displayDownloadedOnly = false
     var modelToDelete: ModelCard?
     var showDeleteConfirmation = false
+    var showHelp = false
     var error: String?
     var lastUpdate = Date()
 
@@ -20,7 +21,7 @@ class ModelPickerViewModel {
 
     var filteredCards: [ModelCard] {
         let _ = lastUpdate
-        let cards = showDownloadedOnly ? allCards.filter { $0.isLoaded } : allCards
+        let cards = displayDownloadedOnly ? allCards.filter { $0.isLoaded } : allCards
         guard !searchText.trimmed.isEmpty else {
             return cards
         }
