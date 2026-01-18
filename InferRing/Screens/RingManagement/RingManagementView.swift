@@ -92,9 +92,10 @@ struct RingManagementView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Tips")
                         .font(.headline)
-                    Text("• Ensure all devices are on the same local network.")
-                    Text("• Start ring formation from one device.")
+                    Text("• For best performance use wired connection (such as USB-C to USB-C cable).")
                     Text("• If formation hangs, try resetting on all devices.")
+                    Text("• Ensure all devices are on the same local network.")
+                    Text("• You can view accessible devices running the app in the 'Browse Devices' section.")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
