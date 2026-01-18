@@ -23,9 +23,13 @@ struct RingManagementView: View {
                         StatusBadge()
                         Spacer()
                         if let ring = coordinator.currentRing {
-                            Text("\(ring.devices.count) Devices")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            VStack(alignment: .leading) {
+                                Text("\(ring.devices.count) Devices")
+                                Text("\(coordinator.totalRAM.formattedMemory) Total RAM")
+                                Text("\(coordinator.usableRAM.formattedMemory) Usable RAM")
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -95,6 +99,7 @@ struct RingManagementView: View {
                     Text("• For best performance use wired connection (such as USB-C to USB-C cable).")
                     Text("• If formation hangs, try resetting on all devices.")
                     Text("• Ensure all devices are on the same local network.")
+                    Text("• Only IPv4 connections are supported.")
                     Text("• You can view accessible devices running the app in the 'Browse Devices' section.")
                 }
                 .font(.caption)
@@ -185,9 +190,7 @@ struct StatusBadge: View {
 }
 
 #Preview {
-//    let coord = RingCoordinator()
     NavigationStack {
         RingManagementView()
-//            .environment(coord)
     }
 }

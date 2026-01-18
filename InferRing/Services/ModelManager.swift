@@ -41,8 +41,7 @@ final class ModelManager {
     // MARK: - Public API
 
     private func checkIfCanLoad(_ modelCard: ModelCard) throws {
-        let devices = coordinator?.ringDevices ?? []
-        let totalMemory = devices.compactMap { $0.device.hardwareProfile?.recommendedUsageRAM }.reduce(0, +)
+        let totalMemory = coordinator?.usableRAM ?? 0
         if modelCard.metadata.storageSize.inBytes > totalMemory {
             throw ModelManagerError.insufficientResources("total ring memory: \(totalMemory.formattedMemory), required: \(modelCard.metadata.storageSize.inBytes.formattedMemory)")
         }
@@ -377,7 +376,7 @@ final class ModelManager {
             throw ModelManagerError.notInitialized
         }
         let devices = coordinator.ringDevices.sorted { $0.rank < $1.rank }
-        let totalMemory = devices.compactMap { $0.device.hardwareProfile?.recommendedUsageRAM }.reduce(0, +)
+        let totalMemory = coordinator.usableRAM
         var metas = [ShardMetadata]()
         var assignedLayers = 0
         let size = devices.count

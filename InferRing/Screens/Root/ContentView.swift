@@ -18,11 +18,11 @@ struct ContentView: View {
     @ViewBuilder
     private var listContent: some View {
         List {
-            NavigationLink("Browse Devices") {
-                ServiceBrowserView()
-            }
             NavigationLink("Ring Management") {
                 RingManagementView()
+            }
+            NavigationLink("Browse Devices") {
+                ServiceBrowserView()
             }
             NavigationLink("Chat") {
                 ChatView()

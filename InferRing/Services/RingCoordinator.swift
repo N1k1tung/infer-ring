@@ -33,6 +33,12 @@ final class RingCoordinator {
     var myRank: Int {
         currentRing?.devices.first { $0.id == localDeviceID }?.rank ?? 0
     }
+    var totalRAM: Int {
+        ringDevices.compactMap { $0.device.hardwareProfile?.totalRAM }.reduce(0, +)
+    }
+    var usableRAM: Int {
+        ringDevices.compactMap { $0.device.hardwareProfile?.recommendedUsageRAM }.reduce(0, +)
+    }
 
     // Local identity
     private let localDeviceID: DeviceID

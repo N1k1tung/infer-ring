@@ -27,7 +27,7 @@ struct RingTopologyView: View {
             #if os(iOS)
             .presentationDetents([.medium, .large])
             #else
-            .frame(minHeight: 400)
+            .frame(minHeight: 300)
             #endif
         }
     }
@@ -136,7 +136,7 @@ struct RingDeviceNode: View {
             .background(Color.secondary.opacity(0.8))
             .cornerRadius(4)
         }
-        .frame(width: 100)
+        .frame(width: 120)
     }
 }
 
