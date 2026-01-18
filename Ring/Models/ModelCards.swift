@@ -449,17 +449,17 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
-        "Qwen3-30B-A3B-4bit": ModelCard(
-            shortId: "Qwen3-30B-A3B-4bit",
-            modelId: "mlx-community/Qwen3-30B-A3B-4bit",
-            name: "Qwen3 30B A3B (4-bit)",
+        "Qwen3-Coder-30B-A3B-Instruct-4bit": ModelCard(
+            shortId: "Qwen3-Coder-30B-A3B-Instruct-4bit",
+            modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit",
+            name: "Qwen3 Coder 30B A3B (4-bit)",
             description: """
-        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
+        Qwen3 30B Coder is a large language model trained on the Qwen3 30B dataset and trained for coding.
         """,
             tags: [],
             metadata: ModelMetadata(
-                modelId: "mlx-community/Qwen3-30B-A3B-4bit",
-                prettyName: "Qwen3 30B A3B (4-bit)",
+                modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit",
+                prettyName: "Qwen3 Coder 30B A3B (4-bit)",
                 storageSize: MemorySize.from_mb(16797),
                 nLayers: 48,
                 hiddenSize: 2048,
@@ -478,6 +478,40 @@ public struct ModelCards {
                 modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-6bit",
                 prettyName: "Qwen3 Coder 30B A3B (6-bit)",
                 storageSize: MemorySize.from_mb(25396),
+                nLayers: 48,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "Qwen3-Coder-30B-A3B-Instruct-8bit": ModelCard(
+            shortId: "Qwen3-Coder-30B-A3B-Instruct-8bit",
+            modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-8bit",
+            name: "Qwen3 Coder 30B A3B (8-bit)",
+            description: """
+        Qwen3 30B Coder is a large language model trained on the Qwen3 30B dataset and trained for coding.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-8bit",
+                prettyName: "Qwen3 Coder 30B A3B (6-bit)",
+                storageSize: MemorySize.from_mb(31738),
+                nLayers: 48,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "Qwen3-30B-A3B-4bit": ModelCard(
+            shortId: "Qwen3-30B-A3B-4bit",
+            modelId: "mlx-community/Qwen3-30B-A3B-4bit",
+            name: "Qwen3 30B A3B (4-bit)",
+            description: """
+        Qwen3 30B is a large language model trained on the Qwen3 30B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-30B-A3B-4bit",
+                prettyName: "Qwen3 30B A3B (4-bit)",
+                storageSize: MemorySize.from_mb(16797),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -546,7 +580,7 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Next-80B-A3B-Thinking-4bit",
                 prettyName: "Qwen3 80B A3B Thinking (4-bit)",
-                storageSize: MemorySize.from_mb(84700),
+                storageSize: MemorySize.from_mb(42350),
                 nLayers: 48,
                 hiddenSize: 2048,
                 supportsTensor: true
@@ -605,6 +639,40 @@ public struct ModelCards {
                 supportsTensor: false
             )
         ),
+        "LFM2-8B-A1B-4bit": ModelCard(
+            shortId: "LFM2-8B-A1B-4bit",
+            modelId: "mlx-community/LFM2-8B-A1B-4bit",
+            name: "LFM2 8B A1B (4-bit)",
+            description: """
+        LFM2 8B A1B is a new family of hybrid models designed for edge AI and on-device deployment.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/LFM2-8B-A1B-4bit",
+                prettyName: "LFM2 8B A1B (4-bit)",
+                storageSize: MemorySize.from_mb(5345),
+                nLayers: 24,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+        "LFM2-8B-A1B-8bit": ModelCard(
+            shortId: "LFM2-8B-A1B-8bit",
+            modelId: "mlx-community/LFM2-8B-A1B-8bit",
+            name: "LFM2 8B A1B (8-bit)",
+            description: """
+        LFM2 8B A1B is a new family of hybrid models designed for edge AI and on-device deployment.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/LFM2-8B-A1B-8bit",
+                prettyName: "LFM2 8B A1B (8-bit)",
+                storageSize: MemorySize.from_mb(9615),
+                nLayers: 24,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
         // gpt-oss
         "gpt-oss-20b-MXFP4-Q4": ModelCard(
             shortId: "gpt-oss-20b-MXFP4-Q4",
@@ -618,6 +686,23 @@ public struct ModelCards {
                 modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
                 prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
                 storageSize: MemorySize.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880,
+                supportsTensor: true
+            )
+        ),
+        "gpt-oss-20b-MXFP4-Q8": ModelCard(
+            shortId: "gpt-oss-20b-MXFP4-Q8",
+            modelId: "mlx-community/gpt-oss-20b-MXFP4-Q8",
+            name: "GPT-OSS 20B (MXFP4-Q8, MLX)",
+            description: """
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this MLX variant uses MXFP4 8-bit quantization.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/gpt-oss-20b-MXFP4-Q8",
+                prettyName: "GPT-OSS 20B (MXFP4-Q8, MLX)",
+                storageSize: MemorySize.from_kb(12_744_051),
                 nLayers: 24,
                 hiddenSize: 2880,
                 supportsTensor: true
