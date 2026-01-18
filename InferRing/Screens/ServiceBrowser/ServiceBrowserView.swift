@@ -5,14 +5,21 @@ struct ServiceBrowserView: View {
 
     var body: some View {
         ZStack {
-            List {
-                ForEach(bonjourClient.nodes, id: \.self) { service in
-                    VStack(alignment: .leading) {
-                        Text(service.name)
-                            .font(.headline)
-                        Text(service.host)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+            VStack(spacing: 0) {
+                if bonjourClient.permissionDenied {
+                    PermissionErrorBanner()
+                        .padding()
+                }
+                
+                List {
+                    ForEach(bonjourClient.nodes, id: \.self) { service in
+                        VStack(alignment: .leading) {
+                            Text(service.name)
+                                .font(.headline)
+                            Text(service.host)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }

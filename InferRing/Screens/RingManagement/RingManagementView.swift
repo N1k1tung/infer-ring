@@ -2,12 +2,17 @@ import SwiftUI
 
 struct RingManagementView: View {
     @Environment(RingCoordinator.self) var coordinator
-    @State private var showingError = false
-    @State private var errorMessage: String?
-    
+    @Environment(BonjourClient.self) var bonjourClient
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
+                // Permission check
+                if bonjourClient.permissionDenied {
+                    PermissionErrorBanner()
+                        .padding(.horizontal)
+                }
+
                 // Topology Visualization
                 RingTopologyView()
                     .frame(height: 350)
@@ -84,14 +89,6 @@ struct RingManagementView: View {
                 .cornerRadius(12)
                 .padding(.horizontal)
                 
-                // Additional Info / Error Display
-                if let error = errorMessage {
-                    ErrorBanner(message: error) {
-                        errorMessage = nil
-                    }
-                    .padding(.horizontal)
-                }
-                
                 // Instructions / Tips
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Tips")
@@ -109,11 +106,6 @@ struct RingManagementView: View {
             }
         }
         .navigationTitle("Ring Management")
-        .alert("Error", isPresented: $showingError, actions: {
-            Button("OK", role: .cancel) { }
-        }, message: {
-            Text(errorMessage ?? "Unknown error")
-        })
     }
     
     private func startFormation() {
@@ -122,36 +114,6 @@ struct RingManagementView: View {
     
     private func stopFormation() {
         coordinator.stopFormation()
-    }
-}
-
-struct ErrorBanner: View {
-    let message: String
-    private var onDismiss: (() -> Void)?
-    
-    init(message: String, onDismiss: (() -> Void)? = nil) {
-        self.message = message
-        self.onDismiss = onDismiss
-    }
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.white)
-            Text(message)
-                .foregroundStyle(.white)
-                .font(.callout)
-            Spacer()
-            if let onDismiss {
-                Button(action: onDismiss) {
-                    Image(systemName: "xmark")
-                        .foregroundStyle(.white.opacity(0.8))
-                }
-            }
-        }
-        .padding()
-        .background(Color.red.opacity(0.8))
-        .cornerRadius(8)
     }
 }
 

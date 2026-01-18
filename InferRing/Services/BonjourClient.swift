@@ -27,6 +27,9 @@ final class BonjourClient: BonjourClientProtocol {
     
     var nodes: [Node] = []
     var isSearching = false
+    var permissionDenied = false
+
+    private static let kDNSServiceErr_PolicyDenied = -65570
 
     func startSearching() {
         stopSearching()
@@ -40,7 +43,26 @@ final class BonjourClient: BonjourClientProtocol {
         browser.browseResultsChangedHandler = { [weak self] results, _ in
             self?.handleResults(results)
         }
-        
+        browser.stateUpdateHandler = { [weak self] state in
+            guard let self else { return }
+            switch state {
+            case .failed(let error):
+                if case .dns(let code) = error, code == Self.kDNSServiceErr_PolicyDenied {
+                    dprint("Bonjour: Permission denied (failed)")
+                    permissionDenied = true
+                }
+            case .waiting(let error):
+                if case .dns(let code) = error, code == Self.kDNSServiceErr_PolicyDenied {
+                    print("Bonjour: Permission denied (waiting)")
+                    permissionDenied = true
+                }
+            case .ready:
+                permissionDenied = false
+            default:
+                break
+            }
+        }
+
         self.browser = browser
         browser.start(queue: .main)
         isSearching = true
