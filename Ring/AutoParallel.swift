@@ -161,6 +161,9 @@ func getLayers(from model: any LanguageModel) -> [TransformerLayer] {
     if let gpt = model as? GPTOSSModel {
         return gpt.model.layers
     }
+    if let glm = model as? GLM4MoELiteModel {
+        return glm.model.layers
+    }
 
     return []
 }
@@ -196,6 +199,10 @@ func setLayers(on model: any LanguageModel, newLayers: [TransformerLayer], shard
         gpt.model.slidingAttentionIndex = gpt.model.layerTypes.firstIndex(of: "sliding_attention") ?? 0
         gpt.model.fullAttentionIndex = gpt.model.layerTypes.firstIndex(of: "full_attention") ?? 0
         gpt.model.rebuildCaches()
+    }
+    else if let glm = model as? GLM4MoELiteModel {
+        glm.model.layers = newLayers
+        glm.model.rebuildCaches()
     }
     else {
         print("Couldn't update hidden layers for model \(String(describing: type(of: model)))")

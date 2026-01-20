@@ -45,8 +45,7 @@ public struct ModelCards {
                 prettyName: "DeepSeek V3.1 (4-bit)",
                 storageSize: MemorySize.from_gb(378),
                 nLayers: 61,
-                hiddenSize: 7168,
-                supportsTensor: true
+                hiddenSize: 7168
             )
         ),
         "DeepSeek-V3.1-8bit": ModelCard(
@@ -62,8 +61,7 @@ public struct ModelCards {
                 prettyName: "DeepSeek V3.1 (8-bit)",
                 storageSize: MemorySize.from_gb(713),
                 nLayers: 61,
-                hiddenSize: 7168,
-                supportsTensor: true
+                hiddenSize: 7168
             )
         ),
         // kimi k2
@@ -80,8 +78,7 @@ public struct ModelCards {
                 prettyName: "Kimi K2 Instruct (4-bit)",
                 storageSize: MemorySize.from_gb(578),
                 nLayers: 61,
-                hiddenSize: 7168,
-                supportsTensor: true
+                hiddenSize: 7168
             )
         ),
         "Kimi-K2-Thinking": ModelCard(
@@ -97,8 +94,7 @@ public struct ModelCards {
                 prettyName: "Kimi K2 Thinking (4-bit)",
                 storageSize: MemorySize.from_gb(658),
                 nLayers: 61,
-                hiddenSize: 7168,
-                supportsTensor: true
+                hiddenSize: 7168
             )
         ),
         "Qwen3-235B-A22B-Instruct-2507-4bit": ModelCard(
@@ -114,8 +110,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 235B A22B (4-bit)",
                 storageSize: MemorySize.from_gb(132),
                 nLayers: 94,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
         "Qwen3-235B-A22B-Instruct-2507-8bit": ModelCard(
@@ -131,8 +126,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 235B A22B (8-bit)",
                 storageSize: MemorySize.from_gb(250),
                 nLayers: 94,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
         "Qwen3-Coder-480B-A35B-Instruct-4bit": ModelCard(
@@ -148,8 +142,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 Coder 480B A35B (4-bit)",
                 storageSize: MemorySize.from_gb(270),
                 nLayers: 62,
-                hiddenSize: 6144,
-                supportsTensor: true
+                hiddenSize: 6144
             )
         ),
         "Qwen3-Coder-480B-A35B-Instruct-8bit": ModelCard(
@@ -165,8 +158,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 Coder 480B A35B (8-bit)",
                 storageSize: MemorySize.from_gb(540),
                 nLayers: 62,
-                hiddenSize: 6144,
-                supportsTensor: true
+                hiddenSize: 6144
             )
         ),
         "GLM-4.5-Air-8bit": ModelCard(
@@ -182,8 +174,7 @@ public struct ModelCards {
                 prettyName: "GLM 4.5 Air 8bit",
                 storageSize: MemorySize.from_gb(114),
                 nLayers: 46,
-                hiddenSize: 4096,
-                supportsTensor: false
+                hiddenSize: 4096
             )
         ),
         "GLM-4.5-Air-bf16": ModelCard(
@@ -199,8 +190,7 @@ public struct ModelCards {
                 prettyName: "GLM 4.5 Air bf16",
                 storageSize: MemorySize.from_gb(214),
                 nLayers: 46,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
 
@@ -218,8 +208,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.1 8B (4-bit)",
                 storageSize: MemorySize.from_mb(4423),
                 nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
         "Meta-Llama-3.1-8B-Instruct-8bit": ModelCard(
@@ -235,8 +224,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.1 8B (8-bit)",
                 storageSize: MemorySize.from_mb(8540),
                 nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
         "Meta-Llama-3.1-8B-Instruct-bf16": ModelCard(
@@ -252,8 +240,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.1 8B (BF16)",
                 storageSize: MemorySize.from_mb(16100),
                 nLayers: 32,
-                hiddenSize: 4096,
-                supportsTensor: true
+                hiddenSize: 4096
             )
         ),
         // llama
@@ -270,8 +257,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.1 70B (4-bit)",
                 storageSize: MemorySize.from_mb(38769),
                 nLayers: 80,
-                hiddenSize: 8192,
-                supportsTensor: true
+                hiddenSize: 8192
             )
         ),
         // llama-3.2
@@ -288,8 +274,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.2 1B (4-bit)",
                 storageSize: MemorySize.from_mb(696),
                 nLayers: 16,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Llama-3.2-3B-Instruct-4bit": ModelCard(
@@ -305,8 +290,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.2 3B (4-bit)",
                 storageSize: MemorySize.from_mb(1777),
                 nLayers: 28,
-                hiddenSize: 3072,
-                supportsTensor: true
+                hiddenSize: 3072
             )
         ),
         "Llama-3.2-3B-Instruct-8bit": ModelCard(
@@ -322,8 +306,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.2 3B (8-bit)",
                 storageSize: MemorySize.from_mb(3339),
                 nLayers: 28,
-                hiddenSize: 3072,
-                supportsTensor: true
+                hiddenSize: 3072
             )
         ),
         // llama-3.3
@@ -340,8 +323,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.3 70B",
                 storageSize: MemorySize.from_mb(38769),
                 nLayers: 80,
-                hiddenSize: 8192,
-                supportsTensor: true
+                hiddenSize: 8192
             )
         ),
         "Llama-3.3-70B-Instruct-8bit": ModelCard(
@@ -357,8 +339,7 @@ public struct ModelCards {
                 prettyName: "Llama 3.3 70B (8-bit)",
                 storageSize: MemorySize.from_mb(73242),
                 nLayers: 80,
-                hiddenSize: 8192,
-                supportsTensor: true
+                hiddenSize: 8192
             )
         ),
         ]
@@ -377,8 +358,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 0.6B (4-bit)",
                 storageSize: MemorySize.from_mb(327),
                 nLayers: 28,
-                hiddenSize: 1024,
-                supportsTensor: false
+                hiddenSize: 1024
             )
         ),
         "Qwen3-0.6B-8bit": ModelCard(
@@ -394,8 +374,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 0.6B (8-bit)",
                 storageSize: MemorySize.from_mb(666),
                 nLayers: 28,
-                hiddenSize: 1024,
-                supportsTensor: false
+                hiddenSize: 1024
             )
         ),
         "Qwen3-4B-4bit": ModelCard(
@@ -411,8 +390,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 4B (4-bit)",
                 storageSize: MemorySize.from_mb(2335),
                 nLayers: 36,
-                hiddenSize: 2560,
-                supportsTensor: false
+                hiddenSize: 2560
             )
         ),
         "Qwen3-4B-8bit": ModelCard(
@@ -428,8 +406,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 4B (8-bit)",
                 storageSize: MemorySize.from_mb(4393),
                 nLayers: 36,
-                hiddenSize: 2560,
-                supportsTensor: false
+                hiddenSize: 2560
             )
         ),
         "Qwen3-14B-MLX-8bit": ModelCard(
@@ -445,8 +422,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 14B (8-bit)",
                 storageSize: MemorySize.from_mb(15565),
                 nLayers: 40,
-                hiddenSize: 5120,
-                supportsTensor: false
+                hiddenSize: 5120
             )
         ),
         "Qwen3-Coder-30B-A3B-Instruct-4bit": ModelCard(
@@ -462,8 +438,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 Coder 30B A3B (4-bit)",
                 storageSize: MemorySize.from_mb(16797),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-Coder-30B-A3B-Instruct-6bit": ModelCard(
@@ -479,8 +454,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 Coder 30B A3B (6-bit)",
                 storageSize: MemorySize.from_mb(25396),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-Coder-30B-A3B-Instruct-8bit": ModelCard(
@@ -493,11 +467,10 @@ public struct ModelCards {
             tags: [],
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-8bit",
-                prettyName: "Qwen3 Coder 30B A3B (6-bit)",
+                prettyName: "Qwen3 Coder 30B A3B (8-bit)",
                 storageSize: MemorySize.from_mb(31738),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-30B-A3B-4bit": ModelCard(
@@ -513,8 +486,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 30B A3B (4-bit)",
                 storageSize: MemorySize.from_mb(16797),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-30B-A3B-8bit": ModelCard(
@@ -530,8 +502,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 30B A3B (8-bit)",
                 storageSize: MemorySize.from_mb(31738),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         // qwen3
@@ -548,8 +519,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 80B A3B (4-bit)",
                 storageSize: MemorySize.from_mb(44800),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-Next-80B-A3B-Instruct-8bit": ModelCard(
@@ -565,8 +535,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 80B A3B (8-bit)",
                 storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-Next-80B-A3B-Thinking-4bit": ModelCard(
@@ -582,8 +551,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 80B A3B Thinking (4-bit)",
                 storageSize: MemorySize.from_mb(42350),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
         "Qwen3-Next-80B-A3B-Thinking-8bit": ModelCard(
@@ -599,8 +567,7 @@ public struct ModelCards {
                 prettyName: "Qwen3 80B A3B Thinking (8-bit)",
                 storageSize: MemorySize.from_mb(84700),
                 nLayers: 48,
-                hiddenSize: 2048,
-                supportsTensor: true
+                hiddenSize: 2048
             )
         ),
 
@@ -618,8 +585,7 @@ public struct ModelCards {
                 prettyName: "LFM2.5 1.2B (8-bit)",
                 storageSize: MemorySize.from_mb(1280),
                 nLayers: 16,
-                hiddenSize: 2048,
-                supportsTensor: false
+                hiddenSize: 2048
             )
         ),
         "LFM2.5-1.2B-Instruct-bf16": ModelCard(
@@ -635,8 +601,7 @@ public struct ModelCards {
                 prettyName: "LFM2.5 1.2B (bf16)",
                 storageSize: MemorySize.from_mb(2407),
                 nLayers: 16,
-                hiddenSize: 2048,
-                supportsTensor: false
+                hiddenSize: 2048
             )
         ),
         // gpt-oss
@@ -653,8 +618,7 @@ public struct ModelCards {
                 prettyName: "GPT-OSS 20B (MXFP4-Q4, MLX)",
                 storageSize: MemorySize.from_kb(11_744_051),
                 nLayers: 24,
-                hiddenSize: 2880,
-                supportsTensor: true
+                hiddenSize: 2880
             )
         ),
         "gpt-oss-20b-MXFP4-Q8": ModelCard(
@@ -670,8 +634,7 @@ public struct ModelCards {
                 prettyName: "GPT-OSS 20B (MXFP4-Q8, MLX)",
                 storageSize: MemorySize.from_kb(12_744_051),
                 nLayers: 24,
-                hiddenSize: 2880,
-                supportsTensor: true
+                hiddenSize: 2880
             )
         ),
         "gpt-oss-120b-MXFP4-Q4": ModelCard(
@@ -687,8 +650,7 @@ public struct ModelCards {
                 prettyName: "GPT-OSS 120B (MXFP4-Q4, MLX)",
                 storageSize: MemorySize.from_kb(34_500_000),
                 nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
+                hiddenSize: 2880
             )
         ),
         "gpt-oss-120b-MXFP4-Q8": ModelCard(
@@ -704,8 +666,60 @@ public struct ModelCards {
                 prettyName: "GPT-OSS 120B (MXFP4-Q8, MLX)",
                 storageSize: MemorySize.from_kb(68_996_301),
                 nLayers: 36,
-                hiddenSize: 2880,
-                supportsTensor: true
+                hiddenSize: 2880
+            )
+        ),
+
+        // glm
+        "GLM-4.7-Flash-4bit": ModelCard(
+            shortId: "GLM-4.7-Flash-4bit",
+            modelId: "mlx-community/GLM-4.7-Flash-4bit",
+            name: "GLM 4.7 Flash 4bit",
+            description: """
+        GLM-4.7-Flash is a 30B-A3B MoE model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/GLM-4.7-Flash-4bit",
+                prettyName: "GLM 4.7 Flash 4bit",
+                storageSize: MemorySize.from_mb(16282),
+                nLayers: 47,
+                hiddenSize: 2048,
+                extraEOSTokens: ["<|user|>"]
+            )
+        ),
+        "GLM-4.7-Flash-6bit": ModelCard(
+            shortId: "GLM-4.7-Flash-6bit",
+            modelId: "mlx-community/GLM-4.7-Flash-6bit",
+            name: "GLM 4.7 Flash 6bit",
+            description: """
+        GLM-4.7-Flash is a 30B-A3B MoE model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/GLM-4.7-Flash-68bit",
+                prettyName: "GLM 4.7 Flash 6bit",
+                storageSize: MemorySize.from_mb(24986),
+                nLayers: 47,
+                hiddenSize: 2048,
+                extraEOSTokens: ["<|user|>"]
+            )
+        ),
+        "GLM-4.7-Flash-8bit": ModelCard(
+            shortId: "GLM-4.7-Flash-8bit",
+            modelId: "mlx-community/GLM-4.7-Flash-8bit",
+            name: "GLM 4.7 Flash 8bit",
+            description: """
+        GLM-4.7-Flash is a 30B-A3B MoE model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/GLM-4.7-Flash-8bit",
+                prettyName: "GLM 4.7 Flash 8bit",
+                storageSize: MemorySize.from_mb(32564),
+                nLayers: 47,
+                hiddenSize: 2048,
+                extraEOSTokens: ["<|user|>"]
             )
         ),
     ]
