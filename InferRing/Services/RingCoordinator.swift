@@ -11,10 +11,11 @@ final class RingCoordinator {
     private var bonjourClient: BonjourClient?
 
     // MARK: - State
-    var currentRing: Ring?
     private var peers: [DiscoveredDevice] = []
-    private var allDevices: [DiscoveredDevice] = [] // peers including self, sorted
+    private var allDevices: [DiscoveredDevice] = [] // discovered devices including self, sorted by id
     private var myIndex: Int = 0
+
+    var currentRing: Ring?
     var coordinatorID: DeviceID?
     var state: CoordinatorState = .inactive
     var electionInProgress: Bool {
@@ -59,9 +60,9 @@ final class RingCoordinator {
         DI.register(mlxManager)
         DI.register(hardwareMonitor)
     }
-    
+
     // MARK: - Public API
-    
+
     func start() {
         Task {
             for await nodes in Observations({ [weak self] in
@@ -78,7 +79,7 @@ final class RingCoordinator {
             await processElectionMessage(message)
         }
     }
-    
+
     // MARK: - Internal Logic
 
     private func updatePeers(nodes: [Node]) {
@@ -99,7 +100,7 @@ final class RingCoordinator {
             initiateElection()
         }
     }
-    
+
     private func initiateElection() {
         dprint("Starting Election from \(localDeviceID.name)")
         state = .candidate
@@ -152,14 +153,11 @@ final class RingCoordinator {
                 // Our message came back! We won.
                 becomeCoordinator()
             }
-            
+
         case .coordinator:
             coordinatorID = message.candidateID
             state = (message.candidateID == localDeviceID) ? .coordinator : .follower
-            currentRing = Ring(
-                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
-                coordinator: message.candidateID
-            )
+            buildRing()
 
             if message.candidateID != localDeviceID {
                 sendToSuccessor(message)
@@ -173,7 +171,7 @@ final class RingCoordinator {
                 // wait for other devices to join before initalizing MLX ring
                 try await Task.sleep(nanoseconds: 3_000_000_000)
                 guard !Task.isCancelled else { return }
-                try mlxManager.initMLX(rank: myIndex, devices: allDevices.map { $0.host })
+                try mlxManager.initMLX(rank: myRank, devices: ringDevices.map { $0.device.host })
                 try await Task.sleep(nanoseconds: 500_000_000)
                 mlxManager.synchronize()
                 dprint("MLX ring started")
@@ -181,12 +179,23 @@ final class RingCoordinator {
             }
         }
     }
-    
+
+    private func buildRing() {
+        guard let coordinatorID,
+              let coordIndex = allDevices.firstIndex(where: { $0.deviceID == coordinatorID }) else { return }
+        let orderedDevices = Array(allDevices[coordIndex...]) + Array(allDevices[..<coordIndex])
+
+        currentRing = Ring(
+            devices: orderedDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
+            coordinator: coordinatorID
+        )
+    }
+
     private func becomeCoordinator() {
         dprint("I am the Coordinator!")
         coordinatorID = localDeviceID
         state = .coordinator
-        
+
         let message = ElectionMessage(
             type: .coordinator,
             candidateID: localDeviceID,
@@ -195,7 +204,7 @@ final class RingCoordinator {
         )
         sendToSuccessor(message)
     }
-    
+
     private func sendToSuccessor(_ message: ElectionMessage) {
         Task {
             var attempts = 4
@@ -214,11 +223,11 @@ final class RingCoordinator {
             dprint("Sending to successor: \(successor.name) (\(successor.host))")
 
             let client = DataClient.client(for: successor)
-            
+
             await client.elect(message: message)
         }
     }
-    
+
     private func getSuccessor() -> DiscoveredDevice? {
         let nextIndex = (myIndex + 1) % allDevices.count
         let successor = allDevices[nextIndex]
@@ -241,12 +250,9 @@ final class RingCoordinator {
                 }
             }
         }
-        
-        if updated, let coordinatorID {
-             currentRing = Ring(
-                devices: allDevices.enumerated().map { RingDevice(device: $0.element, rank: $0.offset) },
-                coordinator: coordinatorID
-            )
+
+        if updated {
+            buildRing()
         }
     }
 
