@@ -71,7 +71,7 @@ public final class MLXManager {
         Memory.clearCache()
 
         var context = try await LLMModelFactory.shared.load(
-            configuration: ModelConfiguration(id: card.modelId, extraEOSTokens: card.metadata.extraEOSTokens),
+            configuration: ModelConfiguration(id: card.modelId),
             lazy: group != nil,
             progressHandler: progressHandler
         )

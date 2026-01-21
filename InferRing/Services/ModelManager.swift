@@ -248,7 +248,10 @@ final class ModelManager {
             })
         }
         else {
-            chatSession = ChatSession(currentModel, instructions: ChatMessage.systemMessage.content)
+            chatSession = ChatSession(
+                currentModel,
+                instructions: ChatMessage.systemMessage.content
+            )
         }
         Memory.clearCache()
     }
