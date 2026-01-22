@@ -6,6 +6,10 @@ It can work over Wi-Fi and wired connections - meaning you can just stick a USB 
 
 You can download the app from the App Store: [link](https://apps.apple.com/app/infer-ring/id6757767558) both for mac and iOS.
 
+## Notes
+
+Running on iOS/macOS 26.2 or later will utilize neural acceleration kernels on compatible devices.
+
 ## Acknowledgments
 
 The app is built on top of [MLX](https://github.com/mlx-explore/mlx-swift-lm).
