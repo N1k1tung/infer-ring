@@ -16,15 +16,13 @@ public struct ModelMetadata: Codable, Hashable, Sendable {
     public let storageSize: MemorySize
     public let nLayers: Int
     public let hiddenSize: Int
-    public let extraEOSTokens: Set<String>
 
-    public init(modelId: String, prettyName: String, storageSize: MemorySize, nLayers: Int, hiddenSize: Int, extraEOSTokens: Set<String> = []) {
+    public init(modelId: String, prettyName: String, storageSize: MemorySize, nLayers: Int, hiddenSize: Int) {
         self.modelId = modelId
         self.prettyName = prettyName
         self.storageSize = storageSize
         self.nLayers = nLayers
         self.hiddenSize = hiddenSize
-        self.extraEOSTokens = extraEOSTokens
     }
 }
 

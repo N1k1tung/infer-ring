@@ -123,18 +123,6 @@ final class FileServerHandler: ChannelInboundHandler {
                     }
                 }
             }
-            else if path.hasPrefix("/updateLastMessage") {
-                guard let data = getData(context: context) else { return }
-                guard let request = parseBody(data: data, context: context, type: UpdateLastMessageRequest.self)
-                else { return }
-
-                let response =  modelManager?.handleUpdateLastMessageRequest(request) ?? UpdateLastMessageResponse(
-                    success: false,
-                    errorMessage: "ModelManager not available",
-                    timestamp: Date()
-                )
-                sendData(context: context, body: response, status: .ok)
-            }
             else if path.hasPrefix("/getHardwareProfile") {
                 guard let data = getData(context: context) else { return }
                 guard let _ = parseBody(data: data, context: context, type: HardwareProfileRequest.self)
@@ -293,7 +281,7 @@ final class FileServerHandler: ChannelInboundHandler {
                     loopBoundSelf.value.startSSE(context: context.value)
                 }
 
-                let stream = modelManager?.streamResponse(to: request.messages)
+                let stream = modelManager?.streamResponse(to: request.messages, tools: request.tools)
 
                 do {
                     if let stream {
@@ -306,7 +294,7 @@ final class FileServerHandler: ChannelInboundHandler {
                                 choices: [
                                     OpenAPIChoice(
                                         index: 0,
-                                        delta: OpenAPIDelta(role: .assistant, content: text),
+                                        delta: OpenAPIDelta(role: .assistant, content: text, toolCalls: nil),
                                         finishReason: nil
                                     )
                                 ]
@@ -326,7 +314,7 @@ final class FileServerHandler: ChannelInboundHandler {
                         choices: [
                             OpenAPIChoice(
                                 index: 0,
-                                delta: OpenAPIDelta(role: .assistant, content: ""),
+                                delta: OpenAPIDelta(role: .assistant, content: "", toolCalls: nil),
                                 finishReason: "stop"
                             )
                         ]
@@ -348,7 +336,7 @@ final class FileServerHandler: ChannelInboundHandler {
             }
             else {
                 var fullText = ""
-                let stream = modelManager?.streamResponse(to: request.messages)
+                let stream = modelManager?.streamResponse(to: request.messages, tools: request.tools)
                 if let stream {
                     try? await {
                         for try await text in stream {
@@ -365,7 +353,7 @@ final class FileServerHandler: ChannelInboundHandler {
                     choices: [
                         OpenAPIChoiceFull(
                             index: 0,
-                            message: OpenAPIMessage(role: .assistant, content: .text(fullText)),
+                            message: OpenAPIMessage(role: .assistant, content: .text(fullText), name: nil, toolCalls: nil, toolCallId: nil),
                             finishReason: "stop"
                         )
                     ]

@@ -684,8 +684,7 @@ public struct ModelCards {
                 prettyName: "GLM 4.7 Flash 4bit",
                 storageSize: MemorySize.from_mb(16282),
                 nLayers: 47,
-                hiddenSize: 2048,
-                extraEOSTokens: ["<|user|>"]
+                hiddenSize: 2048
             )
         ),
         "GLM-4.7-Flash-6bit": ModelCard(
@@ -701,8 +700,7 @@ public struct ModelCards {
                 prettyName: "GLM 4.7 Flash 6bit",
                 storageSize: MemorySize.from_mb(24986),
                 nLayers: 47,
-                hiddenSize: 2048,
-                extraEOSTokens: ["<|user|>"]
+                hiddenSize: 2048
             )
         ),
         "GLM-4.7-Flash-8bit": ModelCard(
@@ -718,8 +716,55 @@ public struct ModelCards {
                 prettyName: "GLM 4.7 Flash 8bit",
                 storageSize: MemorySize.from_mb(32564),
                 nLayers: 47,
-                hiddenSize: 2048,
-                extraEOSTokens: ["<|user|>"]
+                hiddenSize: 2048
+            )
+        ),
+        "GLM-4.7-Flash-REAP-23B-A3B-4-bit": ModelCard(
+            shortId: "GLM-4.7-Flash-REAP-23B-A3B-4-bit",
+            modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-4-bit",
+            name: "GLM 4.7 Flash REAP 4bit",
+            description: """
+        GLM-4.7-Flash is a 23B-A3B MoE model compressed with REAP
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-4-bit",
+                prettyName: "GLM 4.7 Flash REAP 4bit",
+                storageSize: MemorySize.from_mb(13282),
+                nLayers: 47,
+                hiddenSize: 2048
+            )
+        ),
+        "GLM-4.7-Flash-REAP-23B-A3B-6-bit": ModelCard(
+            shortId: "GLM-4.7-Flash-REAP-23B-A3B-6-bit",
+            modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-6-bit",
+            name: "GLM 4.7 Flash REAP 6bit",
+            description: """
+        GLM-4.7-Flash is a 23B-A3B MoE model compressed with REAP
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-6-bit",
+                prettyName: "GLM 4.7 Flash REAP 6bit",
+                storageSize: MemorySize.from_mb(18986),
+                nLayers: 47,
+                hiddenSize: 2048
+            )
+        ),
+        "GLM-4.7-Flash-REAP-23B-A3B-8-bit": ModelCard(
+            shortId: "GLM-4.7-Flash-REAP-23B-A3B-8-bit",
+            modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-8-bit",
+            name: "GLM 4.7 Flash REAP 8bit",
+            description: """
+        GLM-4.7-Flash is a 23B-A3B MoE model compressed with REAP
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "n1k1tung/GLM-4.7-Flash-REAP-23B-A3B-8-bit",
+                prettyName: "GLM 4.7 Flash REAP 8bit",
+                storageSize: MemorySize.from_mb(25586),
+                nLayers: 47,
+                hiddenSize: 2048
             )
         ),
     ]

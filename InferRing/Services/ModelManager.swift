@@ -35,12 +35,14 @@ final class ModelManager {
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
     var tokensPerSecond: Double? {
-        chatSession?.lastGenerationInfo?.tokensPerSecond
+//        chatSession?.lastGenerationInfo?.tokensPerSecond
+        nil
     }
     var messages: [ChatMessage] {
-        chatSession?.messages.map {
-            ChatMessage(role: $0.role.toRole, content: $0.content)
-        } ?? [.systemMessage]
+//        chatSession?.messages.map {
+//            ChatMessage(role: $0.role.toRole, content: $0.content)
+//        } ??
+        [.systemMessage]
     }
 
     // MARK: - Public API
@@ -81,11 +83,22 @@ final class ModelManager {
 
         await withTaskGroup(of: ModelLoadResponse?.self) { group in
             group.addTask { [weak self] in
-                let result = try? await self?.loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
-                    progressHandler(progress.fractionCompleted * localProgressMulti)
+                guard let self else { return nil }
+                do {
+                    let result = try await loadModelLocally(modelCard, shardMeta: shardMeta[coordinator.myRank]) { progress in
+                        progressHandler(progress.fractionCompleted * localProgressMulti)
+                    }
+                    loadingProgress += localProgressMulti
+                    return result
                 }
-                loadingProgress += localProgressMulti
-                return result
+                catch {
+                    return ModelLoadResponse(
+                        requestID: "",
+                        success: false,
+                        errorMessage: error.localizedDescription,
+                        timestamp: Date()
+                    )
+                }
             }
             
             for peer in peers {
@@ -125,13 +138,44 @@ final class ModelManager {
 
     /// stream response
     /// - Parameter messages: full message history including system
+    /// - Parameter tools: list of available tools
     /// - Returns: response stream
-    func streamResponse(to messages: [OpenAPIMessage]) -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) -> AsyncThrowingStream<String, any Error> {
         var messages = messages
+        
+        if let tools = tools, !tools.isEmpty {
+            let toolPrompt = self.generateToolPrompt(tools)
+            if let idx = messages.firstIndex(where: { $0.role == .system }) {
+                let oldContent = messages[idx].content?.text ?? ""
+                let newContent = oldContent + "\n\n" + toolPrompt
+                messages[idx] = OpenAPIMessage(
+                    role: .system,
+                    content: .text(newContent),
+                    name: messages[idx].name,
+                    toolCalls: messages[idx].toolCalls,
+                    toolCallId: messages[idx].toolCallId
+                )
+            } 
+            else {
+                messages.insert(OpenAPIMessage(
+                    role: .system,
+                    content: .text(toolPrompt),
+                    name: nil,
+                    toolCalls: nil,
+                    toolCallId: nil
+                ), at: 0)
+            }
+        }
+        
         let lastMessage = messages.removeLast()
         resetChatSession(history: messages)
 
         return streamResponse(to: lastMessage.content?.text ?? "", history: messages)
+    }
+
+    private func generateToolPrompt(_ tools: [OpenAPITool]) -> String {
+        guard let data = try? JSONEncoder().encode(tools), let json = String(data: data, encoding: .utf8) else { return "" }
+        return "You have access to the following tools:\n\(json)\nIf you use a tool, output the function call in JSON format."
     }
 
     /// stream chat response
@@ -151,7 +195,7 @@ final class ModelManager {
         )
 
         let peers = coordinator?.ringPeers ?? []
-        let peerGenerationTask = Task {
+        Task {
             await withTaskGroup(of: GenerationResponse?.self) { group in
                 for peer in peers {
                     group.addTask {
@@ -161,43 +205,44 @@ final class ModelManager {
             }
         }
 
-        let originalStream = chatSession.streamResponse(to: input)
-
-        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
-        let task = Task {
-            do {
-                for try await chunk in originalStream {
-                    continuation.yield(chunk)
-                }
-                defer { continuation.finish() }
-
-                // Sync last message content to peers
-                guard let lastMessage = chatSession.messages.last else {
-                    return
-                }
-
-                let updateRequest = UpdateLastMessageRequest(
-                    content: lastMessage.content,
-                    timestamp: Date()
-                )
-
-                await peerGenerationTask.value
-                await withTaskGroup(of: Void.self) { group in
-                    for peer in peers {
-                        group.addTask {
-                            _ = await peer.client.updateLastMessage(request: updateRequest)
-                        }
-                    }
-                }
-            }
-            catch {
-                continuation.finish(throwing: error)
-            }
-        }
-        continuation.onTermination = { _ in
-            task.cancel()
-        }
-        return stream
+        return chatSession.streamResponse(to: input, images: [], videos: [])
+//        let originalStream = chatSession.streamDetails(to: input, images: [], videos: [])
+//
+//        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
+//        let task = Task {
+//            do {
+//                for try await chunk in originalStream {
+//                    continuation.yield(chunk)
+//                }
+//                defer { continuation.finish() }
+//
+//                // Sync last message content to peers
+//                guard let lastMessage = chatSession.messages.last else {
+//                    return
+//                }
+//
+//                let updateRequest = UpdateLastMessageRequest(
+//                    content: lastMessage.content,
+//                    timestamp: Date()
+//                )
+//
+//                await peerGenerationTask.value
+//                await withTaskGroup(of: Void.self) { group in
+//                    for peer in peers {
+//                        group.addTask {
+//                            _ = await peer.client.updateLastMessage(request: updateRequest)
+//                        }
+//                    }
+//                }
+//            }
+//            catch {
+//                continuation.finish(throwing: error)
+//            }
+//        }
+//        continuation.onTermination = { _ in
+//            task.cancel()
+//        }
+//        return stream
     }
 
     /// Handle generation request from remote peer
@@ -218,7 +263,6 @@ final class ModelManager {
         do {
             let response = try await chatSession.respond(to: request.input)
             dprint(response)
-            dprint(chatSession.lastGenerationInfo)
             
             return GenerationResponse(
                 requestID: request.requestID,
@@ -243,8 +287,13 @@ final class ModelManager {
         guard let currentModel else { return }
         if let history {
             chatSession = ChatSession(currentModel, history: history.compactMap {
-                guard let text = $0.content?.text else { return nil }
-                return Chat.Message(role: $0.role.toRole, content: text)
+                var content = $0.content?.text ?? ""
+                if content.isEmpty, let toolCalls = $0.toolCalls, !toolCalls.isEmpty {
+                     if let data = try? JSONEncoder().encode(toolCalls), let json = String(data: data, encoding: .utf8) {
+                         content = json
+                     }
+                }
+                return Chat.Message(role: $0.role.toRole, content: content)
             })
         }
         else {
@@ -312,35 +361,6 @@ final class ModelManager {
                 requestID: request.requestID,
                 success: false,
                 errorMessage: error.localizedDescription,
-                timestamp: Date()
-            )
-        }
-    }
-    
-    /// Handle update last message request from peer
-    func handleUpdateLastMessageRequest(_ request: UpdateLastMessageRequest) -> UpdateLastMessageResponse {
-        guard let chatSession else {
-            return UpdateLastMessageResponse(
-                success: false,
-                errorMessage: "ChatSession not initialized",
-                timestamp: Date()
-            )
-        }
-        
-        if !chatSession.messages.isEmpty {
-            let lastIndex = chatSession.messages.count - 1
-            chatSession.messages[lastIndex].content = request.content
-            
-            return UpdateLastMessageResponse(
-                success: true,
-                errorMessage: nil,
-                timestamp: Date()
-            )
-        }
-        else {
-            return UpdateLastMessageResponse(
-                success: false,
-                errorMessage: "Chat session has no messages",
                 timestamp: Date()
             )
         }

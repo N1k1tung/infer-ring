@@ -48,17 +48,6 @@ struct GenerationResponse: Codable {
     let timestamp: Date
 }
 
-struct UpdateLastMessageRequest: Codable {
-    let content: String
-    let timestamp: Date
-}
-
-struct UpdateLastMessageResponse: Codable {
-    let success: Bool
-    let errorMessage: String?
-    let timestamp: Date
-}
-
 struct HardwareProfileRequest: Codable {
     let timestamp: Date
 }
