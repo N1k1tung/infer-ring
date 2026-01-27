@@ -71,8 +71,9 @@ struct ChatView: View {
                         Task { try? await viewModel.send() }
                     }
                 HStack {
-                    if let tps = viewModel.tokensPerSecond {
-                        Text("\(tps, specifier: "%.2f") tps")
+                    if let tps = viewModel.tokensPerSecond,
+                       let pp = viewModel.promptTokensPerSecond {
+                        Text("PP\t\(pp, specifier: "%.2f") tps\nTG\t\(tps, specifier: "%.2f") tps")
                     }
                     Spacer()
                     if let loadingPercent = viewModel.loadingPercent {

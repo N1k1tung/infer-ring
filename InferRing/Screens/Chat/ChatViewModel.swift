@@ -13,7 +13,7 @@ import AppKit
 final class ChatViewModel {
     var messages: [ChatMessage] = [.systemMessage]
     var input: String = ""
-    var isSending: Bool = false
+    private(set) var isSending: Bool = false
     var selectedModel: ModelCard? {
         didSet {
             guard let selectedModel,
@@ -46,8 +46,9 @@ final class ChatViewModel {
     var isShowingToast: Bool = false
 
     var errorMessage: String? = nil
-    var loadingPercent: Double? = nil
-    var tokensPerSecond: Double? = nil
+    private(set) var loadingPercent: Double? = nil
+    private(set) var tokensPerSecond: Double? = nil
+    private(set) var promptTokensPerSecond: Double? = nil
 
     private var displayLink: CADisplayLink?
     private var displayedContent: String = ""
@@ -99,6 +100,7 @@ final class ChatViewModel {
         }
         messages[index].content = fullReply
         tokensPerSecond = modelManager.tokensPerSecond
+        promptTokensPerSecond = modelManager.promptTokensPerSecond
 
         stopDisplayLink()
     }

@@ -34,10 +34,8 @@ final class ModelManager {
     private var chatSession: ChatSession?
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
-    var tokensPerSecond: Double? {
-//        chatSession?.lastGenerationInfo?.tokensPerSecond
-        nil
-    }
+    var promptTokensPerSecond: Double?
+    var tokensPerSecond: Double?
     var messages: [ChatMessage] {
 //        chatSession?.messages.map {
 //            ChatMessage(role: $0.role.toRole, content: $0.content)
@@ -205,44 +203,34 @@ final class ModelManager {
             }
         }
 
-        return chatSession.streamResponse(to: input, images: [], videos: [])
-//        let originalStream = chatSession.streamDetails(to: input, images: [], videos: [])
+//        return chatSession.streamResponse(to: input, images: [], videos: [])
+        let originalStream = chatSession.streamDetails(to: input, images: [], videos: [])
 //
-//        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
-//        let task = Task {
-//            do {
-//                for try await chunk in originalStream {
-//                    continuation.yield(chunk)
-//                }
-//                defer { continuation.finish() }
-//
-//                // Sync last message content to peers
-//                guard let lastMessage = chatSession.messages.last else {
-//                    return
-//                }
-//
-//                let updateRequest = UpdateLastMessageRequest(
-//                    content: lastMessage.content,
-//                    timestamp: Date()
-//                )
-//
-//                await peerGenerationTask.value
-//                await withTaskGroup(of: Void.self) { group in
-//                    for peer in peers {
-//                        group.addTask {
-//                            _ = await peer.client.updateLastMessage(request: updateRequest)
-//                        }
-//                    }
-//                }
-//            }
-//            catch {
-//                continuation.finish(throwing: error)
-//            }
-//        }
-//        continuation.onTermination = { _ in
-//            task.cancel()
-//        }
-//        return stream
+        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
+        let task = Task { [weak self] in
+            do {
+                for try await chunk in originalStream {
+                    switch chunk {
+                    case .chunk(let text):
+                        continuation.yield(text)
+                    case .info(let info):
+                        self?.promptTokensPerSecond = info.promptTokensPerSecond
+                        self?.tokensPerSecond = info.tokensPerSecond
+                    case .toolCall(let tool):
+                        // TODO: tool call
+                        break
+                    }
+                }
+                continuation.finish()
+            }
+            catch {
+                continuation.finish(throwing: error)
+            }
+        }
+        continuation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
     }
 
     /// Handle generation request from remote peer
