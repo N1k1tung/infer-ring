@@ -14,7 +14,7 @@ public final class MLXManager {
     public func initMLX(rank: Int, devices: [String]) throws {
         let port = 13373
         let json = try JSONEncoder().encode(devices.map {
-            devices.count == 2 ? ["\($0):\(port)"] : ["\($0):\(port)", "\($0):\(port+1)"]
+            ["\($0):\(port)", "\($0):\(port+1)"]
         })
         let cachesDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         if !FileManager.default.fileExists(atPath: cachesDir.path) {

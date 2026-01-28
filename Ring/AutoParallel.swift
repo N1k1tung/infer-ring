@@ -134,6 +134,10 @@ public class PipelineLastLayer: CustomMlxLayer, TransformerLayer {
         let totalSize = gathered.dim(0)
         let startIndex = totalSize - batchSize
 
+        if output.dim(1) > 1, var cache { // setup dependency to make sure batched prefill is not deadlocked
+            cache.state = depends(inputs: cache.state, dependencies: Array(gathered[startIndex..<totalSize]))
+        }
+
         return gathered[startIndex..<totalSize]
     }
 
