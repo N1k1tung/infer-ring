@@ -658,7 +658,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/N1k1tung/mlx-swift";
 			requirement = {
-				branch = "ios-distrib";
+				branch = "ios-distrib-0.2.1";
 				kind = branch;
 			};
 		};
@@ -666,7 +666,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/N1k1tung/mlx-swift-lm";
 			requirement = {
-				branch = "ios-distrib";
+				branch = "ios-distrib-0.2.1";
 				kind = branch;
 			};
 		};
