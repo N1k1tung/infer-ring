@@ -6,9 +6,22 @@ It can work over Wi-Fi and wired connections - meaning you can just stick a USB 
 
 You can download the app from the App Store: [link](https://apps.apple.com/app/infer-ring/id6757767558) both for mac and iOS.
 
+## Performance
+
+In general you can expect slightly faster batched prefill (prompt processing) and slightly slower token generation (due to the need to transfer data between devices).
+
+Running on MBP with M1 Pro and iPhone 17 Pro:
+
+| Model               | MBP (M1 Pro) TG | MBP (M1 Pro) PP | Mac + iPhone TG (-12%) | Mac + iPhone PP (+11%) |
+| ------------------- | --------------- | --------------- | ---------------------- | ---------------------- |
+| GLM4.7 Flash 4-bit  | 38              | 170             | 33                     | 190                    |
+| Qwen3-30B-A3B 4-bit | 42              | 200             | 37                     | 225                    |
+
+
 ## Notes
 
-Running on iOS/macOS 26.2 or later will utilize neural acceleration kernels on compatible devices.
+- Using USB3.2 compatible cable is recommended for the best performance.
+- Running on iOS/macOS 26.2 or later will utilize neural acceleration kernels on compatible devices.
 
 ## Acknowledgments
 
