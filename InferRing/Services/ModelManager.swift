@@ -141,8 +141,8 @@ final class ModelManager {
     func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) -> AsyncThrowingStream<String, any Error> {
         var messages = messages
         
-        if let tools = tools, !tools.isEmpty {
-            let toolPrompt = self.generateToolPrompt(tools)
+        if let tools, !tools.isEmpty {
+            let toolPrompt = generateToolPrompt(tools)
             if let idx = messages.firstIndex(where: { $0.role == .system }) {
                 let oldContent = messages[idx].content?.text ?? ""
                 let newContent = oldContent + "\n\n" + toolPrompt
@@ -203,9 +203,8 @@ final class ModelManager {
             }
         }
 
-//        return chatSession.streamResponse(to: input, images: [], videos: [])
         let originalStream = chatSession.streamDetails(to: input, images: [], videos: [])
-//
+
         let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
         let task = Task { [weak self] in
             do {
@@ -218,6 +217,7 @@ final class ModelManager {
                         self?.tokensPerSecond = info.tokensPerSecond
                     case .toolCall(let tool):
                         // TODO: tool call
+                        dprint("tool call \(tool)")
                         break
                     }
                 }
@@ -235,6 +235,10 @@ final class ModelManager {
 
     /// Handle generation request from remote peer
     func handleGenerationRequest(_ request: GenerationRequest) async -> GenerationResponse {
+        if let history = request.history {
+            resetChatSession(history: history)
+        }
+
         guard let chatSession else {
             return GenerationResponse(
                 requestID: request.requestID,
@@ -242,10 +246,6 @@ final class ModelManager {
                 errorMessage: "ChatSession not initialized",
                 timestamp: Date()
             )
-        }
-
-        if let history = request.history {
-            resetChatSession(history: history)
         }
 
         do {
