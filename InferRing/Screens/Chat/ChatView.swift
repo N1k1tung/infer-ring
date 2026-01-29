@@ -1,6 +1,7 @@
 import SwiftUI
 import Observation
 import Ring
+import Textual
 
 struct ChatView: View {
     @State private var viewModel = ChatViewModel()
@@ -147,7 +148,7 @@ private struct ChatBubble: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text(message.content)
+            StructuredText(markdown: message.content)
                 .foregroundStyle(message.role == .system ? .secondary : .primary)
         }
         .padding(12)

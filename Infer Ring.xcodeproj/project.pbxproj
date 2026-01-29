@@ -18,6 +18,7 @@
 		0C7646792F02D6A60065F576 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7646782F02D6A60065F576 /* MLXLLM */; };
 		0C76467B2F02D6A60065F576 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76467A2F02D6A60065F576 /* MLXLMCommon */; };
 		0C8802E12F04A2FF006AF043 /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = 0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */; };
+		0CA7FA222F2A9E7B00569C3E /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = 0CA7FA212F2A9E7B00569C3E /* Textual */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 				0C8802E12F04A2FF006AF043 /* AsyncHTTPClient in Frameworks */,
 				0C7646772F02D6A60065F576 /* MLXNN in Frameworks */,
 				0C7646752F02D6A60065F576 /* MLX in Frameworks */,
+				0CA7FA222F2A9E7B00569C3E /* Textual in Frameworks */,
 				0C7646612F02D6300065F576 /* Ring.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -157,6 +159,7 @@
 				0C7646782F02D6A60065F576 /* MLXLLM */,
 				0C76467A2F02D6A60065F576 /* MLXLMCommon */,
 				0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */,
+				0CA7FA212F2A9E7B00569C3E /* Textual */,
 			);
 			productName = "Infer Ring";
 			productReference = 0C7646482F02D2FD0065F576 /* Infer Ring.app */;
@@ -220,6 +223,7 @@
 				0C8802DF2F04A2FE006AF043 /* XCRemoteSwiftPackageReference "async-http-client" */,
 				0C7DE5E12F22B5CD00EC1E4E /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				0C7DE5E22F22B5DF00EC1E4E /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				0CA7FA202F2A9E7B00569C3E /* XCRemoteSwiftPackageReference "textual" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0C7646492F02D2FD0065F576 /* Products */;
@@ -678,6 +682,14 @@
 				minimumVersion = 1.30.2;
 			};
 		};
+		0CA7FA202F2A9E7B00569C3E /* XCRemoteSwiftPackageReference "textual" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/textual";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -717,6 +729,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0C8802DF2F04A2FE006AF043 /* XCRemoteSwiftPackageReference "async-http-client" */;
 			productName = AsyncHTTPClient;
+		};
+		0CA7FA212F2A9E7B00569C3E /* Textual */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0CA7FA202F2A9E7B00569C3E /* XCRemoteSwiftPackageReference "textual" */;
+			productName = Textual;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
