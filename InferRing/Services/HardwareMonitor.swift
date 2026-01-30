@@ -16,6 +16,9 @@ final class HardwareMonitor {
         // for now no need for live updates, we only track max ram amounts
 //        startMonitoring()
         Memory.memoryLimit = currentProfile.recommendedUsageRAM
+#if os(iOS)
+        Memory.cacheLimit = currentProfile.recommendedUsageRAM / 2
+#endif
     }
     
     deinit {
@@ -48,7 +51,7 @@ extension HardwareProfile {
         #if os(iOS)
         .init(
             totalRAM: gpuInfo.memorySize,
-            recommendedUsageRAM: Int(Double(gpuInfo.maxRecommendedWorkingSetSize) * 0.8), // in practice iOS watchdog will kill when allocating as much as recommended set size
+            recommendedUsageRAM: Int(Double(gpuInfo.maxRecommendedWorkingSetSize) * 0.7), // in practice iOS watchdog will kill when allocating as much as recommended set size
             idiom: .current
         )
         #else
