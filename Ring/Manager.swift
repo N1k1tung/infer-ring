@@ -77,11 +77,15 @@ public final class MLXManager {
         )
 
         if let group {
-            context.model = pipelineAutoParallel(
+            context.model = tensorAutoParallel(
                 model: context.model,
-                group: group,
-                modelShardMeta: shardMeta
+                group: group
             )
+//            context.model = pipelineAutoParallel(
+//                model: context.model,
+//                group: group,
+//                modelShardMeta: shardMeta
+//            )
             eval(context.model)
         }
 
