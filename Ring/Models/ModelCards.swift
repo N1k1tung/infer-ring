@@ -409,6 +409,22 @@ public struct ModelCards {
                 hiddenSize: 2560
             )
         ),
+        "Qwen3-14B-MLX-4bit": ModelCard(
+            shortId: "Qwen3-14B-MLX-4bit",
+            modelId: "Qwen/Qwen3-14B-MLX-4bit",
+            name: "Qwen3 14B (4-bit)",
+            description: """
+        Qwen3 14B is a large language model trained on the Qwen3 14B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3-14B-MLX-4bit",
+                prettyName: "Qwen3 14B (4-bit)",
+                storageSize: MemorySize.from_mb(7965),
+                nLayers: 40,
+                hiddenSize: 5120
+            )
+        ),
         "Qwen3-14B-MLX-8bit": ModelCard(
             shortId: "Qwen3-14B-MLX-8bit",
             modelId: "Qwen/Qwen3-14B-MLX-8bit",
@@ -605,6 +621,22 @@ public struct ModelCards {
             )
         ),
         // gpt-oss
+        "gpt-oss-20b": ModelCard(
+            shortId: "gpt-oss-20b",
+            modelId: "openai/gpt-oss-20b",
+            name: "GPT-OSS 20B",
+            description: """
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this is base openai variant (mxfp4/bf16).
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "openai/gpt-oss-20b",
+                prettyName: "GPT-OSS 20B",
+                storageSize: MemorySize.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880
+            )
+        ),
         "gpt-oss-20b-MXFP4-Q4": ModelCard(
             shortId: "gpt-oss-20b-MXFP4-Q4",
             modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
