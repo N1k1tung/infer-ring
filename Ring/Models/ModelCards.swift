@@ -586,6 +586,38 @@ public struct ModelCards {
                 hiddenSize: 2048
             )
         ),
+        "Qwen3-Coder-Next-4bit": ModelCard(
+            shortId: "Qwen3-Coder-Next-4bit",
+            modelId: "mlx-community/Qwen3-Coder-Next-4bit",
+            name: "Qwen3 80B A3B Coder (4-bit)",
+            description: """
+        Qwen3 80B coding/agentic model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-Coder-Next-4bit",
+                prettyName: "Qwen3 80B A3B Coder (4-bit)",
+                storageSize: MemorySize.from_mb(42350),
+                nLayers: 48,
+                hiddenSize: 2048
+            )
+        ),
+        "Qwen3-Coder-Next-8bit": ModelCard(
+            shortId: "Qwen3-Coder-Next-8bit",
+            modelId: "mlx-community/Qwen3-Coder-Next-8bit",
+            name: "Qwen3 80B A3B Coder (8-bit)",
+            description: """
+        Qwen3 80B Reasoning model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-Coder-Next-8bit",
+                prettyName: "Qwen3 80B A3B Coder (8-bit)",
+                storageSize: MemorySize.from_mb(84700),
+                nLayers: 48,
+                hiddenSize: 2048
+            )
+        ),
 
         // LFM2.5
         "LFM2.5-1.2B-Instruct-8bit": ModelCard(
