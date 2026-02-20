@@ -372,7 +372,23 @@ public struct ModelCards {
             metadata: ModelMetadata(
                 modelId: "mlx-community/Qwen3-0.6B-8bit",
                 prettyName: "Qwen3 0.6B (8-bit)",
-                storageSize: MemorySize.from_mb(666),
+                storageSize: MemorySize.from_mb(667),
+                nLayers: 28,
+                hiddenSize: 1024
+            )
+        ),
+        "Qwen3-0.6B": ModelCard(
+            shortId: "Qwen3-0.6B",
+            modelId: "Qwen/Qwen3-0.6B",
+            name: "Qwen3 0.6B",
+            description: """
+        Qwen3 0.6B is a large language model trained on the Qwen3 0.6B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3-0.6B",
+                prettyName: "Qwen3 0.6B",
+                storageSize: MemorySize.from_mb(1337),
                 nLayers: 28,
                 hiddenSize: 1024
             )
@@ -829,6 +845,24 @@ public struct ModelCards {
                 storageSize: MemorySize.from_mb(25586),
                 nLayers: 47,
                 hiddenSize: 2048
+            )
+        ),
+
+        // Nanbeige
+        "Nanbeige4.1-3B-8bit": ModelCard(
+            shortId: "Nanbeige4.1-3B-8bit",
+            modelId: "mlx-community/Nanbeige4.1-3B-8bit",
+            name: "Nanbeige 4.1 3B 8bit",
+            description: """
+        As a highly competitive open-source model at a small parameter scale, Nanbeige4.1-3B illustrates that compact models can simultaneously achieve robust reasoning, preference alignment, and effective agentic behaviors.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Nanbeige4.1-3B-8bit",
+                prettyName: "Nanbeige 4.1 3B 8bit",
+                storageSize: MemorySize.from_mb(4300),
+                nLayers: 32,
+                hiddenSize: 2560
             )
         ),
     ]
