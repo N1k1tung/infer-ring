@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Infer Ring – Distributed LLM Inference</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #006d5c;          /* deep teal */
+      --accent: #ff6b81;           /* coral accent */
+      --bg: #f9f9f9;               /* light neutral */
+      --text: #1a1a1a;             /* dark text */
+      --border: #e0e0e0;
+      --radius: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1e;
+        --text: #e0e0e0;
+        --border: #333;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover, a:focus {
+      text-decoration: underline;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 3rem 1rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(255,255,255,.08), transparent 60%);
+      z-index: 0;
+    }
+    header h1 {
+      margin: 0 0 .5rem;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      z-index: 1;
+      position: relative;
+    }
+    header p {
+      margin: 0 0 1.5rem;
+      font-size: 1.15rem;
+      z-index: 1;
+      position: relative;
+    }
+    .download-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 1;
+      position: relative;
+    }
+    .download-buttons a {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform .2s, filter .2s;
+    }
+    .download-buttons a:hover,
+    .download-buttons a:focus {
+      filter: brightness(1.05);
+      transform: translateY(-2px);
+    }
+    .download-buttons a img {
+      height: 20px;
+      margin-right: .5rem;
+    }
+
+    main {
+      max-width: 960px;
+      margin: -5rem auto 2rem; /* Pull up to overlap header */
+      background: var(--bg);
+      padding: 4rem 1rem 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      border-radius: var(--radius);
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+    section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    section p {
+      margin: 0 0 1rem;
+    }
+
+    /* Performance table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+      max-width: 100%;
+      white-space: nowrap;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th {
+      background: var(--primary);
+      color: #fff;
+    }
+    @media (max-width: 600px) {
+      th, td { font-size: 0.85rem; }
+    }
+
+    /* Notes & Acknowledgments */
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .grid > article {
+      flex: 1 1 200px;
+      min-width: 260px;
+    }
+    .grid h3 {
+      margin-top: 0;
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+    .grid ul { padding-left: 1.2rem; }
+    .grid li { margin-bottom: 0.5rem; }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--border);
+      padding: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Infer Ring</h1>
+  <p>Combine the memory of multiple iOS and macOS devices to run large LLMs locally.</p>
+  <div class="download-buttons">
+    <a href="https://apps.apple.com/app/infer-ring/id6757767558" target="_blank" rel="noopener">
+      <img src="https://linkmaker.itunes.apple.com/assets/icons/ios-apple-icon-512x512-1f8e7b1c9e6a6a4d1c5d5c9b6a8d3b5.png" alt="">
+      App Store
+    </a>
+    <a href="https://apps.apple.com/app/infer-ring/id6757767558" target="_blank" rel="noopener">
+      <img src="https://linkmaker.itunes.apple.com/assets/icons/ios-apple-icon-512x512-1f8e7b1c9e6a6a4d1c5d5c9b6a8d3b5.png" alt="">
+      macOS App Store
+    </a>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>Performance</h2>
+    <p>Typical results on an M1 Pro MacBook and an iPhone 17 Pro over Wi‑Fi or USB.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>MBP (M1 Pro) TG</th>
+          <th>MBP (M1 Pro) PP</th>
+          <th>Mac + iPhone TG (-12%)</th>
+          <th>Mac + iPhone PP (+11%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GLM4.7 Flash 4‑bit</td>
+          <td>38</td>
+          <td>170</td>
+          <td>33</td>
+          <td>190</td>
+        </tr>
+        <tr>
+          <td>Qwen3‑30B‑A3B 4‑bit</td>
+          <td>42</td>
+          <td>200</td>
+          <td>37</td>
+          <td>225</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul>
+      <li>Using a USB 3.2‑compatible cable gives the best performance.</li>
+      <li>Running on iOS/macOS 26.2 or later unlocks neural‑acceleration kernels.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Acknowledgments</h2>
+    <p>Infer Ring is built on top of <a href="https://github.com/mlx-explore/mlx-swift-lm" target="_blank" rel="noopener">MLX Swift‑LM</a>. The sharding implementation was inspired by <a href="https://github.com/exo-explore/exo" target="_blank" rel="noopener">Exo</a>.</p>
+  </section>
+</main>
+
+<footer>
+  © 2026 Infer Ring. All rights reserved.
+</footer>
+
+</body>
+</html>

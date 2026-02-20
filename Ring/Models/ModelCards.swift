@@ -409,6 +409,22 @@ public struct ModelCards {
                 hiddenSize: 2560
             )
         ),
+        "Qwen3-14B-MLX-4bit": ModelCard(
+            shortId: "Qwen3-14B-MLX-4bit",
+            modelId: "Qwen/Qwen3-14B-MLX-4bit",
+            name: "Qwen3 14B (4-bit)",
+            description: """
+        Qwen3 14B is a large language model trained on the Qwen3 14B dataset.
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3-14B-MLX-4bit",
+                prettyName: "Qwen3 14B (4-bit)",
+                storageSize: MemorySize.from_mb(7965),
+                nLayers: 40,
+                hiddenSize: 5120
+            )
+        ),
         "Qwen3-14B-MLX-8bit": ModelCard(
             shortId: "Qwen3-14B-MLX-8bit",
             modelId: "Qwen/Qwen3-14B-MLX-8bit",
@@ -570,6 +586,38 @@ public struct ModelCards {
                 hiddenSize: 2048
             )
         ),
+        "Qwen3-Coder-Next-4bit": ModelCard(
+            shortId: "Qwen3-Coder-Next-4bit",
+            modelId: "mlx-community/Qwen3-Coder-Next-4bit",
+            name: "Qwen3 80B A3B Coder (4-bit)",
+            description: """
+        Qwen3 80B coding/agentic model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-Coder-Next-4bit",
+                prettyName: "Qwen3 80B A3B Coder (4-bit)",
+                storageSize: MemorySize.from_mb(42350),
+                nLayers: 48,
+                hiddenSize: 2048
+            )
+        ),
+        "Qwen3-Coder-Next-8bit": ModelCard(
+            shortId: "Qwen3-Coder-Next-8bit",
+            modelId: "mlx-community/Qwen3-Coder-Next-8bit",
+            name: "Qwen3 80B A3B Coder (8-bit)",
+            description: """
+        Qwen3 80B Reasoning model
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3-Coder-Next-8bit",
+                prettyName: "Qwen3 80B A3B Coder (8-bit)",
+                storageSize: MemorySize.from_mb(84700),
+                nLayers: 48,
+                hiddenSize: 2048
+            )
+        ),
 
         // LFM2.5
         "LFM2.5-1.2B-Instruct-8bit": ModelCard(
@@ -605,6 +653,22 @@ public struct ModelCards {
             )
         ),
         // gpt-oss
+        "gpt-oss-20b": ModelCard(
+            shortId: "gpt-oss-20b",
+            modelId: "openai/gpt-oss-20b",
+            name: "GPT-OSS 20B",
+            description: """
+        OpenAI's GPT-OSS 20B is a medium-sized MoE model for lower-latency and local or specialized use cases; this is base openai variant (mxfp4/bf16).
+        """,
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "openai/gpt-oss-20b",
+                prettyName: "GPT-OSS 20B",
+                storageSize: MemorySize.from_kb(11_744_051),
+                nLayers: 24,
+                hiddenSize: 2880
+            )
+        ),
         "gpt-oss-20b-MXFP4-Q4": ModelCard(
             shortId: "gpt-oss-20b-MXFP4-Q4",
             modelId: "mlx-community/gpt-oss-20b-MXFP4-Q4",
