@@ -2,13 +2,15 @@
 
 import SwiftUI
 import Ring
+import Textual
 
 struct ContentView: View {
     @Environment(RingCoordinator.self) var coordinator
     @Environment(ModelManager.self) var modelManager
     @AppStorage(ParallelModeSettings.useTensorParallelKey) private var useTensorParallel = false
     @State private var columnVisibility = NavigationSplitViewVisibility.all
-    @State private var showHelp = false
+    @State private var showGeneralHelp = false
+    @State private var showTensorParallelHelp = false
     @State private var showReloadPrompt = false
     @State private var reloadCandidate: ModelCard?
     @State private var errorMessage: String?
@@ -48,8 +50,27 @@ struct ContentView: View {
                     ServiceBrowserView()
                 }
                 if coordinator.currentRing != nil {
-                    Toggle("Use tensor parallel", isOn: $useTensorParallel)
-                        .disabled(modelManager.isLoading)
+                    HStack {
+                        Toggle("Tensor Parallelism", isOn: $useTensorParallel)
+                            .disabled(modelManager.isLoading)
+                        Button {
+                            showTensorParallelHelp.toggle()
+                        } label: {
+                            Image(systemName: "questionmark.circle")
+                        }
+                        .buttonStyle(.glass)
+                        .popover(isPresented: $showTensorParallelHelp) {
+                            StructuredText(markdown: """
+                            Tensor parallelism splits each layer computation across devices, so multiple devices process different tensor shards of the same layer at the same time.
+
+                            Pipeline parallelism splits by layers, where each device owns different layer ranges and passes activations between stages. Tensor parallelism instead keeps devices synchronized within the same layers.
+
+                            Tensor parallelism needs frequent low-latency all-reduce and all-gather traffic, so it benefits from RDMA over Thunderbolt 5. Without that bandwidth and latency, communication overhead is high and it is typically slower than pipeline parallelism.
+                            """)
+                            .frame(minWidth: 280, minHeight: 280)
+                            .padding()
+                        }
+                    }
                 }
             }
             Section("Use") {
@@ -69,12 +90,12 @@ struct ContentView: View {
             }
             ToolbarItem {
                 Button {
-                    showHelp.toggle()
+                    showGeneralHelp.toggle()
                 } label: {
                     Image(systemName: "questionmark.circle")
                 }
                 .buttonStyle(.glass)
-                .popover(isPresented: $showHelp) {
+                .popover(isPresented: $showGeneralHelp) {
                     Text("""
                             Infer Ring facitilates distributed inferrence across iOS and MacOS devices using [MLX Swift](https://github.com/ml-explore/mlx-swift) using ring topology.
                             
