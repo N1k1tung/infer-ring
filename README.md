@@ -6,6 +6,8 @@ It can work over Wi-Fi and wired connections - meaning you can just stick a USB 
 
 You can download the app from the App Store: [link](https://apps.apple.com/app/infer-ring/id6757767558) both for mac and iOS.
 
+It supports both tensor and pipeline parallelism, defaulting to the latter - mainly because of the connection means. Wi-Fi and pre-TB5 over RDMA connections will result in sharp performance decline.
+
 ## Performance
 
 In general you can expect slightly faster batched prefill (prompt processing) and slightly slower token generation (due to the need to transfer data between devices).
