@@ -77,15 +77,19 @@ public final class MLXManager {
         )
 
         if let group {
-            context.model = tensorAutoParallel(
-                model: context.model,
-                group: group
-            )
-//            context.model = pipelineAutoParallel(
-//                model: context.model,
-//                group: group,
-//                modelShardMeta: shardMeta
-//            )
+            if shardMeta.useTensorParallel && card.metadata.supportsTensor {
+                context.model = tensorAutoParallel(
+                    model: context.model,
+                    group: group
+                )
+            }
+            else {
+                context.model = pipelineAutoParallel(
+                    model: context.model,
+                    group: group,
+                    modelShardMeta: shardMeta
+                )
+            }
             eval(context.model)
         }
 
@@ -93,4 +97,3 @@ public final class MLXManager {
     }
 
 }
-

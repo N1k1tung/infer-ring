@@ -1,11 +1,17 @@
 //
 
 import SwiftUI
+import Ring
 
 struct ContentView: View {
     @Environment(RingCoordinator.self) var coordinator
+    @Environment(ModelManager.self) var modelManager
+    @AppStorage(ParallelModeSettings.useTensorParallelKey) private var useTensorParallel = false
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var showHelp = false
+    @State private var showReloadPrompt = false
+    @State private var reloadCandidate: ModelCard?
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -13,22 +19,46 @@ struct ContentView: View {
         } detail: {
             EmptyView()
         }
+        .onChange(of: useTensorParallel) { _, _ in
+            guard let loadedModel = modelManager.currentModelCard, loadedModel.metadata.supportsTensor else { return }
+            reloadCandidate = loadedModel
+            showReloadPrompt = true
+        }
+        .alert("Reload Model?", isPresented: $showReloadPrompt, presenting: reloadCandidate) { model in
+            Button("Reload") {
+                reloadModel(model)
+            }
+            Button("Later", role: .cancel) {
+                reloadCandidate = nil
+            }
+        } message: { model in
+            Text("\(model.metadata.prettyName) is loaded. Reload now to apply \(useTensorParallel ? "tensor parallel" : "pipeline parallel")?")
+        }
+        .errorAlert($errorMessage)
     }
 
     @ViewBuilder
     private var listContent: some View {
         List {
-            NavigationLink("Ring Management") {
-                RingManagementView()
+            Section("Manage") {
+                NavigationLink("Ring Management") {
+                    RingManagementView()
+                }
+                NavigationLink("Browse Devices") {
+                    ServiceBrowserView()
+                }
+                if coordinator.currentRing != nil {
+                    Toggle("Use tensor parallel", isOn: $useTensorParallel)
+                        .disabled(modelManager.isLoading)
+                }
             }
-            NavigationLink("Browse Devices") {
-                ServiceBrowserView()
-            }
-            NavigationLink("Chat") {
-                ChatView()
-            }
-            NavigationLink("OpenAPI Server") {
-                ServerView()
+            Section("Use") {
+                NavigationLink("Chat") {
+                    ChatView()
+                }
+                NavigationLink("OpenAPI Server") {
+                    ServerView()
+                }
             }
         }
         .frame(minWidth: 300)
@@ -63,9 +93,22 @@ struct ContentView: View {
             }
         }
     }
+
+    private func reloadModel(_ model: ModelCard) {
+        Task {
+            do {
+                try await modelManager.loadModelAcrossPeers(model)
+            }
+            catch {
+                errorMessage = "Failed to reload model: \(error.localizedDescription)"
+            }
+            reloadCandidate = nil
+        }
+    }
 }
 
 #Preview {
     ContentView()
         .environment(RingCoordinator())
+        .environment(ModelManager())
 }

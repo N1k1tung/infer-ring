@@ -334,6 +334,7 @@ final class ModelManager {
                 }
             }
             
+            ParallelModeSettings.useTensorParallel = request.shardMeta.useTensorParallel
             _ = try await loadModelLocally(request.modelCard, shardMeta: request.shardMeta) { _ in }
             currentModelCard = request.modelCard
 
@@ -382,6 +383,7 @@ final class ModelManager {
         guard let coordinator else {
             throw ModelManagerError.notInitialized
         }
+        let useTensorParallel = ParallelModeSettings.useTensorParallel
         let devices = coordinator.ringDevices.sorted { $0.rank < $1.rank }
         let totalMemory = coordinator.usableRAM
         var metas = [ShardMetadata]()
@@ -395,6 +397,7 @@ final class ModelManager {
                 modelMeta: modelCard.metadata,
                 deviceRank: device.rank,
                 worldSize: size,
+                useTensorParallel: useTensorParallel,
                 startLayer: assignedLayers,
                 endLayer: device.rank < size - 1 ? assignedLayers+shardLayers : nLayers,
                 nLayers: nLayers
@@ -426,5 +429,3 @@ enum ModelManagerError: LocalizedError {
         }
     }
 }
-
-

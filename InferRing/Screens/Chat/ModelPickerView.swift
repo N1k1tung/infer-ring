@@ -27,6 +27,9 @@ struct ModelPickerView: View {
 
                             HStack(spacing: 8) {
                                 tagView(readableSize(card.metadata.storageSize))
+                                if card.metadata.supportsTensor {
+                                    tagView("Tensor parallel")
+                                }
 
                                 if card.isLoaded {
                                     tagView("Downloaded")
