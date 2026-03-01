@@ -281,7 +281,7 @@ final class FileServerHandler: ChannelInboundHandler {
                     loopBoundSelf.value.startSSE(context: context.value)
                 }
 
-                let stream = modelManager?.streamResponse(to: request.messages, tools: request.tools)
+                let stream = await modelManager?.streamResponse(to: request.messages, tools: request.tools)
 
                 do {
                     if let stream {
@@ -336,7 +336,7 @@ final class FileServerHandler: ChannelInboundHandler {
             }
             else {
                 var fullText = ""
-                let stream = modelManager?.streamResponse(to: request.messages, tools: request.tools)
+                let stream = await modelManager?.streamResponse(to: request.messages, tools: request.tools)
                 if let stream {
                     try? await {
                         for try await text in stream {

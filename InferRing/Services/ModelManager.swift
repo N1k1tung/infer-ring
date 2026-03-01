@@ -32,15 +32,15 @@ final class ModelManager {
     }
     @ObservationIgnored
     private var chatSession: ChatSession?
+    @ObservationIgnored
+    private let chatHistoryStore = ChatHistoryStore()
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
     var promptTokensPerSecond: Double?
     var tokensPerSecond: Double?
-    var messages: [ChatMessage] {
-//        chatSession?.messages.map {
-//            ChatMessage(role: $0.role.toRole, content: $0.content)
-//        } ??
-        [.systemMessage]
+
+    func messageHistory() async -> [ChatMessage] {
+        await chatHistoryStore.snapshot()
     }
 
     // MARK: - Public API
@@ -138,7 +138,7 @@ final class ModelManager {
     /// - Parameter messages: full message history including system
     /// - Parameter tools: list of available tools
     /// - Returns: response stream
-    func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) async -> AsyncThrowingStream<String, any Error> {
         var messages = messages
         
         if let tools, !tools.isEmpty {
@@ -168,7 +168,7 @@ final class ModelManager {
         let lastMessage = messages.removeLast()
         resetChatSession(history: messages)
 
-        return streamResponse(to: lastMessage.content?.text ?? "", history: messages)
+        return await streamResponse(to: lastMessage.content?.text ?? "", history: messages, inputRole: lastMessage.role)
     }
 
     private func generateToolPrompt(_ tools: [OpenAPITool]) -> String {
@@ -179,10 +179,15 @@ final class ModelManager {
     /// stream chat response
     /// - Parameter input: user input
     /// - Returns: response stream
-    func streamResponse(to input: String, history: [OpenAPIMessage]? = nil) -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(to input: String, history: [OpenAPIMessage]? = nil, inputRole: ChatMessage.Role = .user) async -> AsyncThrowingStream<String, any Error> {
         guard let chatSession else {
             return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
         }
+
+        if let history {
+            await chatHistoryStore.replace(with: history)
+        }
+        await chatHistoryStore.append(role: inputRole, content: input)
         
         // Start generation on all peers in parallel
         let request = GenerationRequest(
@@ -207,10 +212,12 @@ final class ModelManager {
 
         let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
         let task = Task { [weak self] in
+            var fullReply = ""
             do {
                 for try await chunk in originalStream {
                     switch chunk {
                     case .chunk(let text):
+                        fullReply += text
                         continuation.yield(text)
                     case .info(let info):
                         self?.promptTokensPerSecond = info.promptTokensPerSecond
@@ -221,6 +228,7 @@ final class ModelManager {
                         break
                     }
                 }
+                await self?.chatHistoryStore.append(role: .assistant, content: fullReply)
                 continuation.finish()
             }
             catch {
@@ -249,7 +257,9 @@ final class ModelManager {
         }
 
         do {
+            await chatHistoryStore.append(role: .user, content: request.input)
             let response = try await chatSession.respond(to: request.input)
+            await chatHistoryStore.append(role: .assistant, content: response)
             dprint(response)
             
             return GenerationResponse(
@@ -273,22 +283,21 @@ final class ModelManager {
     /// - Parameter history: previous history, if nil starts with default system message
     func resetChatSession(history: [OpenAPIMessage]? = nil) {
         guard let currentModel else { return }
-        if let history {
-            chatSession = ChatSession(currentModel, history: history.compactMap {
-                var content = $0.content?.text ?? ""
-                if content.isEmpty, let toolCalls = $0.toolCalls, !toolCalls.isEmpty {
-                     if let data = try? JSONEncoder().encode(toolCalls), let json = String(data: data, encoding: .utf8) {
-                         content = json
-                     }
-                }
-                return Chat.Message(role: $0.role.toRole, content: content)
-            })
-        }
-        else {
+        let resolvedHistory = history?.map(\.resolvedChatMessage) ?? []
+
+        if resolvedHistory.isEmpty {
             chatSession = ChatSession(
                 currentModel,
                 instructions: ChatMessage.systemMessage.content
             )
+        }
+        else {
+            chatSession = ChatSession(currentModel, history: resolvedHistory.map {
+                Chat.Message(role: $0.role.toRole, content: $0.content)
+            })
+        }
+        Task { [chatHistoryStore, resolvedHistory] in
+            await chatHistoryStore.replace(with: resolvedHistory)
         }
         Memory.clearCache()
     }
@@ -405,6 +414,40 @@ final class ModelManager {
             assignedLayers += shardLayers
         }
         return metas
+    }
+}
+
+private actor ChatHistoryStore {
+    private var messages: [ChatMessage] = [.systemMessage]
+
+    func snapshot() -> [ChatMessage] {
+        messages
+    }
+
+    func replace(with history: [OpenAPIMessage]) {
+        replace(with: history.map(\.resolvedChatMessage))
+    }
+
+    func replace(with messages: [ChatMessage]) {
+        self.messages = messages.isEmpty ? [.systemMessage] : messages
+    }
+
+    func append(role: ChatMessage.Role, content: String) {
+        messages.append(ChatMessage(role: role, content: content))
+    }
+}
+
+private extension OpenAPIMessage {
+    var resolvedChatMessage: ChatMessage {
+        var resolvedContent = content?.text ?? ""
+        if resolvedContent.isEmpty,
+           let toolCalls,
+           !toolCalls.isEmpty,
+           let data = try? JSONEncoder().encode(toolCalls),
+           let json = String(data: data, encoding: .utf8) {
+            resolvedContent = json
+        }
+        return ChatMessage(role: role, content: resolvedContent)
     }
 }
 

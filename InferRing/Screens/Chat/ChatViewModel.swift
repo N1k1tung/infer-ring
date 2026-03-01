@@ -94,7 +94,8 @@ final class ChatViewModel {
         startDisplayLinkIfNeeded()
 
         var fullReply = ""
-        for try await replyStream in modelManager.streamResponse(to: trimmedInput) {
+        let stream = await modelManager.streamResponse(to: trimmedInput)
+        for try await replyStream in stream {
             fullReply += replyStream
             displayedContent = fullReply
         }
@@ -119,7 +120,10 @@ final class ChatViewModel {
 
     func refreshMessages() {
         guard !isSending else { return }
-        messages = modelManager?.messages ?? [.systemMessage]
+        Task { [weak self] in
+            guard let self else { return }
+            messages = await modelManager?.messageHistory() ?? [.systemMessage]
+        }
     }
 
     // MARK: display optimizations
