@@ -123,6 +123,23 @@ final class FileServerHandler: ChannelInboundHandler {
                     }
                 }
             }
+            else if path.hasPrefix("/resetChat") {
+                guard let data = getData(context: context) else { return }
+                guard let request = parseBody(data: data, context: context, type: ChatResetRequest.self)
+                else { return }
+
+                Task {
+                    let response = await modelManager?.handleChatResetRequest(request) ?? ChatResetResponse(
+                        requestID: request.requestID,
+                        success: false,
+                        errorMessage: "ModelManager not available",
+                        timestamp: Date()
+                    )
+                    eventLoop.execute {
+                        loopBoundSelf.value.sendData(context: loopBoundContext.value, body: response, status: .ok)
+                    }
+                }
+            }
             else if path.hasPrefix("/getHardwareProfile") {
                 guard let data = getData(context: context) else { return }
                 guard let _ = parseBody(data: data, context: context, type: HardwareProfileRequest.self)

@@ -279,10 +279,65 @@ final class ModelManager {
         }
     }
 
+    /// Reset chat session on all peers and local node
+    func resetChatSessionAcrossPeers() async throws {
+        resetChatSession()
+        await chatHistoryStore.reset()
+
+        let peers = coordinator?.ringPeers ?? []
+        guard !peers.isEmpty else { return }
+
+        let request = ChatResetRequest(
+            requestID: UUID().uuidString,
+            timestamp: Date()
+        )
+        var failures: [String] = []
+
+        await withTaskGroup(of: (Int, ChatResetResponse?).self) { group in
+            for peer in peers {
+                group.addTask {
+                    (peer.rank, await peer.client.resetChat(request: request))
+                }
+            }
+
+            for await (rank, response) in group {
+                guard let response else {
+                    failures.append("peer \(rank): no response")
+                    continue
+                }
+                if !response.success {
+                    failures.append("peer \(rank): \(response.errorMessage ?? "unknown error")")
+                }
+            }
+        }
+
+        if !failures.isEmpty {
+            throw ModelManagerError.peerResetFailed(failures.joined(separator: ", "))
+        }
+    }
+
+    /// Handle chat reset request from peer
+    func handleChatResetRequest(_ request: ChatResetRequest) async -> ChatResetResponse {
+        resetChatSession()
+        await chatHistoryStore.reset()
+        return ChatResetResponse(
+            requestID: request.requestID,
+            success: true,
+            errorMessage: nil,
+            timestamp: Date()
+        )
+    }
+
     /// starts a new chat session
     /// - Parameter history: previous history, if nil starts with default system message
-    func resetChatSession(history: [OpenAPIMessage]? = nil) {
-        guard let currentModel else { return }
+    private func resetChatSession(history: [OpenAPIMessage]? = nil) {
+        guard let currentModel else {
+            chatSession = nil
+            Task { [chatHistoryStore] in
+                await chatHistoryStore.reset()
+            }
+            return
+        }
         let resolvedHistory = history?.map(\.resolvedChatMessage) ?? []
 
         if resolvedHistory.isEmpty {
@@ -424,6 +479,10 @@ private actor ChatHistoryStore {
         messages
     }
 
+    func reset() {
+        messages = [.systemMessage]
+    }
+
     func replace(with history: [OpenAPIMessage]) {
         replace(with: history.map(\.resolvedChatMessage))
     }
@@ -457,6 +516,7 @@ enum ModelManagerError: LocalizedError {
     case notInitialized
     case alreadyLoading
     case peerLoadingFailed(String)
+    case peerResetFailed(String)
     case insufficientResources(String)
     
     var errorDescription: String? {
@@ -467,6 +527,8 @@ enum ModelManagerError: LocalizedError {
             return "Model loading is already in progress"
         case .peerLoadingFailed(let message):
             return "Failed to load model on some peers: \(message)"
+        case .peerResetFailed(let message):
+            return "Failed to reset chat on some peers: \(message)"
         case .insufficientResources(let message):
             return "Insufficient system resources: \(message)"
         }

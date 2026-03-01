@@ -107,8 +107,24 @@ final class ChatViewModel {
     }
 
     func reset() {
-        modelManager?.resetChatSession()
-        resetChatUI()
+        guard !isSending else { return }
+        isSending = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.isSending = false }
+
+            do {
+                if let modelManager = self.modelManager {
+                    try await modelManager.resetChatSessionAcrossPeers()
+                }
+                self.resetChatUI()
+            }
+            catch {
+                self.errorMessage = "Failed to reset chat on all peers: \(error.localizedDescription)"
+                self.messages = await self.modelManager?.messageHistory() ?? [.systemMessage]
+            }
+        }
     }
 
     private func resetChatUI() {

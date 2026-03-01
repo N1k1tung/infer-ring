@@ -153,6 +153,10 @@ extension DataClient {
     func startGeneration(request: GenerationRequest) async -> GenerationResponse? {
         await post(path: "/startGeneration", body: request, timeout: .seconds(300))
     }
+
+    func resetChat(request: ChatResetRequest) async -> ChatResetResponse? {
+        await post(path: "/resetChat", body: request, timeout: .seconds(10))
+    }
     
     func getHardwareProfile(request: HardwareProfileRequest) async -> HardwareProfileResponse? {
         await post(path: "/getHardwareProfile", body: request, timeout: .seconds(10))

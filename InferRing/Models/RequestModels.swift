@@ -48,6 +48,18 @@ struct GenerationResponse: Codable {
     let timestamp: Date
 }
 
+struct ChatResetRequest: Codable {
+    let requestID: String
+    let timestamp: Date
+}
+
+struct ChatResetResponse: Codable {
+    let requestID: String
+    let success: Bool
+    let errorMessage: String?
+    let timestamp: Date
+}
+
 struct HardwareProfileRequest: Codable {
     let timestamp: Date
 }
