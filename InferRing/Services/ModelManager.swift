@@ -5,6 +5,7 @@ import Ring
 import MLX
 import MLXLMCommon
 import MLXLLM
+import Tokenizers
 #if os(iOS)
 import UIKit
 #endif
@@ -140,46 +141,28 @@ final class ModelManager {
     /// - Returns: response stream
     func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) async -> AsyncThrowingStream<String, any Error> {
         var messages = messages
-        
-        if let tools, !tools.isEmpty {
-            let toolPrompt = generateToolPrompt(tools)
-            if let idx = messages.firstIndex(where: { $0.role == .system }) {
-                let oldContent = messages[idx].content?.text ?? ""
-                let newContent = oldContent + "\n\n" + toolPrompt
-                messages[idx] = OpenAPIMessage(
-                    role: .system,
-                    content: .text(newContent),
-                    name: messages[idx].name,
-                    toolCalls: messages[idx].toolCalls,
-                    toolCallId: messages[idx].toolCallId
-                )
-            } 
-            else {
-                messages.insert(OpenAPIMessage(
-                    role: .system,
-                    content: .text(toolPrompt),
-                    name: nil,
-                    toolCalls: nil,
-                    toolCallId: nil
-                ), at: 0)
-            }
-        }
-        
         let lastMessage = messages.removeLast()
-        resetChatSession(history: messages)
-
-        return await streamResponse(to: lastMessage.content?.text ?? "", history: messages, inputRole: lastMessage.role)
-    }
-
-    private func generateToolPrompt(_ tools: [OpenAPITool]) -> String {
-        guard let data = try? JSONEncoder().encode(tools), let json = String(data: data, encoding: .utf8) else { return "" }
-        return "You have access to the following tools:\n\(json)\nIf you use a tool, output the function call in JSON format."
+        return await streamResponse(
+            to: lastMessage.content?.text ?? "",
+            history: messages,
+            inputRole: lastMessage.role,
+            tools: tools
+        )
     }
 
     /// stream chat response
     /// - Parameter input: user input
     /// - Returns: response stream
-    func streamResponse(to input: String, history: [OpenAPIMessage]? = nil, inputRole: ChatMessage.Role = .user) async -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(
+        to input: String,
+        history: [OpenAPIMessage]? = nil,
+        inputRole: ChatMessage.Role = .user,
+        tools: [OpenAPITool]? = nil
+    ) async -> AsyncThrowingStream<String, any Error> {
+        if history != nil || tools != nil {
+            resetChatSession(history: history, tools: tools?.toolSpecs)
+        }
+
         guard let chatSession else {
             return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
         }
@@ -193,7 +176,9 @@ final class ModelManager {
         let request = GenerationRequest(
             requestID: UUID().uuidString,
             input: input,
+            inputRole: inputRole,
             history: history,
+            tools: tools,
             timestamp: Date()
         )
 
@@ -208,7 +193,12 @@ final class ModelManager {
             }
         }
 
-        let originalStream = chatSession.streamDetails(to: input, images: [], videos: [])
+        let originalStream = chatSession.streamDetails(
+            to: input,
+            role: inputRole.toRole,
+            images: [],
+            videos: []
+        )
 
         let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
         let task = Task { [weak self] in
@@ -243,8 +233,8 @@ final class ModelManager {
 
     /// Handle generation request from remote peer
     func handleGenerationRequest(_ request: GenerationRequest) async -> GenerationResponse {
-        if let history = request.history {
-            resetChatSession(history: history)
+        if request.history != nil || request.tools != nil {
+            resetChatSession(history: request.history, tools: request.tools?.toolSpecs)
         }
 
         guard let chatSession else {
@@ -257,8 +247,11 @@ final class ModelManager {
         }
 
         do {
-            await chatHistoryStore.append(role: .user, content: request.input)
-            let response = try await chatSession.respond(to: request.input)
+            await chatHistoryStore.append(role: request.inputRole, content: request.input)
+            let response = try await chatSession.respond(
+                to: request.input,
+                role: request.inputRole.toRole
+            )
             await chatHistoryStore.append(role: .assistant, content: response)
             dprint(response)
             
@@ -330,7 +323,7 @@ final class ModelManager {
 
     /// starts a new chat session
     /// - Parameter history: previous history, if nil starts with default system message
-    private func resetChatSession(history: [OpenAPIMessage]? = nil) {
+    private func resetChatSession(history: [OpenAPIMessage]? = nil, tools: [ToolSpec]? = nil) {
         guard let currentModel else {
             chatSession = nil
             Task { [chatHistoryStore] in
@@ -343,13 +336,18 @@ final class ModelManager {
         if resolvedHistory.isEmpty {
             chatSession = ChatSession(
                 currentModel,
-                instructions: ChatMessage.systemMessage.content
+                instructions: ChatMessage.systemMessage.content,
+                tools: tools
             )
         }
         else {
-            chatSession = ChatSession(currentModel, history: resolvedHistory.map {
-                Chat.Message(role: $0.role.toRole, content: $0.content)
-            })
+            chatSession = ChatSession(
+                currentModel,
+                history: resolvedHistory.map {
+                    Chat.Message(role: $0.role.toRole, content: $0.content)
+                },
+                tools: tools
+            )
         }
         Task { [chatHistoryStore, resolvedHistory] in
             await chatHistoryStore.replace(with: resolvedHistory)
@@ -507,6 +505,93 @@ private extension OpenAPIMessage {
             resolvedContent = json
         }
         return ChatMessage(role: role, content: resolvedContent)
+    }
+}
+
+private extension Collection where Element == OpenAPITool {
+    var toolSpecs: [ToolSpec] {
+        compactMap(\.toolSpec)
+    }
+}
+
+private extension OpenAPITool {
+    var toolSpec: ToolSpec? {
+        var functionSpec: [String: any Sendable] = [
+            "name": function.name
+        ]
+        if let description = function.description {
+            functionSpec["description"] = description
+        }
+        if let parameters = function.parameters?.sendableDictionary {
+            functionSpec["parameters"] = parameters
+        }
+        return [
+            "type": type,
+            "function": functionSpec,
+        ]
+    }
+}
+
+private extension Dictionary where Key == String, Value == AnyCodable {
+    var sendableDictionary: [String: any Sendable]? {
+        var converted: [String: any Sendable] = [:]
+        converted.reserveCapacity(count)
+        for (key, value) in self {
+            guard let sendableValue = value.sendableValue else {
+                return nil
+            }
+            converted[key] = sendableValue
+        }
+        return converted
+    }
+}
+
+private extension AnyCodable {
+    var sendableValue: (any Sendable)? {
+        switch value {
+        case let bool as Bool:
+            return bool
+        case let int as Int:
+            return int
+        case let double as Double:
+            return double
+        case let string as String:
+            return string
+        case let array as [Any]:
+            var converted: [any Sendable] = []
+            converted.reserveCapacity(array.count)
+            for element in array {
+                guard let sendableValue = AnyCodable(element).sendableValue else {
+                    return nil
+                }
+                converted.append(sendableValue)
+            }
+            return converted
+        case let array as [AnyCodable]:
+            var converted: [any Sendable] = []
+            converted.reserveCapacity(array.count)
+            for element in array {
+                guard let sendableValue = element.sendableValue else {
+                    return nil
+                }
+                converted.append(sendableValue)
+            }
+            return converted
+        case let dictionary as [String: Any]:
+            var converted: [String: any Sendable] = [:]
+            converted.reserveCapacity(dictionary.count)
+            for (key, value) in dictionary {
+                guard let sendableValue = AnyCodable(value).sendableValue else {
+                    return nil
+                }
+                converted[key] = sendableValue
+            }
+            return converted
+        case let dictionary as [String: AnyCodable]:
+            return dictionary.sendableDictionary
+        default:
+            return nil
+        }
     }
 }
 

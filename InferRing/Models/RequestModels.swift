@@ -37,7 +37,9 @@ struct ModelLoadResponse: Codable {
 struct GenerationRequest: Codable {
     let requestID: String
     let input: String
+    let inputRole: ChatMessage.Role
     let history: [OpenAPIMessage]?
+    let tools: [OpenAPITool]?
     let timestamp: Date
 }
 

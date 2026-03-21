@@ -553,6 +553,58 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
+        "Qwen3.5-35B-A3B-mlx-lm-mxfp4": ModelCard(
+            shortId: "Qwen3.5-35B-A3B-mlx-lm-mxfp4",
+            modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
+            name: "Qwen3.5 35B A3B (MXFP4)",
+            description: """
+Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantization.
+""",
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
+                prettyName: "Qwen3.5 35B A3B (MXFP4)",
+                storageSize: MemorySize.from_mb(19597),
+                nLayers: 40,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "Qwen3.5-35B-A3B-FP8": ModelCard(
+            shortId: "Qwen3.5-35B-A3B-FP8",
+            modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
+            name: "Qwen3.5 35B A3B (FP8)",
+            description: """
+Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights.
+""",
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
+                prettyName: "Qwen3.5 35B A3B (FP8)",
+                storageSize: MemorySize.from_mb(37095),
+                nLayers: 40,
+                hiddenSize: 2048,
+                supportsTensor: true
+            )
+        ),
+        "Qwen3.5-27B-FP8": ModelCard(
+            shortId: "Qwen3.5-27B-FP8",
+            modelId: "Qwen/Qwen3.5-27B-FP8",
+            name: "Qwen3.5 27B (FP8)",
+            description: """
+Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
+""",
+            tags: [],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-27B-FP8",
+                prettyName: "Qwen3.5 27B (FP8)",
+                storageSize: MemorySize.from_mb(28500),
+                nLayers: 64,
+                hiddenSize: 5120,
+                supportsTensor: true
+            )
+        ),
+
         // qwen3
         "Qwen3-Next-80B-A3B-Instruct-4bit": ModelCard(
             shortId: "Qwen3-Next-80B-A3B-Instruct-4bit",
