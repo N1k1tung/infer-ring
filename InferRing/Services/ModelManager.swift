@@ -139,10 +139,13 @@ final class ModelManager {
     /// - Parameter messages: full message history including system
     /// - Parameter tools: list of available tools
     /// - Returns: response stream
-    func streamResponse(to messages: [OpenAPIMessage], tools: [OpenAPITool]? = nil) async -> AsyncThrowingStream<String, any Error> {
+    func streamResponse(
+        to messages: [OpenAPIMessage],
+        tools: [OpenAPITool]? = nil
+    ) async -> AsyncThrowingStream<ModelResponseChunk, any Error> {
         var messages = messages
         let lastMessage = messages.removeLast()
-        return await streamResponse(
+        return await streamResponseChunks(
             to: lastMessage.content?.text ?? "",
             history: messages,
             inputRole: lastMessage.role,
@@ -159,6 +162,38 @@ final class ModelManager {
         inputRole: ChatMessage.Role = .user,
         tools: [OpenAPITool]? = nil
     ) async -> AsyncThrowingStream<String, any Error> {
+        let originalStream = await streamResponseChunks(
+            to: input,
+            history: history,
+            inputRole: inputRole,
+            tools: tools
+        )
+
+        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
+        let task = Task {
+            do {
+                for try await chunk in originalStream {
+                    guard case .text(let text) = chunk else { continue }
+                    continuation.yield(text)
+                }
+                continuation.finish()
+            }
+            catch {
+                continuation.finish(throwing: error)
+            }
+        }
+        continuation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
+    }
+
+    private func streamResponseChunks(
+        to input: String,
+        history: [OpenAPIMessage]? = nil,
+        inputRole: ChatMessage.Role = .user,
+        tools: [OpenAPITool]? = nil
+    ) async -> AsyncThrowingStream<ModelResponseChunk, any Error> {
         if history != nil || tools != nil {
             resetChatSession(history: history, tools: tools?.toolSpecs)
         }
@@ -200,25 +235,29 @@ final class ModelManager {
             videos: []
         )
 
-        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
+        let (stream, continuation) = AsyncThrowingStream<ModelResponseChunk, Error>.makeStream()
         let task = Task { [weak self] in
             var fullReply = ""
+            var toolCalls: [ModelResponseToolCall] = []
             do {
                 for try await chunk in originalStream {
                     switch chunk {
                     case .chunk(let text):
                         fullReply += text
-                        continuation.yield(text)
+                        continuation.yield(.text(text))
                     case .info(let info):
                         self?.promptTokensPerSecond = info.promptTokensPerSecond
                         self?.tokensPerSecond = info.tokensPerSecond
                     case .toolCall(let tool):
-                        // TODO: tool call
-                        dprint("tool call \(tool)")
-                        break
+                        let toolCall = tool.modelResponseToolCall
+                        toolCalls.append(toolCall)
+                        continuation.yield(.toolCall(toolCall))
                     }
                 }
-                await self?.chatHistoryStore.append(role: .assistant, content: fullReply)
+                await self?.chatHistoryStore.append(
+                    role: .assistant,
+                    content: Self.assistantHistoryContent(text: fullReply, toolCalls: toolCalls)
+                )
                 continuation.finish()
             }
             catch {
@@ -496,15 +535,33 @@ private actor ChatHistoryStore {
 
 private extension OpenAPIMessage {
     var resolvedChatMessage: ChatMessage {
-        var resolvedContent = content?.text ?? ""
-        if resolvedContent.isEmpty,
-           let toolCalls,
+        var parts: [String] = []
+        let text = content?.text ?? ""
+        if !text.isEmpty {
+            parts.append(text)
+        }
+        if let toolCalls,
            !toolCalls.isEmpty,
            let data = try? JSONEncoder().encode(toolCalls),
            let json = String(data: data, encoding: .utf8) {
-            resolvedContent = json
+            parts.append(json)
         }
-        return ChatMessage(role: role, content: resolvedContent)
+        return ChatMessage(role: role, content: parts.joined(separator: "\n\n"))
+    }
+}
+
+private extension ModelManager {
+    static func assistantHistoryContent(text: String, toolCalls: [ModelResponseToolCall]) -> String {
+        var parts: [String] = []
+        if !text.isEmpty {
+            parts.append(text)
+        }
+        if !toolCalls.isEmpty,
+           let data = try? JSONEncoder().encode(toolCalls.map(\.openAPIToolCall)),
+           let json = String(data: data, encoding: .utf8) {
+            parts.append(json)
+        }
+        return parts.joined(separator: "\n\n")
     }
 }
 

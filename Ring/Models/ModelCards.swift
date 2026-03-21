@@ -558,8 +558,8 @@ public struct ModelCards {
             modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
             name: "Qwen3.5 35B A3B (MXFP4)",
             description: """
-Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantization.
-""",
+            Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantization.
+            """,
             tags: [],
             metadata: ModelMetadata(
                 modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
@@ -567,7 +567,7 @@ Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantizat
                 storageSize: MemorySize.from_mb(19597),
                 nLayers: 40,
                 hiddenSize: 2048,
-                supportsTensor: true
+                supportsTensor: false
             )
         ),
         "Qwen3.5-35B-A3B-FP8": ModelCard(
@@ -575,8 +575,8 @@ Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantizat
             modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
             name: "Qwen3.5 35B A3B (FP8)",
             description: """
-Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights.
-""",
+            Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights.
+            """,
             tags: [],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
@@ -584,7 +584,7 @@ Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weigh
                 storageSize: MemorySize.from_mb(37095),
                 nLayers: 40,
                 hiddenSize: 2048,
-                supportsTensor: true
+                supportsTensor: false
             )
         ),
         "Qwen3.5-27B-FP8": ModelCard(
@@ -592,8 +592,8 @@ Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weigh
             modelId: "Qwen/Qwen3.5-27B-FP8",
             name: "Qwen3.5 27B (FP8)",
             description: """
-Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
-""",
+            Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
+            """,
             tags: [],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-27B-FP8",
@@ -601,7 +601,7 @@ Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
                 storageSize: MemorySize.from_mb(28500),
                 nLayers: 64,
                 hiddenSize: 5120,
-                supportsTensor: true
+                supportsTensor: false
             )
         ),
 

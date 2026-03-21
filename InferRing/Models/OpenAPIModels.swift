@@ -29,6 +29,32 @@ struct OpenAPIChatCompletionRequest: Codable {
     }
 }
 
+extension OpenAPIChatCompletionRequest {
+    var selectedTools: [OpenAPITool]? {
+        guard let tools else { return nil }
+        guard let toolChoice else { return tools }
+
+        switch toolChoice.value {
+        case let choice as String:
+            return choice == "none" ? nil : tools
+        case let choice as [String: Any]:
+            guard
+                let type = choice["type"] as? String,
+                type == "function",
+                let function = choice["function"] as? [String: Any],
+                let name = function["name"] as? String
+            else {
+                return tools
+            }
+
+            let filteredTools = tools.filter { $0.function.name == name }
+            return filteredTools.isEmpty ? tools : filteredTools
+        default:
+            return tools
+        }
+    }
+}
+
 struct OpenAPITool: Codable {
     let type: String
     let function: OpenAPIFunction

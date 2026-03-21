@@ -293,32 +293,62 @@ final class FileServerHandler: ChannelInboundHandler {
         let loopBoundSelf = NIOLoopBound(self, eventLoop: eventLoop)
 
         Task {
+            let selectedTools = request.selectedTools
             if request.stream == true {
                 eventLoop.execute {
                     loopBoundSelf.value.startSSE(context: context.value)
                 }
 
-                let stream = await modelManager?.streamResponse(to: request.messages, tools: request.tools)
+                let stream = await modelManager?.streamResponse(to: request.messages, tools: selectedTools)
 
                 do {
+                    var toolCallCount = 0
                     if let stream {
-                        for try await text in stream {
-                            let chunk = OpenAPIChatCompletionChunk(
-                                id: "chatcmpl-\(UUID().uuidString)",
-                                object: "chat.completion.chunk",
-                                created: Int(Date().timeIntervalSince1970),
-                                model: request.model ?? "unknown",
-                                choices: [
-                                    OpenAPIChoice(
-                                        index: 0,
-                                        delta: OpenAPIDelta(role: .assistant, content: text, toolCalls: nil),
-                                        finishReason: nil
-                                    )
-                                ]
-                            )
-                            if let data = try? JSONEncoder().encode(chunk), let jsonString = String(data: data, encoding: .utf8) {
+                        for try await chunk in stream {
+                            let responseChunk: OpenAPIChatCompletionChunk
+                            switch chunk {
+                            case .text(let text):
+                                responseChunk = OpenAPIChatCompletionChunk(
+                                    id: "chatcmpl-\(UUID().uuidString)",
+                                    object: "chat.completion.chunk",
+                                    created: Int(Date().timeIntervalSince1970),
+                                    model: request.model ?? "unknown",
+                                    choices: [
+                                        OpenAPIChoice(
+                                            index: 0,
+                                            delta: OpenAPIDelta(role: .assistant, content: text, toolCalls: nil),
+                                            finishReason: nil
+                                        )
+                                    ]
+                                )
+                            case .toolCall(let toolCall):
+                                responseChunk = OpenAPIChatCompletionChunk(
+                                    id: "chatcmpl-\(UUID().uuidString)",
+                                    object: "chat.completion.chunk",
+                                    created: Int(Date().timeIntervalSince1970),
+                                    model: request.model ?? "unknown",
+                                    choices: [
+                                        OpenAPIChoice(
+                                            index: 0,
+                                            delta: OpenAPIDelta(
+                                                role: .assistant,
+                                                content: nil,
+                                                toolCalls: [toolCall.delta(index: toolCallCount)]
+                                            ),
+                                            finishReason: nil
+                                        )
+                                    ]
+                                )
+                                toolCallCount += 1
+                            }
+
+                            if let data = try? JSONEncoder().encode(responseChunk),
+                               let jsonString = String(data: data, encoding: .utf8) {
                                 eventLoop.execute {
-                                    loopBoundSelf.value.sendSSEData(context: context.value, string: "data: \(jsonString)\n\n")
+                                    loopBoundSelf.value.sendSSEData(
+                                        context: context.value,
+                                        string: "data: \(jsonString)\n\n"
+                                    )
                                 }
                             }
                         }
@@ -331,8 +361,8 @@ final class FileServerHandler: ChannelInboundHandler {
                         choices: [
                             OpenAPIChoice(
                                 index: 0,
-                                delta: OpenAPIDelta(role: .assistant, content: "", toolCalls: nil),
-                                finishReason: "stop"
+                                delta: OpenAPIDelta(role: nil, content: nil, toolCalls: nil),
+                                finishReason: toolCallCount > 0 ? "tool_calls" : "stop"
                             )
                         ]
                     )
@@ -353,11 +383,17 @@ final class FileServerHandler: ChannelInboundHandler {
             }
             else {
                 var fullText = ""
-                let stream = await modelManager?.streamResponse(to: request.messages, tools: request.tools)
+                var toolCalls: [OpenAPIToolCall] = []
+                let stream = await modelManager?.streamResponse(to: request.messages, tools: selectedTools)
                 if let stream {
                     try? await {
-                        for try await text in stream {
-                            fullText += text
+                        for try await chunk in stream {
+                            switch chunk {
+                            case .text(let text):
+                                fullText += text
+                            case .toolCall(let toolCall):
+                                toolCalls.append(toolCall.openAPIToolCall)
+                            }
                         }
                     }()
                 }
@@ -370,8 +406,14 @@ final class FileServerHandler: ChannelInboundHandler {
                     choices: [
                         OpenAPIChoiceFull(
                             index: 0,
-                            message: OpenAPIMessage(role: .assistant, content: .text(fullText), name: nil, toolCalls: nil, toolCallId: nil),
-                            finishReason: "stop"
+                            message: OpenAPIMessage(
+                                role: .assistant,
+                                content: fullText.isEmpty ? nil : .text(fullText),
+                                name: nil,
+                                toolCalls: toolCalls.isEmpty ? nil : toolCalls,
+                                toolCallId: nil
+                            ),
+                            finishReason: toolCalls.isEmpty ? "stop" : "tool_calls"
                         )
                     ]
                 )
