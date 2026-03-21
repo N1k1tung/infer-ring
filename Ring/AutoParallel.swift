@@ -3,6 +3,7 @@ import MLX
 import MLXNN
 import MLXLMCommon
 import MLXLLM
+import MLXVLM
 
 // adapted from https://github.com/exo-explore/exo/blob/main/src/exo/worker/engines/mlx/auto_parallel.py
 

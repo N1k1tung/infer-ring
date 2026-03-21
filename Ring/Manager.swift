@@ -4,6 +4,7 @@ import Darwin
 import MLX
 import MLXLMCommon
 import MLXLLM
+import MLXVLM
 import MLXNN
 
 public final class MLXManager {
@@ -70,7 +71,8 @@ public final class MLXManager {
     ) async throws -> ModelContext {
         Memory.clearCache()
 
-        var context = try await LLMModelFactory.shared.load(
+        let factory: ModelFactory = card.isVisionModel ? VLMModelFactory.shared : LLMModelFactory.shared
+        var context = try await factory.load(
             configuration: ModelConfiguration(id: card.modelId),
             lazy: group != nil,
             progressHandler: progressHandler

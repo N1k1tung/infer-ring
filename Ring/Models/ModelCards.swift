@@ -27,6 +27,10 @@ public struct ModelCard: Codable, Equatable, Sendable {
     public let description: String
     public let tags: [String]
     public let metadata: ModelMetadata
+
+    public var isVisionModel: Bool {
+        tags.contains("Vision")
+    }
 }
 
 public struct ModelCards {
@@ -553,20 +557,209 @@ public struct ModelCards {
                 supportsTensor: true
             )
         ),
-        "Qwen3.5-35B-A3B-mlx-lm-mxfp4": ModelCard(
-            shortId: "Qwen3.5-35B-A3B-mlx-lm-mxfp4",
-            modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
-            name: "Qwen3.5 35B A3B (MXFP4)",
+
+        // qwen3.5
+        "Qwen3.5-0.8B-MLX-4bit": ModelCard(
+            shortId: "Qwen3.5-0.8B-MLX-4bit",
+            modelId: "mlx-community/Qwen3.5-0.8B-MLX-4bit",
+            name: "Qwen3.5-0.8B-MLX-4bit",
             description: """
-            Qwen3.5 35B A3B is a large language model; this MLX variant uses MXFP4 quantization.
+            Qwen3.5-0.8B is a large language model by Qwen. This is a 4-bit MLX variant
             """,
-            tags: [],
+            tags: ["Vision"],
             metadata: ModelMetadata(
-                modelId: "RepublicOfKorokke/Qwen3.5-35B-A3B-mlx-lm-mxfp4",
-                prettyName: "Qwen3.5 35B A3B (MXFP4)",
-                storageSize: MemorySize.from_mb(19597),
-                nLayers: 40,
+                modelId: "mlx-community/Qwen3.5-0.8B-MLX-4bit",
+                prettyName: "Qwen3.5-0.8B-MLX-4bit",
+                storageSize: MemorySize.from_mb(652),
+                nLayers: 24,
+                hiddenSize: 1024,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-0.8B-MLX-8bit": ModelCard(
+            shortId: "Qwen3.5-0.8B-MLX-8bit",
+            modelId: "mlx-community/Qwen3.5-0.8B-MLX-8bit",
+            name: "Qwen3.5-0.8B-MLX-8bit",
+            description: """
+            Qwen3.5-0.8B is a large language model by Qwen. This is a 8-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-0.8B-MLX-8bit",
+                prettyName: "Qwen3.5-0.8B-MLX-8bit",
+                storageSize: MemorySize.from_mb(1050),
+                nLayers: 24,
+                hiddenSize: 1024,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-0.8B": ModelCard(
+            shortId: "Qwen3.5-0.8B",
+            modelId: "Qwen/Qwen3.5-0.8B",
+            name: "Qwen3.5-0.8B",
+            description: """
+            Qwen3.5-0.8B is a large language model by Qwen.
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-0.8B",
+                prettyName: "Qwen3.5-0.8B",
+                storageSize: MemorySize.from_mb(1798),
+                nLayers: 24,
+                hiddenSize: 1024,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-2B-MLX-4bit": ModelCard(
+            shortId: "Qwen3.5-2B-MLX-4bit",
+            modelId: "mlx-community/Qwen3.5-2B-MLX-4bit",
+            name: "Qwen3.5-2B-MLX-4bit",
+            description: """
+            Qwen3.5-2B is a large language model by Qwen. This is a 4-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-2B-MLX-4bit",
+                prettyName: "Qwen3.5-2B-MLX-4bit",
+                storageSize: MemorySize.from_mb(1780),
+                nLayers: 24,
                 hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-2B-MLX-8bit": ModelCard(
+            shortId: "Qwen3.5-2B-MLX-8bit",
+            modelId: "mlx-community/Qwen3.5-2B-MLX-8bit",
+            name: "Qwen3.5-2B-MLX-8bit",
+            description: """
+            Qwen3.5-2B is a large language model by Qwen. This is a 8-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-2B-MLX-8bit",
+                prettyName: "Qwen3.5-2B-MLX-8bit",
+                storageSize: MemorySize.from_mb(2750),
+                nLayers: 24,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-2B": ModelCard(
+            shortId: "Qwen3.5-2B",
+            modelId: "Qwen/Qwen3.5-2B",
+            name: "Qwen3.5-2B",
+            description: """
+            Qwen3.5-2B is a large language model by Qwen.
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-2B",
+                prettyName: "Qwen3.5-2B",
+                storageSize: MemorySize.from_mb(4657),
+                nLayers: 24,
+                hiddenSize: 2048,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-4B-MLX-4bit": ModelCard(
+            shortId: "Qwen3.5-4B-MLX-4bit",
+            modelId: "mlx-community/Qwen3.5-4B-MLX-4bit",
+            name: "Qwen3.5-4B-MLX-4bit",
+            description: """
+            Qwen3.5-4B is a large language model by Qwen. This is a 4-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-4B-MLX-4bit",
+                prettyName: "Qwen3.5-4B-MLX-4bit",
+                storageSize: MemorySize.from_mb(3112),
+                nLayers: 32,
+                hiddenSize: 2560,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-4B-MLX-8bit": ModelCard(
+            shortId: "Qwen3.5-4B-MLX-8bit",
+            modelId: "mlx-community/Qwen3.5-4B-MLX-8bit",
+            name: "Qwen3.5-4B-MLX-8bit",
+            description: """
+            Qwen3.5-4B is a large language model by Qwen. This is a 8-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-4B-MLX-8bit",
+                prettyName: "Qwen3.5-4B-MLX-8bit",
+                storageSize: MemorySize.from_mb(5175),
+                nLayers: 32,
+                hiddenSize: 2560,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-4B": ModelCard(
+            shortId: "Qwen3.5-4B",
+            modelId: "Qwen/Qwen3.5-4B",
+            name: "Qwen3.5-4B",
+            description: """
+            Qwen3.5-4B is a large language model by Qwen.
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-4B",
+                prettyName: "Qwen3.5-4B",
+                storageSize: MemorySize.from_mb(9497),
+                nLayers: 32,
+                hiddenSize: 2560,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-9B-MLX-4bit": ModelCard(
+            shortId: "Qwen3.5-9B-MLX-4bit",
+            modelId: "mlx-community/Qwen3.5-9B-MLX-4bit",
+            name: "Qwen3.5-9B-MLX-4bit",
+            description: """
+            Qwen3.5-9B is a large language model by Qwen. This is a 4-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-9B-MLX-4bit",
+                prettyName: "Qwen3.5-9B-MLX-4bit",
+                storageSize: MemorySize.from_mb(6052),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-9B-MLX-8bit": ModelCard(
+            shortId: "Qwen3.5-9B-MLX-8bit",
+            modelId: "mlx-community/Qwen3.5-9B-MLX-8bit",
+            name: "Qwen3.5-9B-MLX-8bit",
+            description: """
+            Qwen3.5-9B is a large language model by Qwen. This is a 8-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Qwen3.5-9B-MLX-8bit",
+                prettyName: "Qwen3.5-9B-MLX-8bit",
+                storageSize: MemorySize.from_mb(10655),
+                nLayers: 32,
+                hiddenSize: 4096,
+                supportsTensor: false
+            )
+        ),
+        "Qwen3.5-9B": ModelCard(
+            shortId: "Qwen3.5-9B",
+            modelId: "Qwen/Qwen3.5-9B",
+            name: "Qwen3.5-9B",
+            description: """
+            Qwen3.5-9B is a large language model by Qwen.
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "Qwen/Qwen3.5-9B",
+                prettyName: "Qwen3.5-9B",
+                storageSize: MemorySize.from_mb(19597),
+                nLayers: 32,
+                hiddenSize: 4096,
                 supportsTensor: false
             )
         ),
@@ -577,7 +770,7 @@ public struct ModelCards {
             description: """
             Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights.
             """,
-            tags: [],
+            tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
                 prettyName: "Qwen3.5 35B A3B (FP8)",
@@ -594,7 +787,7 @@ public struct ModelCards {
             description: """
             Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
             """,
-            tags: [],
+            tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-27B-FP8",
                 prettyName: "Qwen3.5 27B (FP8)",

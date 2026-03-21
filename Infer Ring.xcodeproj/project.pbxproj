@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C7149492F6F566600FDE01D /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C7149482F6F566600FDE01D /* MLXVLM */; };
+		0C71494B2F6F5CA000FDE01D /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = 0C71494A2F6F5CA000FDE01D /* MLXVLM */; };
 		0C7646612F02D6300065F576 /* Ring.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C76465B2F02D6300065F576 /* Ring.framework */; };
 		0C7646622F02D6300065F576 /* Ring.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0C76465B2F02D6300065F576 /* Ring.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0C76466D2F02D6820065F576 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 0C76466C2F02D6820065F576 /* MLX */; };
@@ -76,6 +78,7 @@
 				0C7646772F02D6A60065F576 /* MLXNN in Frameworks */,
 				0C7646752F02D6A60065F576 /* MLX in Frameworks */,
 				0CA7FA222F2A9E7B00569C3E /* Textual in Frameworks */,
+				0C7149492F6F566600FDE01D /* MLXVLM in Frameworks */,
 				0C7646612F02D6300065F576 /* Ring.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0C71494B2F6F5CA000FDE01D /* MLXVLM in Frameworks */,
 				0C7646712F02D6820065F576 /* MLXLLM in Frameworks */,
 				0C76466F2F02D6820065F576 /* MLXNN in Frameworks */,
 				0C7646732F02D6820065F576 /* MLXLMCommon in Frameworks */,
@@ -160,6 +164,7 @@
 				0C76467A2F02D6A60065F576 /* MLXLMCommon */,
 				0C8802E02F04A2FF006AF043 /* AsyncHTTPClient */,
 				0CA7FA212F2A9E7B00569C3E /* Textual */,
+				0C7149482F6F566600FDE01D /* MLXVLM */,
 			);
 			productName = "Infer Ring";
 			productReference = 0C7646482F02D2FD0065F576 /* Infer Ring.app */;
@@ -187,6 +192,7 @@
 				0C76466E2F02D6820065F576 /* MLXNN */,
 				0C7646702F02D6820065F576 /* MLXLLM */,
 				0C7646722F02D6820065F576 /* MLXLMCommon */,
+				0C71494A2F6F5CA000FDE01D /* MLXVLM */,
 			);
 			productName = Ring;
 			productReference = 0C76465B2F02D6300065F576 /* Ring.framework */;
@@ -406,7 +412,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Infer Ring.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = TP4SYTX9NF;
 				ENABLE_APP_SANDBOX = YES;
@@ -445,7 +451,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.2.4;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.n1k1tung.InferRingApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -470,7 +476,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Infer Ring.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = TP4SYTX9NF;
 				ENABLE_APP_SANDBOX = YES;
@@ -509,7 +515,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.2.4;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.n1k1tung.InferRingApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -693,6 +699,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0C7149482F6F566600FDE01D /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXVLM;
+		};
+		0C71494A2F6F5CA000FDE01D /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MLXVLM;
+		};
 		0C76466C2F02D6820065F576 /* MLX */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MLX;
