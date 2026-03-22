@@ -6,6 +6,7 @@ import MLX
 import MLXLMCommon
 import MLXLLM
 import Tokenizers
+internal import ConcurrencyExtras
 #if os(iOS)
 import UIKit
 #endif
@@ -164,30 +165,17 @@ final class ModelManager {
         inputRole: ChatMessage.Role = .user,
         tools: [OpenAPITool]? = nil
     ) async -> AsyncThrowingStream<String, any Error> {
-        let originalStream = await streamResponseChunks(
+        await streamResponseChunks(
             to: input,
             history: history,
             inputRole: inputRole,
             tools: tools
         )
-
-        let (stream, continuation) = AsyncThrowingStream<String, Error>.makeStream()
-        let task = Task {
-            do {
-                for try await chunk in originalStream {
-                    guard case .text(let text) = chunk else { continue }
-                    continuation.yield(text)
-                }
-                continuation.finish()
-            }
-            catch {
-                continuation.finish(throwing: error)
-            }
+        .compactMap { chunk -> String? in
+            guard case .text(let text) = chunk else { return nil }
+            return text
         }
-        continuation.onTermination = { _ in
-            task.cancel()
-        }
-        return stream
+        .eraseToThrowingStream()
     }
 
     private func streamResponseChunks(
