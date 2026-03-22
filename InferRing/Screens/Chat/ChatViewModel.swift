@@ -13,9 +13,13 @@ import AppKit
 final class ChatViewModel {
     var messages: [ChatMessage] = [.systemMessage]
     var input: String = ""
+    var pendingImages: [ChatImageAttachment] = []
     private(set) var isSending: Bool = false
     var selectedModel: ModelCard? {
         didSet {
+            if isVisionModelSelected {
+                pendingImages = []
+            }
             guard let selectedModel,
                   selectedModel != oldValue,
                   selectedModel != modelManager?.currentModelCard
@@ -40,9 +44,17 @@ final class ChatViewModel {
         }
     }
     var canSend: Bool {
-        selectedModel != nil && !isSending && !input.trimmed.isEmpty
+        guard selectedModel != nil, !isSending else { return false }
+        return !input.trimmed.isEmpty || !pendingImages.isEmpty
+    }
+    var isVisionModelSelected: Bool {
+        selectedModel?.isVisionModel == true
+    }
+    var canAttachImages: Bool {
+        isVisionModelSelected && !isSending
     }
     var isShowingModelPicker: Bool = false
+    var isShowingImageImporter: Bool = false
     var isShowingToast: Bool = false
 
     var errorMessage: String? = nil
@@ -74,16 +86,20 @@ final class ChatViewModel {
 
     func send() async throws {
         let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedInput.isEmpty,
+        let pendingImages = self.pendingImages
+        guard (!trimmedInput.isEmpty || !pendingImages.isEmpty),
               !isSending,
               let modelManager
             else { return }
         isSending = true
         defer { isSending = false }
+        tokensPerSecond = nil
+        promptTokensPerSecond = nil
 
-        let userMessage = ChatMessage(role: .user, content: trimmedInput)
+        let userMessage = ChatMessage(role: .user, content: trimmedInput, images: pendingImages)
         messages.append(userMessage)
         input = ""
+        self.pendingImages = []
 
         let assistantMessage = ChatMessage(role: .assistant, content: "...")
         messages.append(assistantMessage)
@@ -94,7 +110,7 @@ final class ChatViewModel {
         startDisplayLinkIfNeeded()
 
         var fullReply = ""
-        let stream = await modelManager.streamResponse(to: trimmedInput)
+        let stream = await modelManager.streamResponse(to: trimmedInput, images: pendingImages)
         for try await replyStream in stream {
             fullReply += replyStream
             displayedContent = fullReply
@@ -129,6 +145,8 @@ final class ChatViewModel {
 
     private func resetChatUI() {
         input = ""
+        pendingImages = []
+        isShowingImageImporter = false
         isSending = false
         stopDisplayLink()
         refreshMessages()
@@ -140,6 +158,32 @@ final class ChatViewModel {
             guard let self else { return }
             messages = await modelManager?.messageHistory() ?? [.systemMessage]
         }
+    }
+
+    func importImages(from urls: [URL]) {
+        guard !urls.isEmpty else { return }
+
+        var importedImages: [ChatImageAttachment] = []
+        var failures: [String] = []
+
+        for url in urls {
+            do {
+                importedImages.append(try ChatImageAttachmentStore.importImage(from: url))
+            }
+            catch {
+                failures.append(url.lastPathComponent.isEmpty ? url.absoluteString : url.lastPathComponent)
+            }
+        }
+
+        pendingImages.append(contentsOf: importedImages)
+
+        if !failures.isEmpty {
+            errorMessage = "Failed to import: \(failures.joined(separator: ", "))"
+        }
+    }
+
+    func removePendingImage(_ image: ChatImageAttachment) {
+        pendingImages.removeAll { $0.id == image.id }
     }
 
     // MARK: display optimizations

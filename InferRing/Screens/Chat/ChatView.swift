@@ -2,6 +2,7 @@ import SwiftUI
 import Observation
 import Ring
 import Textual
+import UniformTypeIdentifiers
 
 struct ChatView: View {
     @State private var viewModel = ChatViewModel()
@@ -15,6 +16,7 @@ struct ChatView: View {
                             ChatBubble(message: message)
                                 .id(message.id)
                                 .onTapGesture {
+                                    guard !message.content.isEmpty else { return }
                                     Pasteboard.setText(message.content)
                                     viewModel.isShowingToast = true
                                     Task { @MainActor in
@@ -52,6 +54,18 @@ struct ChatView: View {
             ModelPickerView(selectedModel: $viewModel.selectedModel)
                 .frame(minHeight: 560)
         }
+        .fileImporter(
+            isPresented: $viewModel.isShowingImageImporter,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                viewModel.importImages(from: urls)
+            case .failure(let error):
+                viewModel.errorMessage = "Failed to import images: \(error.localizedDescription)"
+            }
+        }
         .errorAlert($viewModel.errorMessage)
         .onAppear {
             viewModel.refreshMessages()
@@ -62,6 +76,12 @@ struct ChatView: View {
     private var messageContainer: some View {
         ZStack {
             VStack(spacing: 4) {
+                if !viewModel.pendingImages.isEmpty {
+                    DraftImageStrip(
+                        images: viewModel.pendingImages,
+                        onRemove: viewModel.removePendingImage
+                    )
+                }
                 TextField("Message", text: $viewModel.input, axis: .vertical)
                     .textFieldStyle(.plain)
                     .lineLimit(1...5)
@@ -81,6 +101,15 @@ struct ChatView: View {
                         Text("\(loadingPercent * 100, specifier: "%.0f")%")
                         ProgressView(value: loadingPercent)
                             .progressViewStyle(.circular)
+                    }
+                    if viewModel.isVisionModelSelected {
+                        Button {
+                            viewModel.isShowingImageImporter = true
+                        } label: {
+                            Image(systemName: "photo.badge.plus")
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!viewModel.canAttachImages)
                     }
                     Button {
                         viewModel.isShowingModelPicker.toggle()
@@ -148,8 +177,13 @@ private struct ChatBubble: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            StructuredText(markdown: message.content)
-                .foregroundStyle(message.role == .system ? .secondary : .primary)
+            if !message.images.isEmpty {
+                MessageImageStrip(images: message.images)
+            }
+            if !message.content.isEmpty {
+                StructuredText(markdown: message.content)
+                    .foregroundStyle(message.role == .system ? .secondary : .primary)
+            }
         }
         .padding(12)
         .background(

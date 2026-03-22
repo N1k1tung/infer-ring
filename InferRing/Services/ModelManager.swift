@@ -147,26 +147,35 @@ final class ModelManager {
         tools: [OpenAPITool]? = nil
     ) async -> AsyncThrowingStream<ModelResponseChunk, any Error> {
         var messages = messages
-        let lastMessage = messages.removeLast()
+        guard let lastMessage = messages.popLast() else {
+            return AsyncThrowingStream { continuation in
+                continuation.finish(
+                    throwing: ModelManagerError.invalidRequest("Chat request must include at least one message")
+                )
+            }
+        }
         return await streamResponseChunks(
             to: lastMessage.content?.text ?? "",
+            images: (lastMessage.content?.imageURLs ?? []).map { ChatImageAttachment(url: $0) },
             history: messages,
             inputRole: lastMessage.role,
             tools: tools
         )
     }
 
-    /// stream chat response
+    /// stream chat response (text only)
     /// - Parameter input: user input
     /// - Returns: response stream
     func streamResponse(
         to input: String,
+        images: [ChatImageAttachment] = [],
         history: [OpenAPIMessage]? = nil,
         inputRole: ChatMessage.Role = .user,
         tools: [OpenAPITool]? = nil
     ) async -> AsyncThrowingStream<String, any Error> {
         await streamResponseChunks(
             to: input,
+            images: images,
             history: history,
             inputRole: inputRole,
             tools: tools
@@ -178,8 +187,11 @@ final class ModelManager {
         .eraseToThrowingStream()
     }
 
+
+    /// chunks stream (all types)
     private func streamResponseChunks(
         to input: String,
+        images: [ChatImageAttachment] = [],
         history: [OpenAPIMessage]? = nil,
         inputRole: ChatMessage.Role = .user,
         tools: [OpenAPITool]? = nil,
@@ -197,7 +209,7 @@ final class ModelManager {
         if let history {
             await chatHistoryStore.replace(with: history)
         }
-        await chatHistoryStore.append(role: inputRole, content: input)
+        await chatHistoryStore.append(role: inputRole, content: input, images: images)
         
         if distributeToPeers {
             let request = GenerationRequest(
@@ -224,7 +236,7 @@ final class ModelManager {
         let originalStream = chatSession.streamDetails(
             to: input,
             role: inputRole.toRole,
-            images: [],
+            images: images.map(\.userInputImage),
             videos: []
         )
 
@@ -347,12 +359,19 @@ final class ModelManager {
         guard let currentModel else {
             chatSession = nil
             currentToolSignature = nil
+            if history == nil {
+                ChatImageAttachmentStore.removeAll()
+            }
             Task { [chatHistoryStore] in
                 await chatHistoryStore.reset()
             }
             return
         }
         let resolvedHistory = history?.map(\.resolvedChatMessage) ?? []
+
+        if history == nil {
+            ChatImageAttachmentStore.removeAll()
+        }
 
         if resolvedHistory.isEmpty {
             chatSession = ChatSession(
@@ -365,7 +384,11 @@ final class ModelManager {
             chatSession = ChatSession(
                 currentModel,
                 history: resolvedHistory.map {
-                    Chat.Message(role: $0.role.toRole, content: $0.content)
+                    Chat.Message(
+                        role: $0.role.toRole,
+                        content: $0.content,
+                        images: $0.images.map(\.userInputImage)
+                    )
                 },
                 tools: tools
             )
@@ -535,8 +558,8 @@ private actor ChatHistoryStore {
         self.messages = messages.isEmpty ? [.systemMessage] : messages
     }
 
-    func append(role: ChatMessage.Role, content: String) {
-        messages.append(ChatMessage(role: role, content: content))
+    func append(role: ChatMessage.Role, content: String, images: [ChatImageAttachment] = []) {
+        messages.append(ChatMessage(role: role, content: content, images: images))
     }
 }
 
@@ -544,6 +567,7 @@ private extension OpenAPIMessage {
     var resolvedChatMessage: ChatMessage {
         var parts: [String] = []
         let text = content?.text ?? ""
+        let images = (content?.imageURLs ?? []).map { ChatImageAttachment(url: $0) }
         if !text.isEmpty {
             parts.append(text)
         }
@@ -552,19 +576,30 @@ private extension OpenAPIMessage {
            !normalizedToolCalls.isEmpty {
             parts.append(normalizedToolCalls)
         }
-        return ChatMessage(role: role, content: parts.joined(separator: "\n\n"))
+        return ChatMessage(
+            role: role,
+            content: parts.joined(separator: "\n\n"),
+            images: images
+        )
     }
 }
 
 private extension Array where Element == ChatMessage {
     var conversationSignature: [ConversationMessageSignature] {
-        map { ConversationMessageSignature(role: $0.role, content: $0.content) }
+        map {
+            ConversationMessageSignature(
+                role: $0.role,
+                content: $0.content,
+                images: $0.images.map { $0.url.absoluteString }
+            )
+        }
     }
 }
 
 private struct ConversationMessageSignature: Equatable {
     let role: ChatMessage.Role
     let content: String
+    let images: [String]
 }
 
 private struct NormalizedToolCall: Codable {
@@ -709,6 +744,8 @@ enum ModelManagerError: LocalizedError {
     case peerLoadingFailed(String)
     case peerResetFailed(String)
     case insufficientResources(String)
+    case distributedVisionNotSupported
+    case invalidRequest(String)
     
     var errorDescription: String? {
         switch self {
@@ -722,6 +759,10 @@ enum ModelManagerError: LocalizedError {
             return "Failed to reset chat on some peers: \(message)"
         case .insufficientResources(let message):
             return "Insufficient system resources: \(message)"
+        case .distributedVisionNotSupported:
+            return "Vision inputs are currently only supported for local inference."
+        case .invalidRequest(let message):
+            return message
         }
     }
 }

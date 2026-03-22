@@ -110,10 +110,19 @@ enum OpenAPIMessageContent: Codable {
 
     var text: String {
         switch self {
-            case .text(let text):
+        case .text(let text):
             return text
         case .parts(let parts):
             return parts.compactMap { $0.type == "text" ? $0.text : nil }.joined()
+        }
+    }
+
+    var imageURLs: [URL] {
+        switch self {
+        case .text:
+            return []
+        case .parts(let parts):
+            return parts.compactMap(\.resolvedImageURL)
         }
     }
 
@@ -130,8 +139,25 @@ enum OpenAPIMessageContent: Codable {
 }
 
 struct OpenAPIMessageContentPart: Codable {
-    let text: String
     let type: String
+    let text: String?
+    let imageURL: OpenAPIImageURL?
+
+    enum CodingKeys: String, CodingKey {
+        case type, text
+        case imageURL = "image_url"
+    }
+
+    var resolvedImageURL: URL? {
+        guard type == "image_url",
+              let rawURL = imageURL?.url else { return nil }
+        return URL(string: rawURL)
+    }
+}
+
+struct OpenAPIImageURL: Codable {
+    let url: String
+    let detail: String?
 }
 
 struct OpenAPIChatCompletionResponse: Codable {

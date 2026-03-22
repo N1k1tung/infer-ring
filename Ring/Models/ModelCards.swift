@@ -598,13 +598,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-0.8B",
             name: "Qwen3.5-0.8B",
             description: """
-            Qwen3.5-0.8B is a large language model by Qwen.
+            Qwen3.5-0.8B is a large language model by Qwen. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-0.8B",
                 prettyName: "Qwen3.5-0.8B",
-                storageSize: MemorySize.from_mb(1798),
+                storageSize: MemorySize.from_mb(3598),
                 nLayers: 24,
                 hiddenSize: 1024,
                 supportsTensor: false
@@ -649,13 +649,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-2B",
             name: "Qwen3.5-2B",
             description: """
-            Qwen3.5-2B is a large language model by Qwen.
+            Qwen3.5-2B is a large language model by Qwen. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-2B",
                 prettyName: "Qwen3.5-2B",
-                storageSize: MemorySize.from_mb(4657),
+                storageSize: MemorySize.from_mb(9257),
                 nLayers: 24,
                 hiddenSize: 2048,
                 supportsTensor: false
@@ -700,13 +700,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-4B",
             name: "Qwen3.5-4B",
             description: """
-            Qwen3.5-4B is a large language model by Qwen.
+            Qwen3.5-4B is a large language model by Qwen. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-4B",
                 prettyName: "Qwen3.5-4B",
-                storageSize: MemorySize.from_mb(9497),
+                storageSize: MemorySize.from_mb(18497),
                 nLayers: 32,
                 hiddenSize: 2560,
                 supportsTensor: false
@@ -751,13 +751,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-9B",
             name: "Qwen3.5-9B",
             description: """
-            Qwen3.5-9B is a large language model by Qwen.
+            Qwen3.5-9B is a large language model by Qwen. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-9B",
                 prettyName: "Qwen3.5-9B",
-                storageSize: MemorySize.from_mb(19597),
+                storageSize: MemorySize.from_mb(29597),
                 nLayers: 32,
                 hiddenSize: 4096,
                 supportsTensor: false
@@ -768,13 +768,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
             name: "Qwen3.5 35B A3B (FP8)",
             description: """
-            Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights.
+            Qwen3.5 35B A3B is a large language model; this variant uses FP8 precision weights. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-35B-A3B-FP8",
                 prettyName: "Qwen3.5 35B A3B (FP8)",
-                storageSize: MemorySize.from_mb(37095),
+                storageSize: MemorySize.from_mb(47095),
                 nLayers: 40,
                 hiddenSize: 2048,
                 supportsTensor: false
@@ -785,13 +785,13 @@ public struct ModelCards {
             modelId: "Qwen/Qwen3.5-27B-FP8",
             name: "Qwen3.5 27B (FP8)",
             description: """
-            Qwen3.5 27B is a large language model; this variant uses FP8 precision weights.
+            Qwen3.5 27B is a large language model; this variant uses FP8 precision weights. Not converted to MLX, much higher RAM usage.
             """,
             tags: ["Vision"],
             metadata: ModelMetadata(
                 modelId: "Qwen/Qwen3.5-27B-FP8",
                 prettyName: "Qwen3.5 27B (FP8)",
-                storageSize: MemorySize.from_mb(28500),
+                storageSize: MemorySize.from_mb(38500),
                 nLayers: 64,
                 hiddenSize: 5120,
                 supportsTensor: false
