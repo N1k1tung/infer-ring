@@ -34,6 +34,8 @@ final class ModelManager {
     @ObservationIgnored
     private var chatSession: ChatSession?
     @ObservationIgnored
+    private var currentToolSignature: Data?
+    @ObservationIgnored
     private let chatHistoryStore = ChatHistoryStore()
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
@@ -192,10 +194,12 @@ final class ModelManager {
         to input: String,
         history: [OpenAPIMessage]? = nil,
         inputRole: ChatMessage.Role = .user,
-        tools: [OpenAPITool]? = nil
+        tools: [OpenAPITool]? = nil,
+        distributeToPeers: Bool = true
     ) async -> AsyncThrowingStream<ModelResponseChunk, any Error> {
-        if history != nil || tools != nil {
+        if await shouldResetChatSession(history: history, tools: tools) {
             resetChatSession(history: history, tools: tools?.toolSpecs)
+            currentToolSignature = toolSignature(for: tools)
         }
 
         guard let chatSession else {
@@ -207,22 +211,23 @@ final class ModelManager {
         }
         await chatHistoryStore.append(role: inputRole, content: input)
         
-        // Start generation on all peers in parallel
-        let request = GenerationRequest(
-            requestID: UUID().uuidString,
-            input: input,
-            inputRole: inputRole,
-            history: history,
-            tools: tools,
-            timestamp: Date()
-        )
+        if distributeToPeers {
+            let request = GenerationRequest(
+                requestID: UUID().uuidString,
+                input: input,
+                inputRole: inputRole,
+                history: history,
+                tools: tools,
+                timestamp: Date()
+            )
 
-        let peers = coordinator?.ringPeers ?? []
-        Task {
-            await withTaskGroup(of: GenerationResponse?.self) { group in
-                for peer in peers {
-                    group.addTask {
-                        await peer.client.startGeneration(request: request)
+            let peers = coordinator?.ringPeers ?? []
+            Task {
+                await withTaskGroup(of: GenerationResponse?.self) { group in
+                    for peer in peers {
+                        group.addTask {
+                            await peer.client.startGeneration(request: request)
+                        }
                     }
                 }
             }
@@ -272,27 +277,15 @@ final class ModelManager {
 
     /// Handle generation request from remote peer
     func handleGenerationRequest(_ request: GenerationRequest) async -> GenerationResponse {
-        if request.history != nil || request.tools != nil {
-            resetChatSession(history: request.history, tools: request.tools?.toolSpecs)
-        }
-
-        guard let chatSession else {
-            return GenerationResponse(
-                requestID: request.requestID,
-                success: false,
-                errorMessage: "ChatSession not initialized",
-                timestamp: Date()
-            )
-        }
-
         do {
-            await chatHistoryStore.append(role: request.inputRole, content: request.input)
-            let response = try await chatSession.respond(
+            let stream = await streamResponseChunks(
                 to: request.input,
-                role: request.inputRole.toRole
+                history: request.history,
+                inputRole: request.inputRole,
+                tools: request.tools,
+                distributeToPeers: false
             )
-            await chatHistoryStore.append(role: .assistant, content: response)
-            dprint(response)
+            for try await _ in stream {}
             
             return GenerationResponse(
                 requestID: request.requestID,
@@ -365,6 +358,7 @@ final class ModelManager {
     private func resetChatSession(history: [OpenAPIMessage]? = nil, tools: [ToolSpec]? = nil) {
         guard let currentModel else {
             chatSession = nil
+            currentToolSignature = nil
             Task { [chatHistoryStore] in
                 await chatHistoryStore.reset()
             }
@@ -391,7 +385,32 @@ final class ModelManager {
         Task { [chatHistoryStore, resolvedHistory] in
             await chatHistoryStore.replace(with: resolvedHistory)
         }
+        if tools == nil {
+            currentToolSignature = nil
+        }
         Memory.clearCache()
+    }
+
+    private func shouldResetChatSession(
+        history: [OpenAPIMessage]? = nil,
+        tools: [OpenAPITool]? = nil
+    ) async -> Bool {
+        guard currentModel != nil else { return false }
+        guard chatSession != nil else { return true }
+        guard toolSignature(for: tools) == currentToolSignature else { return true }
+        guard let history else { return false }
+
+        let requestedHistory = history.map(\.resolvedChatMessage)
+        let requestedConversation = (
+            requestedHistory.isEmpty ? [.systemMessage] : requestedHistory
+        ).conversationSignature
+        let currentConversation = (await chatHistoryStore.snapshot()).conversationSignature
+        return requestedConversation != currentConversation
+    }
+
+    private func toolSignature(for tools: [OpenAPITool]?) -> Data? {
+        guard let tools else { return nil }
+        return try? JSONEncoder.default.encode(tools)
     }
 
     /// Handle model load request from coordinator
@@ -541,13 +560,56 @@ private extension OpenAPIMessage {
             parts.append(text)
         }
         if let toolCalls,
-           !toolCalls.isEmpty,
-           let data = try? JSONEncoder().encode(toolCalls),
-           let json = String(data: data, encoding: .utf8) {
-            parts.append(json)
+           let normalizedToolCalls = normalizedToolCallContent(toolCalls),
+           !normalizedToolCalls.isEmpty {
+            parts.append(normalizedToolCalls)
         }
         return ChatMessage(role: role, content: parts.joined(separator: "\n\n"))
     }
+}
+
+private extension Array where Element == ChatMessage {
+    var conversationSignature: [ConversationMessageSignature] {
+        map { ConversationMessageSignature(role: $0.role, content: $0.content) }
+    }
+}
+
+private struct ConversationMessageSignature: Equatable {
+    let role: ChatMessage.Role
+    let content: String
+}
+
+private struct NormalizedToolCall: Codable {
+    let name: String
+    let arguments: String
+
+    init(_ toolCall: OpenAPIToolCall) {
+        self.name = toolCall.function.name
+        self.arguments = toolCall.function.arguments
+    }
+
+    init(_ toolCall: ModelResponseToolCall) {
+        self.name = toolCall.name
+        self.arguments = toolCall.arguments
+    }
+}
+
+private func normalizedToolCallContent(_ toolCalls: [OpenAPIToolCall]) -> String? {
+    guard !toolCalls.isEmpty,
+          let data = try? JSONEncoder().encode(toolCalls.map(NormalizedToolCall.init)),
+          let json = String(data: data, encoding: .utf8) else {
+        return nil
+    }
+    return json
+}
+
+private func normalizedToolCallContent(_ toolCalls: [ModelResponseToolCall]) -> String? {
+    guard !toolCalls.isEmpty,
+          let data = try? JSONEncoder().encode(toolCalls.map(NormalizedToolCall.init)),
+          let json = String(data: data, encoding: .utf8) else {
+        return nil
+    }
+    return json
 }
 
 private extension ModelManager {
@@ -556,10 +618,9 @@ private extension ModelManager {
         if !text.isEmpty {
             parts.append(text)
         }
-        if !toolCalls.isEmpty,
-           let data = try? JSONEncoder().encode(toolCalls.map(\.openAPIToolCall)),
-           let json = String(data: data, encoding: .utf8) {
-            parts.append(json)
+        if let normalizedToolCalls = normalizedToolCallContent(toolCalls),
+           !normalizedToolCalls.isEmpty {
+            parts.append(normalizedToolCalls)
         }
         return parts.joined(separator: "\n\n")
     }
