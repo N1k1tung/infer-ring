@@ -37,6 +37,12 @@ final class ModelManager {
     @ObservationIgnored
     private var currentToolSignature: Data?
     @ObservationIgnored
+    private var currentTools: [ToolSpec]?
+    @ObservationIgnored
+    private var currentGenerationOptions = ChatGenerationOptions.defaults
+    @ObservationIgnored
+    private var chatSessionKVBits = ChatGenerationOptions.KVBitsOption.full
+    @ObservationIgnored
     private let chatHistoryStore = ChatHistoryStore()
     var currentModelCard: ModelCard?
     var isLoading: Bool = false
@@ -45,6 +51,11 @@ final class ModelManager {
 
     func messageHistory() async -> [ChatMessage] {
         await chatHistoryStore.snapshot()
+    }
+
+    func updateGenerationOptions(_ options: ChatGenerationOptions) {
+        currentGenerationOptions = options
+        chatSession?.generateParameters = options.generateParameters
     }
 
     // MARK: - Public API
@@ -197,10 +208,7 @@ final class ModelManager {
         tools: [OpenAPITool]? = nil,
         distributeToPeers: Bool = true
     ) async -> AsyncThrowingStream<ModelResponseChunk, any Error> {
-        if await shouldResetChatSession(history: history, tools: tools) {
-            resetChatSession(history: history, tools: tools?.toolSpecs)
-            currentToolSignature = toolSignature(for: tools)
-        }
+        await prepareChatSessionForGeneration(history: history, tools: tools)
 
         guard let chatSession else {
             return AsyncThrowingStream { $0.finish(throwing: ModelManagerError.notInitialized) }
@@ -218,6 +226,7 @@ final class ModelManager {
                 inputRole: inputRole,
                 history: history,
                 tools: tools,
+                options: currentGenerationOptions,
                 timestamp: Date()
             )
 
@@ -278,6 +287,7 @@ final class ModelManager {
     /// Handle generation request from remote peer
     func handleGenerationRequest(_ request: GenerationRequest) async -> GenerationResponse {
         do {
+            updateGenerationOptions(request.options)
             let stream = await streamResponseChunks(
                 to: request.input,
                 history: request.history,
@@ -355,11 +365,34 @@ final class ModelManager {
 
     /// starts a new chat session
     /// - Parameter history: previous history, if nil starts with default system message
-    private func resetChatSession(history: [OpenAPIMessage]? = nil, tools: [ToolSpec]? = nil) {
+    private func resetChatSession(
+        history: [OpenAPIMessage]? = nil,
+        tools: [ToolSpec]? = nil,
+        toolSignature: Data? = nil
+    ) {
+        let resolvedHistory = history?.map(\.resolvedChatMessage) ?? []
+        configureChatSession(
+            with: resolvedHistory,
+            tools: tools,
+            clearAttachments: history == nil,
+            replaceStoredHistory: true,
+            toolSignature: toolSignature
+        )
+    }
+
+    private func configureChatSession(
+        with history: [ChatMessage],
+        tools: [ToolSpec]?,
+        clearAttachments: Bool,
+        replaceStoredHistory: Bool,
+        toolSignature: Data?
+    ) {
         guard let currentModel else {
             chatSession = nil
+            currentTools = nil
             currentToolSignature = nil
-            if history == nil {
+            chatSessionKVBits = .full
+            if clearAttachments {
                 ChatImageAttachmentStore.removeAll()
             }
             Task { [chatHistoryStore] in
@@ -367,39 +400,77 @@ final class ModelManager {
             }
             return
         }
-        let resolvedHistory = history?.map(\.resolvedChatMessage) ?? []
 
-        if history == nil {
+        if clearAttachments {
             ChatImageAttachmentStore.removeAll()
         }
 
-        if resolvedHistory.isEmpty {
+        let generateParameters = currentGenerationOptions.generateParameters
+        currentTools = tools
+        currentToolSignature = toolSignature
+        chatSessionKVBits = currentGenerationOptions.kvBits
+
+        if history.isEmpty {
             chatSession = ChatSession(
                 currentModel,
                 instructions: ChatMessage.systemMessage.content,
+                generateParameters: generateParameters,
+                tools: tools
+            )
+        }
+        else if history.count == 1, history[0].role == .system, history[0].images.isEmpty {
+            chatSession = ChatSession(
+                currentModel,
+                instructions: history[0].content,
+                generateParameters: generateParameters,
                 tools: tools
             )
         }
         else {
             chatSession = ChatSession(
                 currentModel,
-                history: resolvedHistory.map {
+                history: history.map {
                     Chat.Message(
                         role: $0.role.toRole,
                         content: $0.content,
                         images: $0.images.map(\.userInputImage)
                     )
                 },
+                generateParameters: generateParameters,
                 tools: tools
             )
         }
-        Task { [chatHistoryStore, resolvedHistory] in
-            await chatHistoryStore.replace(with: resolvedHistory)
-        }
-        if tools == nil {
-            currentToolSignature = nil
+        if replaceStoredHistory {
+            Task { [chatHistoryStore, history] in
+                await chatHistoryStore.replace(with: history)
+            }
         }
         Memory.clearCache()
+    }
+
+    private func prepareChatSessionForGeneration(
+        history: [OpenAPIMessage]? = nil,
+        tools: [OpenAPITool]? = nil
+    ) async {
+        let toolSignature = toolSignature(for: tools)
+        if await shouldResetChatSession(history: history, tools: tools) {
+            resetChatSession(history: history, tools: tools?.toolSpecs, toolSignature: toolSignature)
+            return
+        }
+
+        if chatSessionKVBits != currentGenerationOptions.kvBits {
+            let historySnapshot = await chatHistoryStore.snapshot()
+            configureChatSession(
+                with: historySnapshot,
+                tools: currentTools,
+                clearAttachments: false,
+                replaceStoredHistory: false,
+                toolSignature: currentToolSignature
+            )
+            return
+        }
+
+        chatSession?.generateParameters = currentGenerationOptions.generateParameters
     }
 
     private func shouldResetChatSession(

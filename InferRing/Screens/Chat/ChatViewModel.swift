@@ -11,10 +11,19 @@ import AppKit
 @Observable
 @MainActor
 final class ChatViewModel {
+    @ObservationIgnored
+    private static let generationOptionsStorageKey = "chatGenerationOptions"
+
     var messages: [ChatMessage] = [.systemMessage]
     var input: String = ""
     var pendingImages: [ChatImageAttachment] = []
     private(set) var isSending: Bool = false
+    var generationOptions: ChatGenerationOptions = .defaults {
+        didSet {
+            persistGenerationOptions()
+            modelManager?.updateGenerationOptions(generationOptions)
+        }
+    }
     var selectedModel: ModelCard? {
         didSet {
             if isVisionModelSelected {
@@ -55,6 +64,7 @@ final class ChatViewModel {
     }
     var isShowingModelPicker: Bool = false
     var isShowingImageImporter: Bool = false
+    var isShowingGenerationOptions: Bool = false
     var isShowingToast: Bool = false
 
     var errorMessage: String? = nil
@@ -71,6 +81,8 @@ final class ChatViewModel {
     private var modelManager: ModelManager?
     
     init() {
+        generationOptions = Self.loadStoredGenerationOptions()
+        modelManager?.updateGenerationOptions(generationOptions)
         selectedModel = modelManager?.currentModelCard
         refreshMessages()
 
@@ -184,6 +196,24 @@ final class ChatViewModel {
 
     func removePendingImage(_ image: ChatImageAttachment) {
         pendingImages.removeAll { $0.id == image.id }
+    }
+
+    func resetGenerationOptions() {
+        generationOptions = .defaults
+    }
+
+    private func persistGenerationOptions() {
+        guard let data = try? JSONEncoder.default.encode(generationOptions) else { return }
+        UserDefaults.standard.setValue(data, forKey: Self.generationOptionsStorageKey)
+    }
+
+    private static func loadStoredGenerationOptions() -> ChatGenerationOptions {
+        guard let data = UserDefaults.standard.data(forKey: generationOptionsStorageKey),
+              let options = try? JSONDecoder.default.decode(ChatGenerationOptions.self, from: data)
+        else {
+            return .defaults
+        }
+        return options
     }
 
     // MARK: display optimizations

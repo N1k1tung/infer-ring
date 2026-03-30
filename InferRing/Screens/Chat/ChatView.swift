@@ -82,6 +82,17 @@ struct ChatView: View {
                         onRemove: viewModel.removePendingImage
                     )
                 }
+                if viewModel.isShowingGenerationOptions {
+                    GenerationOptionsPanel(
+                        options: Binding(
+                            get: { viewModel.generationOptions },
+                            set: { viewModel.generationOptions = $0 }
+                        ),
+                        isDisabled: viewModel.isSending,
+                        onReset: viewModel.resetGenerationOptions
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
                 TextField("Message", text: $viewModel.input, axis: .vertical)
                     .textFieldStyle(.plain)
                     .lineLimit(1...5)
@@ -111,6 +122,22 @@ struct ChatView: View {
                         .buttonStyle(.plain)
                         .disabled(!viewModel.canAttachImages)
                     }
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.isShowingGenerationOptions.toggle()
+                        }
+                    } label: {
+                        Image(
+                            systemName: viewModel.isShowingGenerationOptions
+                                ? "slider.horizontal.3.circle.fill"
+                                : "slider.horizontal.3"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(
+                        viewModel.generationOptions == .defaults ? .secondary : Color.accentColor
+                    )
+                    .disabled(viewModel.isSending)
                     Button {
                         viewModel.isShowingModelPicker.toggle()
                     } label: {
@@ -153,6 +180,133 @@ struct ChatView: View {
         .background(.bar)
     }
 
+}
+
+private struct GenerationOptionsPanel: View {
+    @Binding var options: ChatGenerationOptions
+    let isDisabled: Bool
+    let onReset: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Generation Options")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Button("Defaults", action: onReset)
+                    .font(.caption)
+                    .buttonStyle(.plain)
+            }
+
+            HStack {
+                Text("KV Cache")
+                Spacer()
+                Picker("KV Cache", selection: kvBitsBinding) {
+                    ForEach(ChatGenerationOptions.KVBitsOption.allCases) { option in
+                        Text(option.displayName).tag(option)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+            }
+
+            SliderSettingRow(
+                title: "Temperature",
+                value: temperatureBinding,
+                range: 0 ... 2,
+                step: 0.05
+            )
+
+            StepperSettingRow(
+                title: "Top-K",
+                value: topKBinding,
+                range: 0 ... 256,
+                step: 1
+            )
+
+            SliderSettingRow(
+                title: "Top-P",
+                value: topPBinding,
+                range: 0 ... 1,
+                step: 0.01
+            )
+
+            SliderSettingRow(
+                title: "Min-P",
+                value: minPBinding,
+                range: 0 ... 1,
+                step: 0.01
+            )
+
+            Toggle("Repetition Penalty", isOn: repetitionPenaltyEnabled)
+
+            if options.repetitionPenalty != nil {
+                SliderSettingRow(
+                    title: "Penalty",
+                    value: repetitionPenaltyBinding,
+                    range: 1.0 ... 2.0,
+                    step: 0.05
+                )
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.secondary.opacity(0.08))
+        )
+        .disabled(isDisabled)
+    }
+
+    private var kvBitsBinding: Binding<ChatGenerationOptions.KVBitsOption> {
+        Binding(
+            get: { options.kvBits },
+            set: { options.kvBits = $0 }
+        )
+    }
+
+    private var temperatureBinding: Binding<Double> {
+        Binding(
+            get: { options.temperature },
+            set: { options.temperature = $0.clamped(to: 0 ... 2) }
+        )
+    }
+
+    private var topKBinding: Binding<Int> {
+        Binding(
+            get: { options.topK },
+            set: { options.topK = min(max($0, 0), 256) }
+        )
+    }
+
+    private var topPBinding: Binding<Double> {
+        Binding(
+            get: { options.topP },
+            set: { options.topP = $0.clamped(to: 0 ... 1) }
+        )
+    }
+
+    private var minPBinding: Binding<Double> {
+        Binding(
+            get: { options.minP },
+            set: { options.minP = $0.clamped(to: 0 ... 1) }
+        )
+    }
+
+    private var repetitionPenaltyEnabled: Binding<Bool> {
+        Binding(
+            get: { options.repetitionPenalty != nil },
+            set: { isEnabled in
+                options.repetitionPenalty = isEnabled ? max(options.repetitionPenalty ?? 1.1, 1.0) : nil
+            }
+        )
+    }
+
+    private var repetitionPenaltyBinding: Binding<Double> {
+        Binding(
+            get: { options.repetitionPenalty ?? 1.1 },
+            set: { options.repetitionPenalty = $0.clamped(to: 1.0 ... 2.0) }
+        )
+    }
 }
 
 private struct ChatBubble: View {
@@ -201,6 +355,52 @@ private struct ChatBubble: View {
         case .system, .tool:
             return Color.secondary.opacity(0.1)
         }
+    }
+}
+
+private struct SliderSettingRow: View {
+    let title: String
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let step: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(title)
+                Spacer()
+                Text(value.formatted(.number.precision(.fractionLength(2))))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: $value, in: range, step: step)
+        }
+    }
+}
+
+private struct StepperSettingRow: View {
+    let title: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    let step: Int
+
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Stepper(value: $value, in: range, step: step) {
+                Text("\(value)")
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 36, alignment: .trailing)
+            }
+        }
+    }
+}
+
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        min(max(self, range.lowerBound), range.upperBound)
     }
 }
 
