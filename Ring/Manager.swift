@@ -6,6 +6,9 @@ import MLXLMCommon
 import MLXLLM
 import MLXVLM
 import MLXNN
+import MLXHuggingFace
+import Tokenizers
+import HuggingFace
 
 public final class MLXManager {
     public init() {}
@@ -73,6 +76,8 @@ public final class MLXManager {
 
         let factory: ModelFactory = card.isVisionModel ? VLMModelFactory.shared : LLMModelFactory.shared
         var context = try await factory.load(
+            from: #hubDownloader(),
+            using: #huggingFaceTokenizerLoader(),
             configuration: ModelConfiguration(id: card.modelId),
             lazy: group != nil,
             progressHandler: progressHandler
