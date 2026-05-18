@@ -27,7 +27,7 @@ final class ModelManager {
     
     // Current loaded model state
     @ObservationIgnored
-    private var currentModel: ModelContext? {
+    private var currentModel: ModelContainer? {
         didSet {
             resetChatSession()
         }

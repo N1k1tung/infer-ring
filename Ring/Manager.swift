@@ -71,7 +71,7 @@ public final class MLXManager {
         _ card: ModelCard,
         shardMeta: ShardMetadata,
         progressHandler: @Sendable @escaping (Progress) -> Void
-    ) async throws -> ModelContext {
+    ) async throws -> ModelContainer {
         Memory.clearCache()
 
         let factory: ModelFactory = card.isVisionModel ? VLMModelFactory.shared : LLMModelFactory.shared
@@ -100,7 +100,7 @@ public final class MLXManager {
             eval(context.model)
         }
 
-        return context
+        return ModelContainer(context: context)
     }
 
 }
