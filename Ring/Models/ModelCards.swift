@@ -1131,6 +1131,59 @@ public struct ModelCards {
                 hiddenSize: 2560
             )
         ),
+
+        // Gemma4
+        "Gemma-4-e2b-it-bf16": ModelCard(
+            shortId: "Gemma-4-e2b-it-bf16",
+            modelId: "mlx-community/gemma-4-e2b-it-bf16",
+            name: "Gemma-4-e2b-it-bf16",
+            description: """
+            Gemma is a family of open models built by Google DeepMind. This is a bf16 MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Gemma-4-e2b-it-bf16",
+                prettyName: "Gemma-4-e2b-it-bf16",
+                storageSize: MemorySize.from_mb(11000),
+                nLayers: 35,
+                hiddenSize: 1536,
+                supportsTensor: false
+            )
+        ),
+        "Gemma-4-e2b-it-8bit": ModelCard(
+            shortId: "Gemma-4-e2b-it-8bit",
+            modelId: "mlx-community/gemma-4-e2b-it-8bit",
+            name: "Gemma-4-e2b-it-8bit",
+            description: """
+            Gemma is a family of open models built by Google DeepMind. This is a 8-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Gemma-4-e2b-it-8bit",
+                prettyName: "Gemma-4-e2b-it-8bit",
+                storageSize: MemorySize.from_mb(6000),
+                nLayers: 35,
+                hiddenSize: 1536,
+                supportsTensor: false
+            )
+        ),
+        "Gemma-4-e2b-it-4bit": ModelCard(
+            shortId: "Gemma-4-e2b-it-4bit",
+            modelId: "mlx-community/gemma-4-e2b-it-4bit",
+            name: "Gemma-4-e2b-it-4bit",
+            description: """
+            Gemma is a family of open models built by Google DeepMind. This is a 4-bit MLX variant
+            """,
+            tags: ["Vision"],
+            metadata: ModelMetadata(
+                modelId: "mlx-community/Gemma-4-e2b-it-4bit",
+                prettyName: "Gemma-4-e2b-it-4bit",
+                storageSize: MemorySize.from_mb(3700),
+                nLayers: 35,
+                hiddenSize: 1536,
+                supportsTensor: false
+            )
+        ),
     ]
 
 }
